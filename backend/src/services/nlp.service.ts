@@ -152,9 +152,36 @@ function resolveAppointmentDateTime(text: string, hour: number, minute: number):
   return { date, time }
 }
 
+/** ถามรายการนัด (ไม่ใช่สร้างนัดใหม่) */
+export function isAppointmentQueryText(text: string): boolean {
+  const t = text.trim()
+  if (!/นัด|นัดหมาย|ประชุม/i.test(t)) return false
+
+  const isQuestion = /อะไรบ้าง|มีอะไร|มีนัด|ดูนัด|เช็คนัด|ไหม|มั้ย|บ้าง\s*$|มีกี่/i.test(t)
+  const isListByDay = /(?:วันนี้|พรุ่งนี้|วันเสาร์|สัปดาห์หน้า).*(?:นัด|นัดหมาย|ประชุม)/.test(t)
+    && /(?:อะไร|บ้าง|มี|ดู|ไหม|มั้ย)/.test(t)
+
+  if (!isQuestion && !isListByDay) return false
+
+  // มีเวลาชัดเจน → น่าจะเป็นการสร้างนัด เช่น "นัดหมอพรุ่งนี้ 10 โมง"
+  if (parseTimeFromText(t)) return false
+  return true
+}
+
+export function parseAppointmentQueryLocal(text: string): NLPResult | null {
+  if (!isAppointmentQueryText(text)) return null
+  return {
+    intent: 'QUERY',
+    confidence: 0.92,
+    data: { queryType: 'APPOINTMENTS', date: resolveAppointmentDate(text) },
+  }
+}
+
 /** Rule-based นัดหมาย */
 export function parseAppointmentLocal(text: string): NLPResult | null {
   const trimmed = text.trim()
+  if (isAppointmentQueryText(trimmed)) return null
+
   const hasAppointmentHint = /นัด|ประชุม|หมอ|พบ|ทาน|กิน|ข้าว|เตือน|meeting|appointment/i.test(trimmed)
   const time = parseTimeFromText(trimmed)
 
@@ -235,7 +262,10 @@ export function parseExpenseLocal(text: string): NLPResult | null {
 export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | null {
   const trimmed = text.trim()
 
-  if (/ใช้ไป|สรุป|งบเหลือ|ดูนัด|เท่าไหร่/.test(trimmed) && !isStockRelatedText(trimmed)) {
+  const apptQuery = parseAppointmentQueryLocal(trimmed)
+  if (apptQuery) return apptQuery
+
+  if (/ใช้ไป|สรุป|งบเหลือ|เท่าไหร่/.test(trimmed) && !isStockRelatedText(trimmed)) {
     return { intent: 'QUERY', confidence: 0.85, data: { queryType: 'MONTHLY_SUMMARY', period: 'this_month' } }
   }
 
@@ -268,6 +298,12 @@ export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | nu
 }
 
 export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPResult> {
+  const apptQuery = parseAppointmentQueryLocal(text)
+  if (apptQuery) {
+    apptQuery.raw_text = text
+    return apptQuery
+  }
+
   // หุ้น / watchlist → local ก่อนเสมอ
   if (isAddWatchlistText(text)) {
     const symbol = extractSymbolFromText(text)

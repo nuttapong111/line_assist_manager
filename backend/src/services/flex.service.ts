@@ -1,7 +1,8 @@
 import type { NLPResult } from '../types'
 import { getMonthlySummary } from './finance.service'
 import { getBudgets } from './budget.service'
-import { getTodayAppointments } from './appointment.service'
+import { getAppointmentsRange } from './appointment.service'
+import { bangkokToday, bangkokTomorrow } from '../lib/datetime'
 import { INVESTMENT_DISCLAIMER } from '../types'
 import { formatBangkokTime } from '../lib/datetime'
 
@@ -130,13 +131,20 @@ export async function buildQueryReply(userId: string, data: Record<string, unkno
   }
 
   if (queryType === 'APPOINTMENTS') {
-    const appts = await getTodayAppointments(userId)
-    if (appts.length === 0) return { type: 'text' as const, text: '📅 ไม่มีนัดหมายวันนี้ครับ' }
+    const date = String(data?.date || bangkokToday())
+    const dayLabel = date === bangkokToday() ? 'วันนี้'
+      : date === bangkokTomorrow() ? 'พรุ่งนี้'
+        : date
+
+    const appts = await getAppointmentsRange(userId, date, date)
+    if (appts.length === 0) {
+      return { type: 'text' as const, text: `📅 ไม่มีนัดหมาย${dayLabel}ครับ` }
+    }
     const lines = appts.map(a => {
       const time = formatBangkokTime(a.startAt)
       return `• ${time} ${a.title}`
     })
-    return { type: 'text' as const, text: `📅 นัดหมายวันนี้:\n${lines.join('\n')}` }
+    return { type: 'text' as const, text: `📅 นัดหมาย${dayLabel}:\n${lines.join('\n')}` }
   }
 
   return { type: 'text' as const, text: 'ไม่พบข้อมูลที่ต้องการครับ' }

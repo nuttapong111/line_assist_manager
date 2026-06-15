@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { middleware, WebhookEvent } from '@line/bot-sdk'
 import { createUserIfNotExists } from '../services/user.service'
-import { parseMessage } from '../services/nlp.service'
+import { parseMessage, isAppointmentQueryText, parseAppointmentQueryLocal } from '../services/nlp.service'
 import { buildConfirmFlexMessage, buildSuccessMessage, buildQueryReply } from '../services/flex.service'
 import { sendPushWithQuotaCheck, lineClient } from '../services/push.service'
 import { getBudgetSummaryByCategory, resolveCategoryId } from '../services/budget.service'
@@ -151,6 +151,13 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
         await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
         return
       }
+    }
+
+    if (isAppointmentQueryText(text)) {
+      clearChatContext(lineUserId)
+      const reply = await buildQueryReply(user.id, parseAppointmentQueryLocal(text)?.data ?? null)
+      await lineClient.replyMessage(event.replyToken, reply)
+      return
     }
 
     const stockSymbol = extractSymbolFromText(text)
