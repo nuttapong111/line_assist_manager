@@ -363,8 +363,8 @@ export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPRe
     if (symbol) return { intent: 'STOCK_QUERY', confidence: 0.9, data: { symbol }, raw_text: text }
   }
 
-  // รายจ่าย — จับก่อนนัดหมาย/Gemini เมื่อมีตัวเลขจำนวนเงิน
-  if (mode === 'EXPENSE' || !TIME_HINT.test(text)) {
+  // รายจ่าย — จับก่อนเสมอเมื่อมีจำนวนเงินชัดเจน (แม้อยู่ในโหมดนัดหมาย)
+  if (hasExpenseAmount(text) && !TIME_HINT.test(text)) {
     const expense = parseExpenseLocal(text)
     if (expense) {
       expense.raw_text = text
@@ -408,6 +408,7 @@ export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPRe
       || parsed.confidence < 0.6
       || (TIME_HINT.test(text) && parsed.intent !== 'APPOINTMENT')
       || (mode === 'APPOINTMENT' && parsed.intent !== 'APPOINTMENT')
+      || (hasExpenseAmount(text) && !TIME_HINT.test(text) && parsed.intent !== 'EXPENSE' && parsed.intent !== 'INCOME')
 
     if (needsLocalFallback) {
       const local = parseMessageLocal(text, mode)

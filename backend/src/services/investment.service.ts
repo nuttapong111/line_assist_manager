@@ -56,8 +56,15 @@ export function extractSymbolFromText(text: string): string | null {
   return null
 }
 
+export function isStockRecommendText(text: string): boolean {
+  if (isAddWatchlistText(text)) return false
+  if (extractSymbolFromText(text)) return false
+  return /แนะนำ.*หุ้น|หุ้น.*แนะนำ|หุ้นตัวไหน|ตัวไหนดี|หุ้นอะไรดี|น่าสนใจ|ควรดูหุ้น|หุ้นวันนี้/i.test(text)
+}
+
 export function isStockRelatedText(text: string): boolean {
   if (extractSymbolFromText(text)) return true
+  if (isStockRecommendText(text)) return true
   return /หุ้น|ราคา|วิเคราะห์|macd|rsi|น่าสน|เป็นอย่างไร|ตอนนี้|ลงทุน|portfolio|watchlist|ติดตามหุ้น|สัญญาณซื้อ|bollinger/i.test(text)
 }
 
@@ -121,6 +128,64 @@ export function formatStockAnalysisMessage(a: StockAnalysis): string {
   ].filter(Boolean)
 
   return lines.join('\n')
+}
+
+async function collectStockAnalyses(
+  symbols: { symbol: string; displayName: string }[],
+  limit = 8,
+): Promise<StockAnalysis[]> {
+  const results: StockAnalysis[] = []
+  for (const { symbol, displayName } of symbols.slice(0, limit)) {
+    const a = await analyzeStock(symbol, displayName)
+    if (a) results.push(a)
+    await new Promise(r => setTimeout(r, 400))
+  }
+  return results
+}
+
+function formatTopStockPicks(
+  results: StockAnalysis[],
+  options: { title: string; sourceLabel: string },
+): string {
+  if (!results.length) {
+    return `ไม่สามารถดึงข้อมูลหุ้นได้ตอนนี้\nลองพิมพ์ชื่อหุ้น เช่น "NVDA ตอนนี้เป็นอย่างไร"\n\n${INVESTMENT_DISCLAIMER}`
+  }
+
+  const sorted = [...results].sort((a, b) => b.normalizedScore - a.normalizedScore)
+  const buySignals = sorted.filter(s => s.normalizedScore >= BUY_SIGNAL_THRESHOLD)
+  const top = buySignals.length > 0 ? buySignals.slice(0, 5) : sorted.slice(0, 3)
+
+  const lines = [
+    options.title,
+    options.sourceLabel,
+    '',
+    ...top.map((a, i) => {
+      const ch = a.changePct != null ? ` ${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(1)}%` : ''
+      const price = a.price != null ? ` $${a.price.toFixed(2)}` : ''
+      return `${i + 1}. ${a.displayName} (${a.symbol}) — ${scoreLabel(a.normalizedScore)}${price}${ch}`
+    }),
+    '',
+    buySignals.length === 0 ? '⚠️ ยังไม่มีสัญญาณซื้อชัดเจน — แสดง 3 ตัวที่ score สูงสุด' : '',
+    'ดูรายละเอียด: "NVDA ตอนนี้เป็นอย่างไร"',
+    'ติดตาม: "ติดตาม NVDA"',
+    '',
+    INVESTMENT_DISCLAIMER,
+  ].filter(Boolean)
+
+  return lines.join('\n')
+}
+
+export async function buildStockRecommendReply(userId: string): Promise<string> {
+  const watched = await getWatchedAssets(userId)
+  const symbols = watched.length > 0
+    ? watched.map(w => ({ symbol: w.symbol, displayName: w.displayName }))
+    : DEFAULT_SCAN_SYMBOLS.map(s => ({ symbol: s, displayName: s }))
+
+  const results = await collectStockAnalyses(symbols)
+  return formatTopStockPicks(results, {
+    title: `📈 หุ้นที่ technical score สูงสุดวันนี้ (${bangkokToday()})`,
+    sourceLabel: watched.length > 0 ? '📋 จาก watchlist ของคุณ' : '📋 สแกนหุ้นยอดนิยม (พิมพ์ "ติดตาม NVDA" เพื่อติดตามเฉพาะตัว)',
+  })
 }
 
 export async function buildStockQueryReply(symbol: string): Promise<string> {
@@ -197,35 +262,15 @@ export async function sendMorningInvestmentSummaries(): Promise<void> {
         ? watched.map(w => ({ symbol: w.symbol, displayName: w.displayName }))
         : DEFAULT_SCAN_SYMBOLS.map(s => ({ symbol: s, displayName: s }))
 
-      const results: StockAnalysis[] = []
-      for (const { symbol, displayName } of symbols.slice(0, 8)) {
-        const a = await analyzeStock(symbol, displayName)
-        if (a) results.push(a)
-        await new Promise(r => setTimeout(r, 400))
-      }
-
+      const results = await collectStockAnalyses(symbols)
       if (!results.length) continue
 
-      const sorted = [...results].sort((a, b) => b.normalizedScore - a.normalizedScore)
-      const interesting = sorted.filter(s => s.normalizedScore >= 0.15).slice(0, 5)
-      const top = interesting.length > 0 ? interesting : sorted.slice(0, 3)
+      const text = formatTopStockPicks(results, {
+        title: `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()})`,
+        sourceLabel: watched.length > 0 ? '📋 จาก watchlist ของคุณ' : '📋 หุ้นยอดนิยม (เพิ่ม watchlist ในแอปเพื่อติดตามเฉพาะตัว)',
+      })
 
-      const lines = [
-        `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()})`,
-        watched.length > 0 ? '📋 จาก watchlist ของคุณ' : '📋 หุ้นยอดนิยม (เพิ่ม watchlist ในแอปเพื่อติดตามเฉพาะตัว)',
-        '',
-        ...top.map((a, i) => {
-          const ch = a.changePct != null ? ` ${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(1)}%` : ''
-          return `${i + 1}. ${a.displayName} (${a.symbol}) — ${scoreLabel(a.normalizedScore)}${ch}`
-        }),
-        '',
-        'พิมพ์ชื่อหุ้นในแชทได้เลย เช่น "NVDA ตอนนี้เป็นอย่างไร"',
-        'เพิ่ม watchlist: "ติดตาม NVDA"',
-        '',
-        INVESTMENT_DISCLAIMER,
-      ]
-
-      await sendPushWithQuotaCheck(user.id, user.lineUserId, { type: 'text', text: lines.join('\n') })
+      await sendPushWithQuotaCheck(user.id, user.lineUserId, { type: 'text', text })
     } catch (err) {
       console.error(`[investment] morning summary failed for ${user.id}:`, err)
     }

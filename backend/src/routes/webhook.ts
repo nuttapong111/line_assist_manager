@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { middleware, WebhookEvent } from '@line/bot-sdk'
 import { createUserIfNotExists } from '../services/user.service'
-import { parseMessage, isAppointmentQueryText, parseAppointmentQueryLocal, isExpenseQueryText, parseExpenseQueryLocal } from '../services/nlp.service'
+import { parseMessage, parseExpenseLocal, isAppointmentQueryText, parseAppointmentQueryLocal, isExpenseQueryText, parseExpenseQueryLocal } from '../services/nlp.service'
 import { buildConfirmFlexMessage, buildSuccessMessage, buildQueryReply } from '../services/flex.service'
 import { sendPushWithQuotaCheck, lineClient } from '../services/push.service'
 import { getBudgetSummaryByCategory, resolveCategoryId } from '../services/budget.service'
@@ -16,7 +16,7 @@ import {
   isCancelText,
   type PendingType,
 } from '../services/chat-context.service'
-import { buildStockQueryReply, addSymbolToWatchlist, isAddWatchlistText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
+import { buildStockQueryReply, buildStockRecommendReply, addSymbolToWatchlist, isAddWatchlistText, isStockRecommendText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
 
 const router = Router()
 
@@ -144,6 +144,12 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
     }
 
     // หุ้น / watchlist — จับตรงๆ ก่อน NLP (ไม่พึ่ง Gemini)
+    if (isStockRecommendText(text)) {
+      const reply = await buildStockRecommendReply(user.id)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
     if (isAddWatchlistText(text)) {
       const symbol = extractSymbolFromText(text)
       if (symbol) {
@@ -171,6 +177,15 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
     if (stockSymbol && isStockRelatedText(text) && !isAddWatchlistText(text)) {
       const reply = await buildStockQueryReply(stockSymbol)
       await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
+    const expenseNlp = parseExpenseLocal(text)
+    if (expenseNlp && !isExpenseQueryText(text)) {
+      clearChatContext(lineUserId)
+      const pendingType: PendingType = expenseNlp.intent === 'INCOME' ? 'INCOME' : 'EXPENSE'
+      setPendingConfirm(lineUserId, pendingType, expenseNlp.data || {})
+      await lineClient.replyMessage(event.replyToken, buildConfirmFlexMessage(expenseNlp) as any)
       return
     }
 
