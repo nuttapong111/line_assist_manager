@@ -5,9 +5,11 @@ export function normalizeUrl(url: string): string {
   return `https://${trimmed}`
 }
 
-/** LIFF ต้องอยู่บน Vercel ไม่ใช่ Railway backend */
-export function isLiffFrontend(url: string): boolean {
+/** ใช้ตรวจว่า FRONTEND_URL ชี้ไปโดเมนอื่น (redirect) หรือ serve จาก service เดียวกัน */
+export function isExternalFrontend(url: string, publicBaseUrl?: string): boolean {
   const normalized = normalizeUrl(url)
   if (!normalized) return false
-  return !normalized.includes('railway.app')
+  if (!publicBaseUrl) return true
+  const base = normalizeUrl(publicBaseUrl)
+  return normalized !== base
 }

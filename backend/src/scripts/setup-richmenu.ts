@@ -61,7 +61,7 @@ async function main() {
     throw new Error('LINE_CHANNEL_ACCESS_TOKEN is required')
   }
   if (!LIFF_URL.startsWith('https://')) {
-    throw new Error('FRONTEND_URL must be a valid https URL (e.g. https://your-app.vercel.app)')
+    throw new Error('FRONTEND_URL must be a valid https URL (e.g. https://your-app.up.railway.app)')
   }
 
   console.log('Creating rich menu...')
