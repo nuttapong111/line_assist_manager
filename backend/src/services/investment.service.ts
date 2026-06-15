@@ -1,7 +1,7 @@
 import { db } from '../lib/db'
 import { users, watchedAssets, signalLog } from '../lib/schema'
 import { eq, and, gte, desc } from 'drizzle-orm'
-import { fetchOHLCV, fetchCurrentPrice, resolveSymbol } from './yahoo.service'
+import { fetchOHLCV, fetchCurrentPrice } from './yahoo.service'
 import { analyzeIndicators } from './technicals.service'
 import { sendPushWithQuotaCheck } from './push.service'
 import { addWatchedAsset, getWatchedAssets } from './portfolio.service'
@@ -75,20 +75,25 @@ export async function analyzeSymbol(symbol: string) {
 
 export async function analyzeStock(symbol: string, displayName?: string): Promise<StockAnalysis | null> {
   const sym = symbol.toUpperCase()
-  const ohlcv = await fetchOHLCV(sym, '1d', 200)
-  if (ohlcv.length < 30) return null
+  try {
+    const ohlcv = await fetchOHLCV(sym, '1d', 200)
+    if (ohlcv.length < 20) return null
 
-  const analysis = analyzeIndicators(ohlcv)
-  const priceData = await fetchCurrentPrice(sym)
+    const analysis = analyzeIndicators(ohlcv)
+    const priceData = await fetchCurrentPrice(sym)
 
-  return {
-    symbol: sym,
-    displayName: displayName || sym,
-    price: priceData?.price ?? ohlcv[ohlcv.length - 1]?.close ?? null,
-    changePct: priceData?.changePct ?? null,
-    overall: analysis.overall,
-    normalizedScore: analysis.normalizedScore,
-    indicators: analysis.indicators,
+    return {
+      symbol: sym,
+      displayName: displayName || sym,
+      price: priceData?.price ?? ohlcv[ohlcv.length - 1]?.close ?? null,
+      changePct: priceData?.changePct ?? null,
+      overall: analysis.overall,
+      normalizedScore: analysis.normalizedScore,
+      indicators: analysis.indicators,
+    }
+  } catch (err) {
+    console.error(`[investment] analyzeStock failed for ${sym}:`, err)
+    return null
   }
 }
 
@@ -229,25 +234,37 @@ export async function sendMorningInvestmentSummaries(): Promise<void> {
 
 export async function addSymbolToWatchlist(userId: string, symbol: string): Promise<string> {
   const sym = symbol.toUpperCase()
-  const resolved = resolveSymbol(sym).replace('.BK', '')
-  const displayName = SYMBOL_ALIASES[resolved.toLowerCase()] ? sym : sym
+  const displayName = sym
 
   const existing = await getWatchedAssets(userId)
   if (existing.some(w => w.symbol.toUpperCase() === sym)) {
     return `✅ ${sym} อยู่ใน watchlist แล้วครับ — ระบบจะวิเคราะห์และแจ้งเตือนเมื่อคะแนนเกิน ${Math.round(BUY_SIGNAL_THRESHOLD * 100)}/100`
   }
 
-  await addWatchedAsset(userId, {
-    symbol: sym,
-    display_name: displayName,
-    asset_type: sym.endsWith('BK') || ['PTT', 'KBANK', 'SCB', 'AOT', 'ADVANC', 'KFSDIV'].includes(sym) ? 'TH_STOCK' : 'US_STOCK',
-    currency: sym.includes('GOLD') ? 'USD' : 'THB',
-  })
+  try {
+    await addWatchedAsset(userId, {
+      symbol: sym,
+      display_name: displayName,
+      asset_type: ['PTT', 'KBANK', 'SCB', 'AOT', 'ADVANC', 'KFSDIV'].includes(sym) ? 'TH_STOCK' : 'US_STOCK',
+      currency: ['PTT', 'KBANK', 'SCB', 'AOT', 'ADVANC', 'KFSDIV'].includes(sym) ? 'THB' : 'USD',
+    })
+  } catch (err) {
+    console.error(`[investment] addWatchedAsset failed for ${sym}:`, err)
+    throw new Error(`เพิ่ม ${sym} ไม่สำเร็จ — ลองใหม่อีกครั้ง`)
+  }
 
-  const analysis = await analyzeStock(sym, displayName)
-  const scoreText = analysis
-    ? `\nคะแนนตอนนี้: ${Math.round(analysis.normalizedScore * 100)}/100 (${analysis.overall})`
-    : ''
+  let scoreText = ''
+  try {
+    const analysis = await analyzeStock(sym, displayName)
+    if (analysis) {
+      scoreText = `\nคะแนนตอนนี้: ${Math.round(analysis.normalizedScore * 100)}/100 (${analysis.overall})`
+      if (analysis.price != null) {
+        scoreText += `\nราคา: $${analysis.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+      }
+    }
+  } catch (err) {
+    console.error(`[investment] post-add analysis failed for ${sym}:`, err)
+  }
 
   return `✅ เพิ่ม ${sym} ใน watchlist แล้ว${scoreText}\nจะแจ้งเตือนเมื่อมีสัญญาณซื้อ (คะแนน ≥ ${Math.round(BUY_SIGNAL_THRESHOLD * 100)}/100)\n\n${INVESTMENT_DISCLAIMER}`
 }

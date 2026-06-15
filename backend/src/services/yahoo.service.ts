@@ -28,7 +28,11 @@ export async function fetchOHLCV(symbol: string, interval = '1d', count = 200): 
 
   try {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'application/json',
+      },
+      signal: AbortSignal.timeout(15000),
     })
     const json = await res.json() as {
       chart?: { result?: Array<{
