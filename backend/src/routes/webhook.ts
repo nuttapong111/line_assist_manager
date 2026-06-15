@@ -11,10 +11,19 @@ import { createAppointment } from '../services/appointment.service'
 const router = Router()
 
 router.post('/',
-  middleware({ channelSecret: process.env.LINE_CHANNEL_SECRET! }),
+  (req, res, next) => {
+    if (!process.env.LINE_CHANNEL_SECRET) {
+      console.error('[webhook] LINE_CHANNEL_SECRET is not set')
+      return res.status(500).send('LINE_CHANNEL_SECRET not configured')
+    }
+    next()
+  },
+  middleware({ channelSecret: process.env.LINE_CHANNEL_SECRET as string }),
   async (req, res) => {
     res.sendStatus(200)
-    await Promise.allSettled((req.body.events as WebhookEvent[]).map(handleEvent))
+    const events = req.body?.events as WebhookEvent[] | undefined
+    if (!events?.length) return
+    await Promise.allSettled(events.map(handleEvent))
   }
 )
 

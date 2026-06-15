@@ -39,11 +39,12 @@ app.use(cors({
   },
   credentials: true,
 }))
-app.use(express.json({ limit: '1mb' }))
-
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 
+// Webhook ต้องอยู่ก่อน express.json() — LINE ต้องใช้ raw body ตรวจ signature
 app.use('/webhook', webhookRouter)
+
+app.use(express.json({ limit: '1mb' }))
 
 const gcalCallbackRouter = Router()
 gcalCallbackRouter.get('/callback', async (req, res) => {
