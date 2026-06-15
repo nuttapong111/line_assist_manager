@@ -11,8 +11,15 @@ import { bangkokToday } from '../lib/datetime'
 /** คะแนนรวม (normalized -1..1) ที่ถือว่ามีสัญญาณซื้อน่าพิจารณา */
 export const BUY_SIGNAL_THRESHOLD = Number(process.env.SIGNAL_BUY_THRESHOLD || '0.35')
 
-/** หุ้นสแกนตอนเช้าเมื่อยังไม่มี watchlist */
-export const DEFAULT_SCAN_SYMBOLS = ['PTT', 'KBANK', 'NVDA', 'AAPL', 'GOLD'] as const
+/** หุ้นที่สแกนทั้งตลาด (ไทย + US + ทอง) */
+export const MARKET_SCAN_SYMBOLS = [
+  'PTT', 'KBANK', 'SCB', 'AOT', 'ADVANC', 'KFSDIV',
+  'NVDA', 'AAPL', 'MSFT', 'TSLA',
+  'GOLD',
+] as const
+
+/** @deprecated ใช้ MARKET_SCAN_SYMBOLS */
+export const DEFAULT_SCAN_SYMBOLS = MARKET_SCAN_SYMBOLS
 
 export const SYMBOL_ALIASES: Record<string, string> = {
   nvidia: 'NVDA', nvda: 'NVDA', นวิดา: 'NVDA',
@@ -130,30 +137,70 @@ export function formatStockAnalysisMessage(a: StockAnalysis): string {
   return lines.join('\n')
 }
 
+async function buildScanUniverse(userId: string) {
+  const watched = await getWatchedAssets(userId)
+  const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
+  const merged = new Map<string, string>()
+
+  for (const s of MARKET_SCAN_SYMBOLS) merged.set(s, s)
+  for (const w of watched) merged.set(w.symbol.toUpperCase(), w.displayName)
+
+  return {
+    symbols: [...merged.entries()].map(([symbol, displayName]) => ({ symbol, displayName })),
+    watchlistSymbols,
+    watchlistCount: watched.length,
+  }
+}
+
 async function collectStockAnalyses(
   symbols: { symbol: string; displayName: string }[],
-  limit = 8,
 ): Promise<StockAnalysis[]> {
   const results: StockAnalysis[] = []
-  for (const { symbol, displayName } of symbols.slice(0, limit)) {
+  for (const { symbol, displayName } of symbols) {
     const a = await analyzeStock(symbol, displayName)
     if (a) results.push(a)
-    await new Promise(r => setTimeout(r, 400))
+    await new Promise(r => setTimeout(r, 350))
   }
   return results
 }
 
 function formatTopStockPicks(
   results: StockAnalysis[],
-  options: { title: string; sourceLabel: string },
+  options: {
+    title: string
+    sourceLabel: string
+    requireBuySignal?: boolean
+    watchlistSymbols?: Set<string>
+    scannedCount?: number
+  },
 ): string {
   if (!results.length) {
     return `ไม่สามารถดึงข้อมูลหุ้นได้ตอนนี้\nลองพิมพ์ชื่อหุ้น เช่น "NVDA ตอนนี้เป็นอย่างไร"\n\n${INVESTMENT_DISCLAIMER}`
   }
 
+  const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
   const sorted = [...results].sort((a, b) => b.normalizedScore - a.normalizedScore)
   const buySignals = sorted.filter(s => s.normalizedScore >= BUY_SIGNAL_THRESHOLD)
-  const top = buySignals.length > 0 ? buySignals.slice(0, 5) : sorted.slice(0, 3)
+
+  if (options.requireBuySignal && buySignals.length === 0) {
+    const best = sorted[0]
+    const lines = [
+      options.title,
+      `🔍 สแกน ${options.scannedCount ?? results.length} ตัวทั้งตลาด + watchlist`,
+      `ยังไม่มีหุ้นที่คะแนนเกิน ${thresholdPct}/100 วันนี้`,
+      best ? `score สูงสุด: ${best.displayName} (${best.symbol}) — ${Math.round(best.normalizedScore * 100)}/100` : '',
+      '',
+      'ลองถามใหม่พรุ่งนี้ หรือดูรายละเอียด "NVDA ตอนนี้เป็นอย่างไร"',
+      'ติดตาม: "ติดตาม NVDA"',
+      '',
+      INVESTMENT_DISCLAIMER,
+    ].filter(Boolean)
+    return lines.join('\n')
+  }
+
+  const top = options.requireBuySignal ? buySignals.slice(0, 5) : (
+    buySignals.length > 0 ? buySignals.slice(0, 5) : sorted.slice(0, 3)
+  )
 
   const lines = [
     options.title,
@@ -162,10 +209,13 @@ function formatTopStockPicks(
     ...top.map((a, i) => {
       const ch = a.changePct != null ? ` ${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(1)}%` : ''
       const price = a.price != null ? ` $${a.price.toFixed(2)}` : ''
-      return `${i + 1}. ${a.displayName} (${a.symbol}) — ${scoreLabel(a.normalizedScore)}${price}${ch}`
+      const tag = options.watchlistSymbols?.has(a.symbol) ? ' 📋' : ''
+      return `${i + 1}. ${a.displayName} (${a.symbol}) — ${scoreLabel(a.normalizedScore)}${price}${ch}${tag}`
     }),
     '',
-    buySignals.length === 0 ? '⚠️ ยังไม่มีสัญญาณซื้อชัดเจน — แสดง 3 ตัวที่ score สูงสุด' : '',
+    options.requireBuySignal
+      ? `✅ แสดงเฉพาะหุ้นที่คะแนน ≥ ${thresholdPct}/100 (📋 = อยู่ใน watchlist)`
+      : buySignals.length === 0 ? `⚠️ ยังไม่มีสัญญาณซื้อชัดเจน — แสดง 3 ตัวที่ score สูงสุด` : '',
     'ดูรายละเอียด: "NVDA ตอนนี้เป็นอย่างไร"',
     'ติดตาม: "ติดตาม NVDA"',
     '',
@@ -176,15 +226,19 @@ function formatTopStockPicks(
 }
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
-  const watched = await getWatchedAssets(userId)
-  const symbols = watched.length > 0
-    ? watched.map(w => ({ symbol: w.symbol, displayName: w.displayName }))
-    : DEFAULT_SCAN_SYMBOLS.map(s => ({ symbol: s, displayName: s }))
-
+  const { symbols, watchlistSymbols, watchlistCount } = await buildScanUniverse(userId)
   const results = await collectStockAnalyses(symbols)
+
+  const sourceLabel = watchlistCount > 0
+    ? `🔍 สแกน ${symbols.length} ตัว (ตลาด + watchlist ${watchlistCount} ตัว)`
+    : `🔍 สแกน ${symbols.length} ตัวจากตลาด`
+
   return formatTopStockPicks(results, {
-    title: `📈 หุ้นที่ technical score สูงสุดวันนี้ (${bangkokToday()})`,
-    sourceLabel: watched.length > 0 ? '📋 จาก watchlist ของคุณ' : '📋 สแกนหุ้นยอดนิยม (พิมพ์ "ติดตาม NVDA" เพื่อติดตามเฉพาะตัว)',
+    title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
+    sourceLabel,
+    requireBuySignal: true,
+    watchlistSymbols,
+    scannedCount: symbols.length,
   })
 }
 
@@ -257,17 +311,14 @@ export async function sendMorningInvestmentSummaries(): Promise<void> {
 
   for (const user of enabledUsers) {
     try {
-      const watched = await getWatchedAssets(user.id)
-      const symbols = watched.length > 0
-        ? watched.map(w => ({ symbol: w.symbol, displayName: w.displayName }))
-        : DEFAULT_SCAN_SYMBOLS.map(s => ({ symbol: s, displayName: s }))
-
+      const { symbols, watchlistSymbols } = await buildScanUniverse(user.id)
       const results = await collectStockAnalyses(symbols)
       if (!results.length) continue
 
       const text = formatTopStockPicks(results, {
         title: `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()})`,
-        sourceLabel: watched.length > 0 ? '📋 จาก watchlist ของคุณ' : '📋 หุ้นยอดนิยม (เพิ่ม watchlist ในแอปเพื่อติดตามเฉพาะตัว)',
+        sourceLabel: `🔍 สแกน ${symbols.length} ตัว (ตลาด + watchlist)`,
+        watchlistSymbols,
       })
 
       await sendPushWithQuotaCheck(user.id, user.lineUserId, { type: 'text', text })
