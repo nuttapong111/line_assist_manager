@@ -63,6 +63,7 @@ export default function Dashboard() {
             { icon: '📅', label: 'นัดหมาย', bg: 'bg-[#E6F0EB]', path: '/appointments' },
             { icon: '💸', label: 'รายจ่าย', bg: 'bg-[#FBF0E0]', path: '/finance' },
             { icon: '📷', label: 'สแกนสลิป', bg: 'bg-[#EEE8FA]', path: '/slip' },
+            { icon: '📰', label: 'ข่าวหุ้น', bg: 'bg-[#E8F4F0]', path: '/news' },
             { icon: '🎯', label: 'เป้าหมาย', bg: 'bg-[#E8EEFA]', path: '/goals' },
           ].map(a => (
             <button key={a.label} onClick={() => navigate(a.path)} className="flex flex-col items-center gap-1.5">

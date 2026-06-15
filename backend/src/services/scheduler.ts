@@ -12,6 +12,7 @@ import { checkPriceAlerts } from './price-alert.service'
 import { checkSignalAlerts } from './signal.service'
 import { syncFromGoogle } from './gcal.service'
 import { formatBangkokTime } from '../lib/datetime'
+import { fetchAndCacheAllWatchedNews } from './news.service'
 
 export function startScheduler() {
   // Reminders + appointment alerts every minute
@@ -59,6 +60,11 @@ export function startScheduler() {
   cron.schedule('*/15 * * * *', async () => {
     try { await syncFromGoogle() } catch (err) { console.error('GCal sync cron error:', err) }
   })
+
+  // News fetch daily 07:00 Bangkok
+  cron.schedule('0 7 * * *', async () => {
+    try { await fetchAndCacheAllWatchedNews() } catch (err) { console.error('News cron error:', err) }
+  }, { timezone: 'Asia/Bangkok' })
 
   console.log('✅ Scheduler started')
 }

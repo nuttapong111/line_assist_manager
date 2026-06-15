@@ -15,6 +15,7 @@ import alertsRouter from './routes/alerts'
 import goalsRouter from './routes/goals'
 import portfolioRouter from './routes/portfolio'
 import gcalRouter from './routes/gcal'
+import newsRouter from './routes/news'
 import { Router } from 'express'
 import * as gcal from './services/gcal.service'
 import { startScheduler } from './services/scheduler'
@@ -92,6 +93,7 @@ app.use('/api/alerts', alertsRouter)
 app.use('/api/goals', goalsRouter)
 app.use('/api/portfolio', portfolioRouter)
 app.use('/api/gcal', gcalRouter)
+app.use('/api/news', newsRouter)
 
 if (hasFrontend) {
   app.use(express.static(publicDir, { index: false }))

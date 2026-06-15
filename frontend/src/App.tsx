@@ -9,12 +9,13 @@ import Appointments from './screens/Appointments'
 import SavingGoals from './screens/SavingGoals'
 import Portfolio from './screens/Portfolio'
 import PriceAlerts from './screens/PriceAlerts'
+import News from './screens/News'
 import Settings from './screens/Settings'
 import BudgetSetup from './screens/BudgetSetup'
 
 function AppLayout() {
   const location = useLocation()
-  const hideTabBar = ['/slip', '/portfolio', '/alerts', '/budget'].includes(location.pathname)
+  const hideTabBar = ['/slip', '/portfolio', '/alerts', '/news', '/budget'].includes(location.pathname)
 
   return (
     <div className="max-w-[430px] mx-auto h-screen flex flex-col bg-[#F7F6F2]">
@@ -27,6 +28,7 @@ function AppLayout() {
           <Route path="/goals" element={<SavingGoals />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/alerts" element={<PriceAlerts />} />
+          <Route path="/news" element={<News />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/budget" element={<BudgetSetup />} />
         </Routes>

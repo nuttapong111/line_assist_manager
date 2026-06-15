@@ -101,4 +101,11 @@ export const api = {
     getAuthUrl: () => apiFetch<{ url: string }>('/gcal/auth'),
     disconnect: () => apiFetch('/gcal/disconnect', { method: 'DELETE' }),
   },
+  news: {
+    getFeed: () => apiFetch<{ bundles: any[]; market: any[]; disclaimer: string }>('/news'),
+    getSymbol: (symbol: string) => apiFetch<any>(`/news/${symbol}`),
+    getMarket: () => apiFetch<{ market: any[]; disclaimer: string }>('/news/market'),
+    refresh: () => apiFetch<{ bundles: any[]; disclaimer: string }>('/news/refresh', { method: 'POST' }),
+    getSymbols: () => apiFetch<Array<{ symbol: string; displayName: string }>>('/news/symbols'),
+  },
 }
