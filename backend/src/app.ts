@@ -17,17 +17,63 @@ import { Router } from 'express'
 import * as gcal from './services/gcal.service'
 import { startScheduler } from './services/scheduler'
 import { verifyOAuthState } from './lib/oauth-state'
+import { normalizeUrl, isLiffFrontend } from './lib/url'
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
+const frontendUrl = normalizeUrl(process.env.FRONTEND_URL || '')
 const corsOrigins: string[] = []
-if (process.env.FRONTEND_URL) corsOrigins.push(process.env.FRONTEND_URL)
+if (frontendUrl) corsOrigins.push(frontendUrl)
 if (process.env.NODE_ENV !== 'production') {
   corsOrigins.push('http://localhost:5173', 'http://127.0.0.1:5173')
 }
+
+function landingHtml(): string {
+  const liffId = process.env.LIFF_ID || ''
+  return `<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyAssist API</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background:#F7F6F2; color:#18170F; padding:24px; line-height:1.6; }
+    .card { background:#fff; border-radius:14px; padding:20px; max-width:400px; margin:auto; border:1px solid rgba(0,0,0,0.07); }
+    h1 { color:#2A5C45; font-size:20px; margin:0 0 8px; }
+    p { font-size:14px; color:#636259; margin:0 0 12px; }
+    code { background:#EEEDE8; padding:2px 6px; border-radius:6px; font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>MyAssist API</h1>
+    <p>นี่คือ <strong>backend API</strong> ไม่ใช่หน้าแอป LIFF</p>
+    <p>เปิดแอปจาก <strong>LINE OA</strong> → กดแท็บ 「เมนู」 ด้านล่าง</p>
+    <p>ตั้ง <code>FRONTEND_URL</code> บน Railway เป็น URL Vercel (LIFF) ไม่ใช่ URL Railway</p>
+    ${liffId ? `<p>LIFF ID: <code>${liffId}</code></p>` : ''}
+    <p><a href="/health">/health</a></p>
+  </div>
+</body>
+</html>`
+}
+
+app.get('/', (_req, res) => {
+  if (isLiffFrontend(frontendUrl)) {
+    return res.redirect(frontendUrl)
+  }
+  res.type('html').send(landingHtml())
+})
+
+app.get('/slip', (req, res) => {
+  if (isLiffFrontend(frontendUrl)) {
+    const query = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''
+    return res.redirect(`${frontendUrl}/slip${query}`)
+  }
+  res.type('html').send(landingHtml())
+})
 
 app.use(cors({
   origin: (origin, callback) => {

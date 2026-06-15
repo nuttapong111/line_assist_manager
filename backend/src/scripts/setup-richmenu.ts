@@ -1,15 +1,9 @@
 import { Client } from '@line/bot-sdk'
 import sharp from 'sharp'
 import dotenv from 'dotenv'
+import { normalizeUrl } from '../lib/url'
 
 dotenv.config()
-
-function normalizeUrl(url: string): string {
-  const trimmed = url.trim().replace(/\/$/, '')
-  if (!trimmed) return trimmed
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
-  return `https://${trimmed}`
-}
 
 const client = new Client({ channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN! })
 const LIFF_URL = normalizeUrl(process.env.FRONTEND_URL || '')
