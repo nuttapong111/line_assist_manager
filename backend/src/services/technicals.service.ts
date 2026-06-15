@@ -1,4 +1,4 @@
-import TI from 'technicalindicators'
+import * as TI from 'technicalindicators'
 import type { IndicatorResult } from '../types'
 import type { OHLCV } from './yahoo.service'
 
