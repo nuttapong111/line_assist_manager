@@ -32,7 +32,10 @@ router.post('/',
     res.sendStatus(200)
     const events = req.body?.events as WebhookEvent[] | undefined
     if (!events?.length) return
-    await Promise.allSettled(events.map(handleEvent))
+    const results = await Promise.allSettled(events.map(handleEvent))
+    for (const r of results) {
+      if (r.status === 'rejected') console.error('[webhook] event handler failed:', r.reason)
+    }
   }
 )
 
@@ -117,18 +120,18 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
   const text: string = event.message.text.trim()
   const ctx = getChatContext(lineUserId)
 
-  if (isCancelText(text)) {
-    clearChatContext(lineUserId)
-    await lineClient.replyMessage(event.replyToken, { type: 'text', text: 'ยกเลิกแล้วครับ' })
-    return
-  }
+  try {
+    if (isCancelText(text)) {
+      clearChatContext(lineUserId)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: 'ยกเลิกแล้วครับ' })
+      return
+    }
 
-  if (isConfirmText(text) && !ctx?.pending) {
-    return
-  }
+    if (isConfirmText(text) && !ctx?.pending) {
+      return
+    }
 
-  if (isConfirmText(text) && ctx?.pending) {
-    try {
+    if (isConfirmText(text) && ctx?.pending) {
       const { type, data } = ctx.pending
       if (type === 'EXPENSE' || type === 'INCOME') {
         await confirmExpense(event.replyToken, user, lineUserId, data)
@@ -136,40 +139,44 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
         await confirmAppointment(event.replyToken, user, data)
       }
       clearChatContext(lineUserId)
-    } catch (err) {
-      console.error('[webhook] confirm from text failed:', err)
+      return
+    }
+
+    const nlp = await parseMessage(text, ctx?.mode)
+
+    if (nlp.intent === 'UNKNOWN' || nlp.confidence < 0.6) {
       await lineClient.replyMessage(event.replyToken, {
         type: 'text',
-        text: 'บันทึกไม่สำเร็จครับ ลองใหม่อีกครั้งนะครับ',
+        text: 'ขอโทษครับ ไม่เข้าใจ 😅\nลองพิม เช่น:\n"นัดหมอพรุ่งนี้ 10 โมง"\n"กาแฟ 85 อาหาร"\n"ใช้ไปเท่าไหร่เดือนนี้"',
       })
+      return
     }
-    return
+
+    if (nlp.intent === 'QUERY') {
+      clearChatContext(lineUserId)
+      const reply = await buildQueryReply(user.id, nlp.data)
+      await lineClient.replyMessage(event.replyToken, reply)
+      return
+    }
+
+    const pendingType: PendingType =
+      nlp.intent === 'INCOME' ? 'INCOME'
+        : nlp.intent === 'APPOINTMENT' ? 'APPOINTMENT'
+          : 'EXPENSE'
+
+    setPendingConfirm(lineUserId, pendingType, nlp.data || {})
+    await lineClient.replyMessage(event.replyToken, buildConfirmFlexMessage(nlp) as any)
+  } catch (err) {
+    console.error('[webhook] handleTextMessage failed:', text, err)
+    try {
+      await lineClient.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'ระบบมีปัญหาชั่วคราวครับ ลองพิมใหม่อีกครั้งนะครับ',
+      })
+    } catch (replyErr) {
+      console.error('[webhook] error reply failed:', replyErr)
+    }
   }
-
-  const nlp = await parseMessage(text, ctx?.mode)
-
-  if (nlp.intent === 'UNKNOWN' || nlp.confidence < 0.6) {
-    await lineClient.replyMessage(event.replyToken, {
-      type: 'text',
-      text: 'ขอโทษครับ ไม่เข้าใจ 😅\nลองพิม เช่น:\n"นัดหมอพรุ่งนี้ 10 โมง"\n"กาแฟ 85 อาหาร"\n"ใช้ไปเท่าไหร่เดือนนี้"',
-    })
-    return
-  }
-
-  if (nlp.intent === 'QUERY') {
-    clearChatContext(lineUserId)
-    const reply = await buildQueryReply(user.id, nlp.data)
-    await lineClient.replyMessage(event.replyToken, reply)
-    return
-  }
-
-  const pendingType: PendingType =
-    nlp.intent === 'INCOME' ? 'INCOME'
-      : nlp.intent === 'APPOINTMENT' ? 'APPOINTMENT'
-        : 'EXPENSE'
-
-  setPendingConfirm(lineUserId, pendingType, nlp.data || {})
-  await lineClient.replyMessage(event.replyToken, buildConfirmFlexMessage(nlp) as any)
 }
 
 async function handlePostback(event: any, user: any, lineUserId: string) {
@@ -179,30 +186,22 @@ async function handlePostback(event: any, user: any, lineUserId: string) {
   try {
     switch (action) {
       case 'CONFIRM_EXPENSE': {
-        const payload = parsePostbackPayload(params.get('payload'))
-        if (!payload.amount) {
-          const ctx = getChatContext(lineUserId)
-          if (ctx?.pending?.type === 'EXPENSE' || ctx?.pending?.type === 'INCOME') {
-            await confirmExpense(event.replyToken, user, lineUserId, ctx.pending.data)
-            clearChatContext(lineUserId)
-            return
-          }
-          throw new Error('Missing expense payload')
-        }
+        const ctx = getChatContext(lineUserId)
+        const payload = ctx?.pending?.type === 'EXPENSE' || ctx?.pending?.type === 'INCOME'
+          ? ctx.pending.data
+          : parsePostbackPayload(params.get('payload'))
+        if (!payload?.amount) throw new Error('Missing expense payload — พิมรายการใหม่แล้วกดยืนยันอีกครั้ง')
         await confirmExpense(event.replyToken, user, lineUserId, payload)
         clearChatContext(lineUserId)
         break
       }
       case 'CONFIRM_APPOINTMENT': {
-        const payload = parsePostbackPayload(params.get('payload'))
-        if (!payload.title && !payload.date) {
-          const ctx = getChatContext(lineUserId)
-          if (ctx?.pending?.type === 'APPOINTMENT') {
-            await confirmAppointment(event.replyToken, user, ctx.pending.data)
-            clearChatContext(lineUserId)
-            return
-          }
-          throw new Error('Missing appointment payload')
+        const ctx = getChatContext(lineUserId)
+        const payload = ctx?.pending?.type === 'APPOINTMENT'
+          ? ctx.pending.data
+          : parsePostbackPayload(params.get('payload'))
+        if (!payload?.title && !payload?.date) {
+          throw new Error('Missing appointment payload — พิมนัดหมายใหม่แล้วกดยืนยันอีกครั้ง')
         }
         await confirmAppointment(event.replyToken, user, payload)
         clearChatContext(lineUserId)

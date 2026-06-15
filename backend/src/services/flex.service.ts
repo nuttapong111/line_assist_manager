@@ -7,8 +7,6 @@ import { formatBangkokTime } from '../lib/datetime'
 
 export function buildConfirmFlexMessage(nlp: NLPResult) {
   const data = nlp.data || {}
-  const payload = JSON.stringify(data)
-
   if (nlp.intent === 'EXPENSE' || nlp.intent === 'INCOME') {
     return {
       type: 'flex' as const,
@@ -34,7 +32,7 @@ export function buildConfirmFlexMessage(nlp: NLPResult) {
               action: {
                 type: 'postback',
                 label: 'ยืนยัน',
-                data: `action=CONFIRM_EXPENSE&payload=${encodeURIComponent(payload)}`,
+                data: 'action=CONFIRM_EXPENSE',
                 displayText: 'ยืนยัน',
               },
               style: 'primary',
@@ -75,7 +73,7 @@ export function buildConfirmFlexMessage(nlp: NLPResult) {
               action: {
                 type: 'postback',
                 label: 'ยืนยัน',
-                data: `action=CONFIRM_APPOINTMENT&payload=${encodeURIComponent(payload)}`,
+                data: 'action=CONFIRM_APPOINTMENT',
                 displayText: 'ยืนยัน',
               },
               style: 'primary',

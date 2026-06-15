@@ -1,4 +1,5 @@
-const TTL_MS = 10 * 60 * 1000
+const MODE_TTL_MS = 2 * 60 * 60 * 1000 // โหมดจากเมนูคงอยู่ 2 ชม.
+const PENDING_TTL_MS = 30 * 60 * 1000 // รอยืนยันคงอยู่ 30 นาที
 
 export type ChatMode = 'APPOINTMENT' | 'EXPENSE' | 'REMINDER'
 export type PendingType = 'EXPENSE' | 'INCOME' | 'APPOINTMENT'
@@ -22,13 +23,20 @@ function isExpired(ctx: ChatContext): boolean {
 }
 
 export function setChatMode(lineUserId: string, mode: ChatMode) {
-  sessions.set(lineUserId, { mode, expiresAt: Date.now() + TTL_MS })
+  const existing = sessions.get(lineUserId)
+  sessions.set(lineUserId, {
+    mode,
+    pending: existing?.pending,
+    expiresAt: Date.now() + MODE_TTL_MS,
+  })
 }
 
 export function setPendingConfirm(lineUserId: string, type: PendingType, data: Record<string, unknown>) {
+  const existing = sessions.get(lineUserId)
   sessions.set(lineUserId, {
-    pending: { type, data, expiresAt: Date.now() + TTL_MS },
-    expiresAt: Date.now() + TTL_MS,
+    mode: existing?.mode,
+    pending: { type, data, expiresAt: Date.now() + PENDING_TTL_MS },
+    expiresAt: Date.now() + PENDING_TTL_MS,
   })
 }
 

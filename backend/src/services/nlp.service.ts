@@ -257,6 +257,23 @@ export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | nu
 }
 
 export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPResult> {
+  // นัดหมาย + เวลาไทย → ใช้ local ก่อนเสมอ (แม่นกว่า Gemini)
+  if (mode === 'APPOINTMENT' || mode === 'REMINDER' || TIME_HINT.test(text)) {
+    const appt = parseAppointmentLocal(text)
+    if (appt) {
+      appt.raw_text = text
+      return appt
+    }
+  }
+
+  if (mode === 'EXPENSE') {
+    const expense = parseExpenseLocal(text)
+    if (expense) {
+      expense.raw_text = text
+      return expense
+    }
+  }
+
   if (!hasGeminiKey()) {
     const local = parseMessageLocal(text, mode)
     if (local) {
@@ -279,9 +296,15 @@ export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPRe
     const parsed = parseJsonFromText(responseText) as NLPResult
     parsed.raw_text = text
 
-    if (mode === 'APPOINTMENT' && parsed.intent === 'EXPENSE' && TIME_HINT.test(text)) {
-      const appt = parseAppointmentLocal(text)
-      if (appt) return { ...appt, raw_text: text }
+    const needsLocalFallback =
+      parsed.intent === 'UNKNOWN'
+      || parsed.confidence < 0.6
+      || (TIME_HINT.test(text) && parsed.intent !== 'APPOINTMENT')
+      || (mode === 'APPOINTMENT' && parsed.intent !== 'APPOINTMENT')
+
+    if (needsLocalFallback) {
+      const local = parseMessageLocal(text, mode)
+      if (local) return { ...local, raw_text: text }
     }
 
     return parsed
