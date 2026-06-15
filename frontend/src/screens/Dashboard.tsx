@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { PageHeader, Skeleton, EmptyState } from '../components/Layout'
 import { api } from '../lib/api'
 import { getDisplayName } from '../lib/liff'
+import { formatBangkokTime } from '../lib/datetime'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -81,7 +82,7 @@ export default function Dashboard() {
           ) : appts.map(a => (
             <div key={a.id} className="bg-white border border-[rgba(0,0,0,0.07)] rounded-[14px] p-4 mb-2 flex gap-3">
               <div className="text-[13px] font-semibold text-[#636259]">
-                {new Date(a.startAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                {formatBangkokTime(a.startAt)}
               </div>
               <div>
                 <p className="text-[14px] font-medium">{a.title}</p>

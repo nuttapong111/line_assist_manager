@@ -1,11 +1,11 @@
 import { db } from '../lib/db'
 import { appointments } from '../lib/schema'
 import { eq, and, gte, lt, desc } from 'drizzle-orm'
+import { bangkokDayRange, bangkokToday, parseBangkokDateTime } from '../lib/datetime'
 
 export async function getTodayAppointments(userId: string) {
-  const today = new Date().toISOString().split('T')[0]
-  const start = new Date(today)
-  const end = new Date(today + 'T23:59:59')
+  const today = bangkokToday()
+  const { start, end } = bangkokDayRange(today)
 
   return db
     .select()
@@ -19,8 +19,8 @@ export async function getTodayAppointments(userId: string) {
 }
 
 export async function getAppointmentsRange(userId: string, from: string, to: string) {
-  const start = new Date(from)
-  const end = new Date(to + 'T23:59:59')
+  const { start } = bangkokDayRange(from)
+  const { end } = bangkokDayRange(to)
 
   return db
     .select()
@@ -45,13 +45,23 @@ export async function createAppointment(userId: string, data: {
   reminderMin?: number
   source?: string
 }) {
-  const startAt = data.startAt || data.start_at
+  const rawStart = data.startAt || data.start_at
+  let startAt: Date
+
+  if (typeof rawStart === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(rawStart) && !rawStart.includes('+') && !rawStart.endsWith('Z')) {
+    const [datePart, timePart] = rawStart.split('T')
+    const time = timePart.slice(0, 5)
+    startAt = parseBangkokDateTime(datePart, time)
+  } else {
+    startAt = new Date(rawStart!)
+  }
+
   const [appt] = await db.insert(appointments).values({
     userId,
     title: data.title,
     location: data.location,
     category: data.category || 'PERSONAL',
-    startAt: new Date(startAt!),
+    startAt,
     endAt: data.endAt || data.end_at ? new Date(data.endAt || data.end_at!) : null,
     reminderMin: data.reminderMin || data.reminder_min || 60,
     source: data.source || 'MANUAL',

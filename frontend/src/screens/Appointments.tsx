@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { PageHeader, Skeleton, EmptyState } from '../components/Layout'
 import { api } from '../lib/api'
+import { formatBangkokTime, formatBangkokDate, bangkokDateString } from '../lib/datetime'
 
 export default function Appointments() {
   const [appts, setAppts] = useState<any[]>([])
@@ -33,7 +34,7 @@ export default function Appointments() {
       <div className="bg-white border-b border-[rgba(0,0,0,0.07)] px-3 py-3 flex gap-1">
         {days.map(d => {
           const isToday = d.toDateString() === today.toDateString()
-          const hasEvent = appts.some(a => new Date(a.startAt).toDateString() === d.toDateString())
+          const hasEvent = appts.some(a => bangkokDateString(a.startAt) === bangkokDateString(d))
           return (
             <div key={d.toISOString()} className={`flex-1 flex flex-col items-center py-2 rounded-[10px] ${isToday ? 'bg-[#2A5C45] text-white' : ''}`}>
               <span className={`text-[10px] uppercase ${isToday ? 'text-white/70' : 'text-[#9B9A94]'}`}>
@@ -53,14 +54,14 @@ export default function Appointments() {
           <div key={a.id} className="bg-white border border-[rgba(0,0,0,0.07)] rounded-[14px] p-4 mb-3 flex gap-3">
             <div className="text-right w-10">
               <p className="font-['DM_Mono'] text-[11px] text-[#9B9A94]">
-                {new Date(a.startAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                {formatBangkokTime(a.startAt)}
               </p>
             </div>
             <div className="flex-1 border-l-[3px] border-[#2A5C45] pl-3">
               <p className="text-[13px] font-semibold">{a.title}</p>
               {a.location && <p className="text-[11px] text-[#636259] mt-0.5">📍 {a.location}</p>}
               <p className="text-[11px] text-[#9B9A94] mt-0.5">
-                {new Date(a.startAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
+                {formatBangkokDate(a.startAt, { day: 'numeric', month: 'short' })}
               </p>
             </div>
           </div>

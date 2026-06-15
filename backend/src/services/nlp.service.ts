@@ -1,5 +1,6 @@
 import { uploadSlip } from '../lib/storage'
 import { getGeminiModel, parseJsonFromText, hasGeminiKey } from '../lib/gemini'
+import { bangkokToday } from '../lib/datetime'
 import type { NLPResult } from '../types'
 import type { ChatMode } from './chat-context.service'
 
@@ -58,7 +59,7 @@ function detectCategory(text: string): string {
 }
 
 function todayStr(): string {
-  return new Date().toISOString().split('T')[0]
+  return bangkokToday()
 }
 
 function tomorrowStr(): string {

@@ -11,6 +11,7 @@ import { eq } from 'drizzle-orm'
 import { checkPriceAlerts } from './price-alert.service'
 import { checkSignalAlerts } from './signal.service'
 import { syncFromGoogle } from './gcal.service'
+import { formatBangkokTime } from '../lib/datetime'
 
 export function startScheduler() {
   // Reminders + appointment alerts every minute
@@ -20,7 +21,7 @@ export function startScheduler() {
       for (const appt of appts) {
         const [user] = await db.select().from(users).where(eq(users.id, appt.userId)).limit(1)
         if (!user) continue
-        const time = new Date(appt.startAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+        const time = formatBangkokTime(appt.startAt)
         await sendPushWithQuotaCheck(user.id, user.lineUserId, {
           type: 'text',
           text: `📅 เตือนนัดหมาย: ${appt.title}\nเวลา ${time}${appt.location ? `\n📍 ${appt.location}` : ''}`,

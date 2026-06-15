@@ -3,6 +3,7 @@ import { getMonthlySummary } from './finance.service'
 import { getBudgets } from './budget.service'
 import { getTodayAppointments } from './appointment.service'
 import { INVESTMENT_DISCLAIMER } from '../types'
+import { formatBangkokTime } from '../lib/datetime'
 
 export function buildConfirmFlexMessage(nlp: NLPResult) {
   const data = nlp.data || {}
@@ -134,7 +135,7 @@ export async function buildQueryReply(userId: string, data: Record<string, unkno
     const appts = await getTodayAppointments(userId)
     if (appts.length === 0) return { type: 'text' as const, text: '📅 ไม่มีนัดหมายวันนี้ครับ' }
     const lines = appts.map(a => {
-      const time = new Date(a.startAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+      const time = formatBangkokTime(a.startAt)
       return `• ${time} ${a.title}`
     })
     return { type: 'text' as const, text: `📅 นัดหมายวันนี้:\n${lines.join('\n')}` }

@@ -2,6 +2,7 @@ import { db } from '../lib/db'
 import { users, budgetCategories } from '../lib/schema'
 import { eq } from 'drizzle-orm'
 import type { User } from '../types'
+import { bangkokDayRange, bangkokToday } from '../lib/datetime'
 
 const DEFAULT_CATEGORIES = [
   { name: 'อาหาร', icon: '🍜', color: '#2A5C45' },
@@ -58,8 +59,8 @@ export async function deleteUserAccount(userId: string) {
 }
 
 export async function getUserStats(userId: string) {
-  const month = new Date().toISOString().slice(0, 7)
-  const today = new Date().toISOString().split('T')[0]
+  const month = bangkokToday().slice(0, 7)
+  const today = bangkokToday()
 
   const { transactions, appointments, reminders } = await import('../lib/schema')
   const { and, gte, lt, eq: eqOp } = await import('drizzle-orm')
@@ -76,8 +77,7 @@ export async function getUserStats(userId: string) {
   const expenses = txs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0)
   const income = txs.filter(t => t.type === 'INCOME').reduce((s, t) => s + Number(t.amount), 0)
 
-  const todayStart = new Date(today)
-  const todayEnd = new Date(today + 'T23:59:59')
+  const { start: todayStart, end: todayEnd } = bangkokDayRange(today)
   const todayAppts = await db
     .select()
     .from(appointments)
