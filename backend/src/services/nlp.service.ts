@@ -3,6 +3,7 @@ import { getGeminiModel, parseJsonFromText, hasGeminiKey } from '../lib/gemini'
 import { bangkokToday, bangkokTomorrow, parseBangkokDateTime } from '../lib/datetime'
 import type { NLPResult } from '../types'
 import type { ChatMode } from './chat-context.service'
+import { extractSymbolFromText, isStockRelatedText, isAddWatchlistText } from './investment.service'
 
 export const NLP_SYSTEM_PROMPT = `
 You are a Thai personal assistant that extracts structured data from Thai text messages.
@@ -234,8 +235,18 @@ export function parseExpenseLocal(text: string): NLPResult | null {
 export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | null {
   const trimmed = text.trim()
 
-  if (/ใช้ไป|สรุป|งบเหลือ|ดูนัด|เท่าไหร่/.test(trimmed)) {
+  if (/ใช้ไป|สรุป|งบเหลือ|ดูนัด|เท่าไหร่/.test(trimmed) && !isStockRelatedText(trimmed)) {
     return { intent: 'QUERY', confidence: 0.85, data: { queryType: 'MONTHLY_SUMMARY', period: 'this_month' } }
+  }
+
+  if (isAddWatchlistText(trimmed)) {
+    const symbol = extractSymbolFromText(trimmed)
+    if (symbol) return { intent: 'ADD_WATCHLIST', confidence: 0.9, data: { symbol } }
+  }
+
+  if (isStockRelatedText(trimmed)) {
+    const symbol = extractSymbolFromText(trimmed)
+    if (symbol) return { intent: 'STOCK_QUERY', confidence: 0.9, data: { symbol } }
   }
 
   if (mode === 'APPOINTMENT' || mode === 'REMINDER' || TIME_HINT.test(trimmed)) {
@@ -257,6 +268,16 @@ export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | nu
 }
 
 export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPResult> {
+  // หุ้น / watchlist → local ก่อนเสมอ
+  if (isAddWatchlistText(text)) {
+    const symbol = extractSymbolFromText(text)
+    if (symbol) return { intent: 'ADD_WATCHLIST', confidence: 0.9, data: { symbol }, raw_text: text }
+  }
+  if (isStockRelatedText(text)) {
+    const symbol = extractSymbolFromText(text)
+    if (symbol) return { intent: 'STOCK_QUERY', confidence: 0.9, data: { symbol }, raw_text: text }
+  }
+
   // นัดหมาย + เวลาไทย → ใช้ local ก่อนเสมอ (แม่นกว่า Gemini)
   if (mode === 'APPOINTMENT' || mode === 'REMINDER' || TIME_HINT.test(text)) {
     const appt = parseAppointmentLocal(text)

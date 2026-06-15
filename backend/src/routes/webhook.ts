@@ -16,6 +16,7 @@ import {
   isCancelText,
   type PendingType,
 } from '../services/chat-context.service'
+import { buildStockQueryReply, addSymbolToWatchlist } from '../services/investment.service'
 
 const router = Router()
 
@@ -156,6 +157,20 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
       clearChatContext(lineUserId)
       const reply = await buildQueryReply(user.id, nlp.data)
       await lineClient.replyMessage(event.replyToken, reply)
+      return
+    }
+
+    if (nlp.intent === 'STOCK_QUERY') {
+      const symbol = String(nlp.data?.symbol || '')
+      const text = await buildStockQueryReply(symbol)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text })
+      return
+    }
+
+    if (nlp.intent === 'ADD_WATCHLIST') {
+      const symbol = String(nlp.data?.symbol || '')
+      const text = await addSymbolToWatchlist(user.id, symbol)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text })
       return
     }
 

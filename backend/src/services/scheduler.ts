@@ -9,10 +9,11 @@ import { db } from '../lib/db'
 import { users } from '../lib/schema'
 import { eq } from 'drizzle-orm'
 import { checkPriceAlerts } from './price-alert.service'
-import { checkSignalAlerts } from './signal.service'
+import { checkWatchlistBuySignals } from './investment.service'
 import { syncFromGoogle } from './gcal.service'
 import { formatBangkokTime } from '../lib/datetime'
 import { fetchAndCacheAllWatchedNews } from './news.service'
+import { sendMorningInvestmentSummaries } from './investment.service'
 
 export function startScheduler() {
   // Reminders + appointment alerts every minute
@@ -51,10 +52,15 @@ export function startScheduler() {
     try { await checkPriceAlerts() } catch (err) { console.error('Price alert cron error:', err) }
   })
 
-  // Signal alerts every 5 minutes
-  cron.schedule('*/5 * * * *', async () => {
-    try { await checkSignalAlerts() } catch (err) { console.error('Signal cron error:', err) }
+  // Watchlist buy signals every 30 minutes
+  cron.schedule('*/30 * * * *', async () => {
+    try { await checkWatchlistBuySignals() } catch (err) { console.error('Signal cron error:', err) }
   })
+
+  // Morning investment summary 08:00 Bangkok
+  cron.schedule('0 8 * * *', async () => {
+    try { await sendMorningInvestmentSummaries() } catch (err) { console.error('Morning summary cron error:', err) }
+  }, { timezone: 'Asia/Bangkok' })
 
   // Google Calendar sync every 15 minutes
   cron.schedule('*/15 * * * *', async () => {
