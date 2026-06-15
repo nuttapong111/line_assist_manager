@@ -1,6 +1,6 @@
 import { uploadSlip } from '../lib/storage'
 import { getGeminiModel, parseJsonFromText, hasGeminiKey } from '../lib/gemini'
-import { bangkokToday } from '../lib/datetime'
+import { bangkokToday, bangkokTomorrow, parseBangkokDateTime } from '../lib/datetime'
 import type { NLPResult } from '../types'
 import type { ChatMode } from './chat-context.service'
 
@@ -15,6 +15,7 @@ Classify as EXPENSE when text contains spending + amount in baht (e.g. กาแ
 Do NOT classify as EXPENSE when number is a time (11โมง, 10:30, บ่ายสอง)
 Classify as INCOME when text contains income + number
 Classify as APPOINTMENT when text contains meal/meeting/doctor + time (ทานข้าว 11โมง, นัดหมอ 10 โมง)
+If appointment time has already passed today and no explicit date, use tomorrow
 Classify as REMINDER when text contains เตือน/อย่าลืม + time
 Classify as QUERY when asking ใช้ไปเท่าไหร่, สรุป, ดูนัด
 
@@ -63,7 +64,7 @@ function todayStr(): string {
 }
 
 function tomorrowStr(): string {
-  return new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  return bangkokTomorrow()
 }
 
 function padTime(h: number, m = 0): string {
@@ -115,14 +116,39 @@ export function parseTimeFromText(text: string): { hour: number; minute: number;
 
 function resolveAppointmentDate(text: string): string {
   if (/พรุ่งนี้/.test(text)) return tomorrowStr()
+  if (/วันนี้/.test(text)) return todayStr()
   if (/วันเสาร์|เสาร์/.test(text)) {
-    const d = new Date()
-    const day = d.getDay()
-    const daysUntil = (6 - day + 7) % 7 || 7
-    d.setDate(d.getDate() + daysUntil)
-    return d.toISOString().split('T')[0]
+    const today = bangkokToday()
+    const base = parseBangkokDateTime(today, '12:00')
+    const day = base.getUTCDay() // Sunday=0 ... but getUTCDay on +07:00 noon might be ok
+    // หาเสาร์ถัดไป (Bangkok)
+    const now = new Date()
+    const bangkokDay = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' })).getDay()
+    const daysUntil = (6 - bangkokDay + 7) % 7 || 7
+    const d = parseBangkokDateTime(today, '12:00')
+    d.setTime(d.getTime() + daysUntil * 86400000)
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(d)
   }
   return todayStr()
+}
+
+/** ถ้าไม่ระบุวัน และเวลานัดผ่านแล้ว → พรุ่งนี้ (ยกเว้นพิม "วันนี้" ชัดเจน) */
+function resolveAppointmentDateTime(text: string, hour: number, minute: number): { date: string; time: string } {
+  const time = padTime(hour, minute)
+  const explicitToday = /วันนี้/.test(text)
+  const explicitTomorrow = /พรุ่งนี้/.test(text)
+  const explicitWeekday = /วันเสาร์|เสาร์/.test(text)
+
+  let date = resolveAppointmentDate(text)
+
+  if (!explicitToday && !explicitTomorrow && !explicitWeekday) {
+    const candidate = parseBangkokDateTime(date, time)
+    if (candidate.getTime() <= Date.now()) {
+      date = tomorrowStr()
+    }
+  }
+
+  return { date, time }
 }
 
 /** Rule-based นัดหมาย */
@@ -148,15 +174,16 @@ export function parseAppointmentLocal(text: string): NLPResult | null {
 
   if (!time) return null
 
-  const title = time.cleaned.replace(/พรุ่งนี้|วันเสาร์|เสาร์/g, '').trim() || trimmed
+  const title = time.cleaned.replace(/พรุ่งนี้|วันนี้|วันเสาร์|เสาร์/g, '').trim() || trimmed
+  const { date, time: timeStr } = resolveAppointmentDateTime(trimmed, time.hour, time.minute)
 
   return {
     intent: 'APPOINTMENT',
     confidence: 0.88,
     data: {
       title,
-      date: resolveAppointmentDate(trimmed),
-      time: padTime(time.hour, time.minute),
+      date,
+      time: timeStr,
       category: /หมอ|ฟัน|สุขภาพ/.test(trimmed) ? 'HEALTH' : 'PERSONAL',
       reminderMinutes: 60,
     },

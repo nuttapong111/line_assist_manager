@@ -5,6 +5,21 @@ export function bangkokToday(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date())
 }
 
+/** วันที่พรุ่งนี้ในไทย YYYY-MM-DD */
+export function bangkokTomorrow(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(Date.now() + 86400000))
+}
+
+/** เวลาปัจจุบันในไทย HH:mm */
+export function bangkokNowTime(): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: TZ,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date())
+}
+
 /** สร้าง Date จากวันที่+เวลาไทย (ไม่ใช้ UTC ของ server) */
 export function parseBangkokDateTime(date: string, time: string): Date {
   const [h, m] = time.split(':').map(Number)
