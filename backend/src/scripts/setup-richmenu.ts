@@ -4,8 +4,15 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
+function normalizeUrl(url: string): string {
+  const trimmed = url.trim().replace(/\/$/, '')
+  if (!trimmed) return trimmed
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  return `https://${trimmed}`
+}
+
 const client = new Client({ channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN! })
-const LIFF_URL = process.env.FRONTEND_URL!
+const LIFF_URL = normalizeUrl(process.env.FRONTEND_URL || '')
 
 const LABELS = [
   'เพิ่มนัดหมาย', 'บันทึกรายจ่าย', 'สแกนสลิป',
@@ -59,8 +66,8 @@ async function main() {
   if (!process.env.LINE_CHANNEL_ACCESS_TOKEN) {
     throw new Error('LINE_CHANNEL_ACCESS_TOKEN is required')
   }
-  if (!LIFF_URL) {
-    throw new Error('FRONTEND_URL is required')
+  if (!LIFF_URL.startsWith('https://')) {
+    throw new Error('FRONTEND_URL must be a valid https URL (e.g. https://your-app.vercel.app)')
   }
 
   console.log('Creating rich menu...')
