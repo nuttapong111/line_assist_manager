@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/app.js",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "ts-node src/lib/migrate.ts",
+    "db:migrate": "node dist/lib/migrate.js",
+    "db:migrate:dev": "ts-node src/lib/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "setup:richmenu": "ts-node src/scripts/setup-richmenu.ts"
   },
