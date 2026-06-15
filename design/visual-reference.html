@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MyAssist — Visual Reference (ทุกหน้าจอ)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!--
+  CLAUDE CODE INSTRUCTION — อ่านก่อน code ทุกหน้าจอ
+  ════════════════════════════════════════════════════
+  Design tokens:
+    --bg      #F7F6F2   warm white page bg
+    --sur     #FFFFFF   card / input surface
+    --s2      #EEEDE8   hover / subtle surface
+    --b       rgba(0,0,0,.07)   default border
+    --bm      rgba(0,0,0,.13)   emphasis border
+    --t1      #18170F   primary text
+    --t2      #636259   secondary
+    --t3      #9B9A94   hint / placeholder
+    --ac      #2A5C45   accent forest green
+    --al      #E6F0EB   accent light bg
+    --up      #0F6E56   bullish / income green
+    --upl     #E1F5EE   bullish light
+    --dn      #A32D2D   bearish / expense red
+    --dnl     #FCEBEB   bearish light
+    --amb     #854F0B   warning amber
+    --ambl    #FAEEDA   amber light
+    --blu     #185FA5   info blue
+    --blul    #E6F1FB   blue light
+    --pur     #534AB7   purple
+    --purl    #EEEDFE   purple light
+
+  Fonts:
+    font-th   Noto Sans Thai   body text, Thai content, buttons
+    font-en   DM Sans          headings, section titles, numbers label
+    font-mono DM Mono          currency, time, codes
+
+  Radius: card=14px  large-card=20px  pill=999px
+  Shadow: 0 1px 3px rgba(0,0,0,.06) only — except FAB
+  Tab bar: 68px, 5 tabs, active icon bg-accent scale(1.08)
+  Progress bar color: <80% accent · 80-99% amber · ≥100% red
+
+  Screens: D=Dashboard F=Finance S=SlipConfirm B=Budget
+           A=Appointments P=PriceAlerts/Signal G=SavingGoals
+           T=Portfolio N=News/Monthly M=Settings
+  Nav keys match sw() function below
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F6F2;--sur:#fff;--s2:#EEEDE8;--s3:#E5E3DC;
+  --b:rgba(0,0,0,.07);--bm:rgba(0,0,0,.13);
+  --t1:#18170F;--t2:#636259;--t3:#9B9A94;
+  --ac:#2A5C45;--al:#E6F0EB;--amid:#3D7A5E;
+  --up:#0F6E56;--upl:#E1F5EE;--upd:#1D9E75;
+  --dn:#A32D2D;--dnl:#FCEBEB;--dnd:#E24B4A;
+  --amb:#854F0B;--ambl:#FAEEDA;--ambd:#BA7517;
+  --blu:#185FA5;--blul:#E6F1FB;--blud:#378ADD;
+  --pur:#534AB7;--purl:#EEEDFE;
+  --line:#06C755;
+}
+body{background:var(--bg);font-family:'Noto Sans Thai',sans-serif;color:var(--t1);
+  display:flex;gap:16px;padding:20px;align-items:flex-start;flex-wrap:wrap}
+.phone{width:375px;background:var(--sur);border-radius:44px;border:1px solid var(--bm);
+  overflow:hidden;display:flex;flex-direction:column;flex-shrink:0;
+  box-shadow:0 10px 40px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.9)}
+.sb{height:44px;background:var(--sur);display:flex;align-items:center;
+  justify-content:space-between;padding:0 22px;flex-shrink:0;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600}
+.scr{flex:1;overflow-y:auto;scrollbar-width:none;background:var(--bg);max-height:680px}
+.scr::-webkit-scrollbar{display:none}
+.off{display:none}
+.tab-bar{height:68px;background:rgba(255,255,255,.96);border-top:1px solid var(--b);
+  display:flex;align-items:center;padding:0 6px 8px;flex-shrink:0}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 2px;border-radius:10px;cursor:pointer;transition:all .15s}
+.tab-ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:17px;transition:all .18s}
+.tab.on .tab-ic{background:var(--ac);transform:scale(1.08)}
+.tab-lb{font-size:10px;color:var(--t3);transition:color .15s}
+.tab.on .tab-lb{color:var(--ac);font-weight:500}
+.ph{padding:14px 18px 10px;background:var(--sur);display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--b);flex-shrink:0}
+.ph-t{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.3px}
+.ph-s{font-size:11px;color:var(--t3);margin-top:2px}
+.ib{width:34px;height:34px;border-radius:50%;background:var(--s2);border:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+.sec{padding:0 16px;margin-top:14px}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-t{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;
+  color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+.see{font-size:11px;color:var(--ac);font-weight:500;cursor:pointer}
+.card{background:var(--sur);border:1px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:8px}
+.card-p{padding:12px 14px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--b)}
+.row:last-child{border-bottom:none}
+.tog{width:38px;height:22px;border-radius:11px;background:var(--bm);display:flex;
+  align-items:center;padding:0 2px;cursor:pointer;flex-shrink:0;transition:background .2s}
+.tog.on{background:var(--ac)}
+.tog-k{width:18px;height:18px;border-radius:50%;background:white;transition:transform .2s}
+.tog.on .tog-k{transform:translateX(16px)}
+.btn-pr{width:100%;padding:14px;background:var(--ac);color:white;border:none;
+  border-radius:14px;font-family:'Noto Sans Thai',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+.btn-se{width:100%;padding:12px;background:var(--s2);color:var(--t2);border:none;
+  border-radius:14px;font-family:'Noto Sans Thai',sans-serif;font-size:13px;cursor:pointer;margin-top:8px}
+.bar-bg{height:5px;background:var(--s2);border-radius:3px;overflow:hidden}
+.bar-f{height:100%;border-radius:3px}
+.badge{font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;font-family:'DM Sans',sans-serif;letter-spacing:.02em}
+.fab{position:absolute;bottom:80px;right:18px;width:50px;height:50px;border-radius:50%;
+  background:var(--ac);color:white;border:none;font-size:22px;display:flex;
+  align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(42,92,69,.35);
+  cursor:pointer;z-index:10}
+.bbl{max-width:88%;border-radius:14px;padding:8px 11px;font-size:11px;line-height:1.55}
+.bbl.bot{background:white;border-bottom-left-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.bbl.usr{background:var(--line);color:white;border-bottom-right-radius:3px;align-self:flex-end}
+.bbl.push{background:white;border-left:3px solid var(--ac);border-bottom-left-radius:3px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.mrow{display:flex;align-items:flex-end;gap:5px}
+.mrow.u{justify-content:flex-end}
+.avsm{width:22px;height:22px;border-radius:50%;background:var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-bottom:2px}
+
+.nav-panel{width:210px;padding-top:40px;flex-shrink:0}
+.nav-lbl{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;
+  color:var(--t3);letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;
+  cursor:pointer;font-size:12px;color:var(--t2);margin-bottom:2px;transition:background .12s}
+.nav-item:hover{background:rgba(0,0,0,.04)}
+.nav-item.on{background:var(--al);color:var(--ac);font-weight:500}
+.ndot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.legend{margin-top:20px;padding-top:16px;border-top:1px solid var(--b)}
+.leg{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:11px;color:var(--t2)}
+.lsw{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- NAV PANEL -->
+<div class="nav-panel">
+  <p class="nav-lbl">หน้าจอ (10 screens)</p>
+  <div class="nav-item on" onclick="sw('d',this)"><div class="ndot" style="background:var(--ac)"></div>Dashboard</div>
+  <div class="nav-item" onclick="sw('f',this)"><div class="ndot" style="background:var(--amb)"></div>การเงิน</div>
+  <div class="nav-item" onclick="sw('s',this)"><div class="ndot" style="background:var(--pur)"></div>สแกนสลิป</div>
+  <div class="nav-item" onclick="sw('b',this)"><div class="ndot" style="background:var(--blu)"></div>ตั้งงบ</div>
+  <div class="nav-item" onclick="sw('a',this)"><div class="ndot" style="background:var(--dn)"></div>นัดหมาย</div>
+  <div class="nav-item" onclick="sw('p',this)"><div class="ndot" style="background:var(--up)"></div>แจ้งเตือนราคา</div>
+  <div class="nav-item" onclick="sw('g',this)"><div class="ndot" style="background:var(--ambd)"></div>เป้าหมายออม</div>
+  <div class="nav-item" onclick="sw('t',this)"><div class="ndot" style="background:var(--pur)"></div>พอร์ตการลงทุน</div>
+  <div class="nav-item" onclick="sw('n',this)"><div class="ndot" style="background:var(--blu)"></div>ข่าว + สรุปเดือน</div>
+  <div class="nav-item" onclick="sw('m',this)"><div class="ndot" style="background:var(--t3)"></div>ตั้งค่า</div>
+  <div class="legend">
+    <p class="nav-lbl" style="margin-top:0">Color tokens</p>
+    <div class="leg"><div class="lsw" style="background:#F7F6F2;border:1px solid #ccc"></div>--bg warm white</div>
+    <div class="leg"><div class="lsw" style="background:#2A5C45"></div>--ac accent green</div>
+    <div class="leg"><div class="lsw" style="background:#0F6E56"></div>--up bullish/income</div>
+    <div class="leg"><div class="lsw" style="background:#A32D2D"></div>--dn bearish/expense</div>
+    <div class="leg"><div class="lsw" style="background:#854F0B"></div>--amb warning</div>
+    <div class="leg"><div class="lsw" style="background:#185FA5"></div>--blu info/blue</div>
+    <div class="leg"><div class="lsw" style="background:#534AB7"></div>--pur purple</div>
+  </div>
+</div>
+
+<!-- PHONE -->
+<div class="phone" style="min-height:800px">
+  <div class="sb"><span>9:41</span><span style="font-size:11px">●●● WiFi 🔋</span></div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="scr" id="sc-d">
+    <div class="ph" style="border-bottom:none">
+      <div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:24px;font-weight:600;letter-spacing:-.4px">สวัสดี, <span style="color:var(--ac)">คุณแบงค์</span> 👋</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:2px">วันจันทร์ที่ 16 มิถุนายน 2026</div>
+      </div>
+      <button class="ib">⚙️</button>
+    </div>
+    <div style="padding:0 16px 16px;background:var(--sur);border-bottom:1px solid var(--b)">
+      <div style="background:var(--ac);border-radius:20px;padding:18px 20px;color:white;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-16px;top:-16px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.07)"></div>
+        <div style="font-size:12px;opacity:.7;margin-bottom:4px">ใช้จ่ายเดือนนี้</div>
+        <div style="font-family:'DM Mono',monospace;font-size:30px;font-weight:500;letter-spacing:-1px">฿9,350</div>
+        <div style="font-size:12px;opacity:.65;margin-top:2px">จากงบ 14,500 บ. · เหลือ 5,150 บ.</div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <div style="background:rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:11px">📅 3 นัดวันนี้</div>
+          <div style="background:rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:11px">📈 PTT สัญญาณซื้อ</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--sur);padding:12px 16px 14px;border-bottom:1px solid var(--b)">
+      <div class="sec-t" style="margin-bottom:10px">ทำรายการ</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+          <div style="width:50px;height:50px;border-radius:15px;background:var(--al);display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--b)">📅</div>
+          <span style="font-size:10px;color:var(--t2)">นัดหมาย</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+          <div style="width:50px;height:50px;border-radius:15px;background:var(--ambl);display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--b)">💸</div>
+          <span style="font-size:10px;color:var(--t2)">บันทึกจ่าย</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+          <div style="width:50px;height:50px;border-radius:15px;background:var(--purl);display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--b)">📷</div>
+          <span style="font-size:10px;color:var(--t2)">สแกนสลิป</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+          <div style="width:50px;height:50px;border-radius:15px;background:var(--blul);display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--b)">🔔</div>
+          <span style="font-size:10px;color:var(--t2)">ตั้งเตือน</span>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><span class="sec-t">นัดวันนี้</span><span class="see">ดูทั้งหมด</span></div>
+      <div class="card">
+        <div class="row">
+          <div style="min-width:36px;text-align:center">
+            <div style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">10:00</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--blu);margin:4px auto"></div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">ประชุมทีม Weekly Sync</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">📍 ห้องประชุม A · Google</div>
+          </div>
+          <span class="badge" style="background:var(--blul);color:var(--blu)">งาน</span>
+        </div>
+        <div class="row">
+          <div style="min-width:36px;text-align:center">
+            <div style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">14:30</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--ac);margin:4px auto"></div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">พบหมอ ตรวจสุขภาพ</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">📍 รพ.กรุงเทพ · MyAssist</div>
+          </div>
+          <span class="badge" style="background:var(--al);color:var(--ac)">สุขภาพ</span>
+        </div>
+      </div>
+    </div>
+    <div class="sec" style="margin-bottom:16px">
+      <div class="sec-hd"><span class="sec-t">สัญญาณล่าสุด</span><span class="see">ดูทั้งหมด</span></div>
+      <div class="card">
+        <div class="row">
+          <div style="font-size:16px;margin-right:2px">📈</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">PTT <span class="badge" style="background:var(--upl);color:var(--up)">ซื้อ 7/10</span></div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">MACD crossover + RSI oversold</div>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">33.25</div>
+        </div>
+        <div class="row">
+          <div style="font-size:16px;margin-right:2px">📉</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">NVDA <span class="badge" style="background:var(--dnl);color:var(--dn)">ขาย 6/10</span></div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">RSI overbought + resistance</div>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">$118.40</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FINANCE ══ -->
+  <div class="scr off" id="sc-f">
+    <div class="ph"><div><div class="ph-t">การเงิน</div></div><button class="ib">➕</button></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 18px 14px;background:var(--sur)">
+      <button style="width:30px;height:30px;border-radius:50%;border:1px solid var(--bm);background:var(--sur);font-size:13px">‹</button>
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600">มิถุนายน 2026</span>
+      <button style="width:30px;height:30px;border-radius:50%;border:1px solid var(--bm);background:var(--sur);font-size:13px">›</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px;margin-bottom:12px">
+      <div class="card-p" style="background:var(--sur);border:1px solid var(--b);border-radius:14px">
+        <div style="font-size:11px;color:var(--t3)">รายรับ</div>
+        <div style="font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--up);margin-top:3px">฿45,000</div>
+      </div>
+      <div class="card-p" style="background:var(--sur);border:1px solid var(--b);border-radius:14px">
+        <div style="font-size:11px;color:var(--t3)">รายจ่าย</div>
+        <div style="font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--dn);margin-top:3px">฿9,350</div>
+      </div>
+    </div>
+    <div class="card" style="margin:0 16px 12px">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between">
+        <span class="sec-t">งบประมาณ</span><span class="see" style="font-size:11px">แก้ไข</span>
+      </div>
+      <div style="padding:10px 14px;border-bottom:1px solid var(--b)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500">
+            <div style="width:24px;height:24px;border-radius:6px;background:var(--ambl);display:flex;align-items:center;justify-content:center;font-size:12px">🍜</div>อาหาร
+            <span class="badge" style="background:var(--ambl);color:var(--amb)">76%</span>
+          </div>
+          <span style="font-size:11px;color:var(--t3);font-family:'DM Mono',monospace">3,800/5,000</span>
+        </div>
+        <div class="bar-bg"><div class="bar-f" style="width:76%;background:var(--ambd)"></div></div>
+      </div>
+      <div style="padding:10px 14px;border-bottom:1px solid var(--b)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500">
+            <div style="width:24px;height:24px;border-radius:6px;background:var(--blul);display:flex;align-items:center;justify-content:center;font-size:12px">🚗</div>เดินทาง
+          </div>
+          <span style="font-size:11px;color:var(--t3);font-family:'DM Mono',monospace">1,000/2,000</span>
+        </div>
+        <div class="bar-bg"><div class="bar-f" style="width:50%;background:var(--blud)"></div></div>
+      </div>
+      <div style="padding:10px 14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500">
+            <div style="width:24px;height:24px;border-radius:6px;background:var(--dnl);display:flex;align-items:center;justify-content:center;font-size:12px">🛍️</div>ช้อปปิ้ง
+            <span class="badge" style="background:var(--dnl);color:var(--dn)">เกิน</span>
+          </div>
+          <span style="font-size:11px;color:var(--dn);font-family:'DM Mono',monospace">3,090/3,000</span>
+        </div>
+        <div class="bar-bg"><div class="bar-f" style="width:100%;background:var(--dnd)"></div></div>
+      </div>
+    </div>
+    <div class="card" style="margin:0 16px 16px">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--b)"><span class="sec-t">รายการล่าสุด</span></div>
+      <div class="row"><div style="width:36px;height:36px;border-radius:10px;background:var(--ambl);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">☕</div><div style="flex:1"><div style="font-size:12px;font-weight:500">Cafe Amazon</div><div style="font-size:10px;color:var(--t3);margin-top:1px">อาหาร · OCR</div></div><div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--dn)">-฿350</div><div style="font-size:10px;color:var(--t3);margin-top:1px">วันนี้</div></div></div>
+      <div class="row"><div style="width:36px;height:36px;border-radius:10px;background:var(--blul);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🚇</div><div style="flex:1"><div style="font-size:12px;font-weight:500">BTS</div><div style="font-size:10px;color:var(--t3);margin-top:1px">เดินทาง · แชท</div></div><div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--dn)">-฿59</div><div style="font-size:10px;color:var(--t3);margin-top:1px">วันนี้</div></div></div>
+      <div class="row"><div style="width:36px;height:36px;border-radius:10px;background:var(--al);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">💼</div><div style="flex:1"><div style="font-size:12px;font-weight:500">เงินเดือน</div><div style="font-size:10px;color:var(--t3);margin-top:1px">รายรับ</div></div><div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--up)">+฿40,000</div><div style="font-size:10px;color:var(--t3);margin-top:1px">1 มิ.ย.</div></div></div>
+    </div>
+  </div>
+
+  <!-- ══ SLIP CONFIRM ══ -->
+  <div class="scr off" id="sc-s" style="background:var(--bg)">
+    <div style="background:var(--sur);padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--b)">
+      <button style="width:30px;height:30px;border-radius:50%;background:var(--s2);border:none;font-size:15px">‹</button>
+      <span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600">บันทึกจากสลิป</span>
+    </div>
+    <div class="card" style="margin:14px 16px 10px">
+      <div style="background:var(--al);padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(42,92,69,.1)">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--ac);animation:pulse 1.8s ease-in-out infinite;flex-shrink:0"></div>
+        <span style="font-size:11px;color:var(--ac);font-weight:500">AI อ่านสลิปแล้ว</span>
+        <span style="margin-left:auto;font-size:10px;background:rgba(42,92,69,.12);color:var(--ac);padding:2px 9px;border-radius:20px;font-weight:600">✓ สำเร็จ</span>
+      </div>
+      <div style="height:80px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:32px;border-bottom:1px solid var(--b)">🧾</div>
+      <div style="padding:12px 14px;display:grid;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--t3)">ยอดเงิน</span><span style="font-family:'DM Mono',monospace;font-size:20px;font-weight:500">฿350.00</span></div>
+        <div style="height:1px;background:var(--b)"></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--t3)">วันที่</span><span style="font-size:12px;font-weight:500">7 มิ.ย. 2026, 09:32</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--t3)">ร้าน</span><span style="font-size:12px;font-weight:500">Cafe Amazon ✏️</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--t3)">ธนาคาร</span><span style="font-size:12px;color:var(--t3)">KBANK → SCB</span></div>
+      </div>
+    </div>
+    <div class="card-p card" style="margin:0 16px 10px">
+      <div style="font-size:11px;color:var(--t3);margin-bottom:10px">เลือกหมวดหมู่ <span style="color:var(--dn)">*</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border-radius:10px;border:2px solid var(--ac);background:var(--al);cursor:pointer"><span style="font-size:18px">🍜</span><span style="font-size:10px;color:var(--ac);font-weight:500">อาหาร</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border-radius:10px;border:1px solid var(--b);cursor:pointer"><span style="font-size:18px">🚗</span><span style="font-size:10px;color:var(--t2)">เดินทาง</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border-radius:10px;border:1px solid var(--b);cursor:pointer"><span style="font-size:18px">🛍️</span><span style="font-size:10px;color:var(--t2)">ช้อปปิ้ง</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border-radius:10px;border:1px solid var(--b);cursor:pointer"><span style="font-size:18px">📄</span><span style="font-size:10px;color:var(--t2)">บิล</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border-radius:10px;border:1px solid var(--b);cursor:pointer"><span style="font-size:18px">💊</span><span style="font-size:10px;color:var(--t2)">สุขภาพ</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border-radius:10px;border:1px solid var(--b);cursor:pointer"><span style="font-size:18px">···</span><span style="font-size:10px;color:var(--t2)">อื่นๆ</span></div>
+      </div>
+    </div>
+    <div style="margin:0 16px 10px;padding:10px 12px;background:var(--ambl);border:1px solid rgba(133,79,11,.2);border-radius:12px;font-size:11px;color:var(--amb);display:flex;gap:8px;line-height:1.5"><span>⚠️</span><span>อาหาร: ใช้ไป 3,800/5,000 บ. (76%) — หลังบันทึกเหลือ <strong>850 บ.</strong></span></div>
+    <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:6px">
+      <button class="btn-pr">บันทึกรายจ่าย</button>
+      <button class="btn-se">ยกเลิก</button>
+    </div>
+  </div>
+
+  <!-- ══ BUDGET SETUP ══ -->
+  <div class="scr off" id="sc-b">
+    <div class="ph"><div><div class="ph-t">งบประมาณ</div><div class="ph-s">มิถุนายน 2026</div></div><button class="ib" style="background:var(--ac);color:white;font-size:13px">✓</button></div>
+    <div style="margin:12px 16px 10px;display:flex;gap:8px">
+      <button style="flex:1;padding:8px;border-radius:9px;border:1px solid var(--ac);background:var(--al);color:var(--ac);font-family:'Noto Sans Thai',sans-serif;font-size:11px;font-weight:500;cursor:pointer">คัดลอกจากเดือนก่อน</button>
+      <button style="flex:1;padding:8px;border-radius:9px;border:1px solid var(--bm);background:var(--sur);color:var(--t2);font-family:'Noto Sans Thai',sans-serif;font-size:11px;cursor:pointer">ล้างทั้งหมด</button>
+    </div>
+    <div style="margin:0 16px 8px;padding:10px 12px;background:var(--blul);border:1px solid rgba(24,95,165,.15);border-radius:12px;font-size:11px;color:var(--blu);display:flex;gap:8px;line-height:1.5"><span>💡</span><span>คัดลอกงบจากเดือนก่อนได้เลย หรือแก้ไขแต่ละหมวดตามต้องการ</span></div>
+    <div class="card" style="margin:0 16px 12px">
+      <div class="row"><div style="width:34px;height:34px;border-radius:9px;background:var(--ambl);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🍜</div><div style="flex:1"><div style="font-size:12px;font-weight:500">อาหาร</div><div style="font-size:10px;color:var(--amb);margin-top:1px">ใช้ไป 3,800 บ. (76%)</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">5,000</span><span style="font-size:10px;color:var(--t3)">บ.</span><span style="font-size:11px;color:var(--t3)">›</span></div></div>
+      <div class="row"><div style="width:34px;height:34px;border-radius:9px;background:var(--blul);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🚗</div><div style="flex:1"><div style="font-size:12px;font-weight:500">เดินทาง</div><div style="font-size:10px;color:var(--t3);margin-top:1px">ใช้ไป 1,000 บ. (50%)</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">2,000</span><span style="font-size:10px;color:var(--t3)">บ.</span><span style="font-size:11px;color:var(--t3)">›</span></div></div>
+      <div class="row"><div style="width:34px;height:34px;border-radius:9px;background:var(--dnl);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🛍️</div><div style="flex:1"><div style="font-size:12px;font-weight:500">ช้อปปิ้ง</div><div style="font-size:10px;color:var(--dn);margin-top:1px">เกินงบ 90 บ. ⚠</div></div><div style="display:flex;align-items:center;gap:4px"><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">3,000</span><span style="font-size:10px;color:var(--t3)">บ.</span><span style="font-size:11px;color:var(--t3)">›</span></div></div>
+      <div class="row"><div style="width:34px;height:34px;border-radius:9px;background:var(--al);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">➕</div><div><div style="font-size:12px;color:var(--ac);font-weight:500">เพิ่มหมวดหมู่ใหม่</div></div></div>
+    </div>
+    <div style="margin:0 16px;padding:11px 14px;background:var(--sur);border:1px solid var(--b);border-radius:13px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:11px;color:var(--t3)">งบรวม</div><div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:500">฿12,500 <span style="font-size:12px;color:var(--t3)">/ เดือน</span></div></div>
+      <div style="text-align:right;font-size:11px;color:var(--t3)">ใช้ไป<br><span style="color:var(--dn);font-weight:600">9,350</span></div>
+    </div>
+    <div style="padding:12px 16px"><button class="btn-pr">บันทึกงบประมาณ</button></div>
+  </div>
+
+  <!-- ══ APPOINTMENTS ══ -->
+  <div class="scr off" id="sc-a" style="position:relative">
+    <div class="ph"><div class="ph-t">นัดหมาย</div><button class="ib">➕</button></div>
+    <div style="background:var(--sur);border-bottom:1px solid var(--b);padding:8px 16px 14px">
+      <div style="display:flex;gap:5px">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:9px;cursor:pointer"><span style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase">จ</span><span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600">2</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:9px;cursor:pointer"><span style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase">อ</span><span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600">3</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:9px;background:var(--ac);cursor:pointer"><span style="font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(255,255,255,.7);font-weight:500;text-transform:uppercase">พ</span><span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:white">16</span><div style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.7)"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:9px;cursor:pointer"><span style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase">พฤ</span><span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600">17</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:9px;cursor:pointer"><span style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase">ศ</span><span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600">18</span><div style="width:4px;height:4px;border-radius:50%;background:var(--ac)"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:9px;cursor:pointer"><span style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase">ส</span><span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600">19</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:9px;cursor:pointer"><span style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase">อา</span><span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600">20</span></div>
+      </div>
+    </div>
+    <div style="padding:14px 16px 0">
+      <div class="sec-t" style="margin-bottom:9px">เช้า</div>
+      <div style="display:flex;gap:10px;margin-bottom:9px;cursor:pointer">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);width:34px;padding-top:10px;text-align:right;flex-shrink:0">10:00</div>
+        <div style="flex:1;background:var(--blul);border-left:3px solid var(--blu);border-radius:12px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:var(--blu)">ประชุม Weekly Sync</div><div style="font-size:10px;color:var(--blu);opacity:.7;margin-top:2px">Google Meet · Google</div></div>
+      </div>
+      <div class="sec-t" style="margin-bottom:9px;margin-top:12px">บ่าย</div>
+      <div style="display:flex;gap:10px;margin-bottom:9px;cursor:pointer">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);width:34px;padding-top:10px;text-align:right;flex-shrink:0">14:30</div>
+        <div style="flex:1;background:var(--al);border-left:3px solid var(--ac);border-radius:12px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:var(--ac)">พบหมอ ตรวจสุขภาพ</div><div style="font-size:10px;color:var(--ac);opacity:.7;margin-top:2px">รพ.กรุงเทพ · MyAssist</div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:9px;cursor:pointer">
+        <div style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--t3);width:34px;padding-top:10px;text-align:right;flex-shrink:0">19:00</div>
+        <div style="flex:1;background:var(--ambl);border-left:3px solid var(--amb);border-radius:12px;padding:10px 12px"><div style="font-size:12px;font-weight:600;color:var(--amb)">Team Dinner</div><div style="font-size:10px;color:var(--amb);opacity:.7;margin-top:2px">ร้านอาหาร สยาม · Google</div></div>
+      </div>
+    </div>
+    <button class="fab">＋</button>
+  </div>
+
+  <!-- ══ PRICE ALERTS + SIGNAL ══ -->
+  <div class="scr off" id="sc-p">
+    <div class="ph"><div><div class="ph-t">แจ้งเตือนราคา</div><div class="ph-s">วิเคราะห์สัญญาณ technical</div></div><button class="ib">➕</button></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px 0">
+      <div style="padding:5px 12px;border-radius:20px;background:var(--ac);color:white;font-size:11px;font-weight:500">ทั้งหมด</div>
+      <div style="padding:5px 12px;border-radius:20px;border:1px solid var(--b);background:var(--sur);font-size:11px;color:var(--t2)">หุ้นไทย</div>
+      <div style="padding:5px 12px;border-radius:20px;border:1px solid var(--b);background:var(--sur);font-size:11px;color:var(--t2)">หุ้น US</div>
+      <div style="padding:5px 12px;border-radius:20px;border:1px solid var(--b);background:var(--sur);font-size:11px;color:var(--t2)">ทอง</div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><span class="sec-t">ราคา + สัญญาณ</span><span style="font-size:10px;color:var(--t3)">delay 15 นาที</span></div>
+      <div class="card">
+        <div class="row">
+          <div style="width:36px;height:36px;border-radius:10px;background:#FBF5E0;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🥇</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">ทองคำ <span class="badge" style="background:var(--upl);color:var(--up)">ซื้อ 8/10</span></div><div style="font-size:10px;color:var(--t3);margin-top:1px">Gold Spot · บาทหนัก</div></div>
+          <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">47,850</div><div style="font-size:10px;color:var(--up);margin-top:1px">▲ +0.4%</div></div>
+        </div>
+        <div class="row">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--blul);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🇹🇭</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">PTT <span class="badge" style="background:var(--upl);color:var(--up)">ซื้อ 7/10</span></div><div style="font-size:10px;color:var(--t3);margin-top:1px">ปตท. · SET</div></div>
+          <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">33.25</div><div style="font-size:10px;color:var(--dn);margin-top:1px">▼ -1.2%</div></div>
+        </div>
+        <div class="row">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--dnl);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🇺🇸</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">NVDA <span class="badge" style="background:var(--dnl);color:var(--dn)">ขาย 6/10</span></div><div style="font-size:10px;color:var(--t3);margin-top:1px">Nvidia · NASDAQ</div></div>
+          <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">$118.40</div><div style="font-size:10px;color:var(--up);margin-top:1px">▲ +2.1%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-hd"><span class="sec-t">การแจ้งเตือน</span></div>
+      <div class="card">
+        <div class="row"><div style="width:8px;height:8px;border-radius:50%;background:#9A7B2E;flex-shrink:0"></div><div style="flex:1"><div style="font-size:12px;font-weight:500">ทองคำ ≥ 48,000</div><div style="font-size:10px;color:var(--t3);margin-top:1px">ราคา ≥ 48,000 บาท/บาทหนัก</div></div><span class="badge" style="background:var(--al);color:var(--ac)">รอ</span><div class="tog on"><div class="tog-k"></div></div></div>
+        <div class="row"><div style="width:8px;height:8px;border-radius:50%;background:var(--dn);flex-shrink:0"></div><div style="flex:1"><div style="font-size:12px;font-weight:500">PTT ≤ 33.00</div><div style="font-size:10px;color:var(--amb);margin-top:1px">ใกล้เป้าแล้ว!</div></div><span class="badge" style="background:var(--ambl);color:var(--amb)">ใกล้</span><div class="tog on"><div class="tog-k"></div></div></div>
+      </div>
+    </div>
+    <div style="margin:8px 16px 14px;padding:9px 12px;background:var(--ambl);border:1px solid rgba(133,79,11,.15);border-radius:10px;font-size:10px;color:var(--amb);line-height:1.5">⚠️ สรุปจาก technical indicators เท่านั้น ไม่ใช่คำแนะนำการลงทุน</div>
+  </div>
+
+  <!-- ══ SAVING GOALS ══ -->
+  <div class="scr off" id="sc-g">
+    <div class="ph"><div><div class="ph-t">เป้าหมายออม</div><div class="ph-s">3 เป้าหมาย · รวม 405,000 บ.</div></div><button class="ib">＋</button></div>
+    <div class="sec">
+      <div class="sec-hd"><span class="sec-t">กำลังออม</span></div>
+      <div class="card">
+        <div style="padding:12px 14px;display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--b)">
+          <div style="width:36px;height:36px;border-radius:10px;background:#FBF5E0;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">📱</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">iPhone 16 Pro</div><div style="font-size:10px;color:var(--t3)">เป้า 45,000 บ. · ถึงเป้า ~ส.ค.</div></div>
+          <div style="text-align:right"><div style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--ac)">71%</div></div>
+        </div>
+        <div style="padding:8px 14px 10px">
+          <div class="bar-bg" style="margin-bottom:4px"><div class="bar-f" style="width:71%;background:var(--ac)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3)"><span>ออมไปแล้ว <span style="font-family:'DM Mono',monospace">31,950</span> บ.</span><span>เหลือ <span style="font-family:'DM Mono',monospace">13,050</span></span></div>
+        </div>
+        <div style="padding:8px 14px 10px;border-top:1px solid var(--b);display:flex;align-items:center;gap:8px">
+          <div style="flex:1"><div style="font-size:10px;color:var(--t3);margin-bottom:4px">รายเดือน (4 เดือน)</div><div style="display:flex;gap:4px">${[80,100,65,40].map(w=>`<div style="flex:1;height:14px;border-radius:3px;background:var(--s2);overflow:hidden"><div style="height:100%;width:${w}%;background:var(--ac)"></div></div>`).join('')}</div></div>
+          <button style="padding:5px 12px;border-radius:20px;background:var(--ac);color:white;border:none;font-size:11px;font-weight:600;font-family:'Noto Sans Thai',sans-serif;cursor:pointer;white-space:nowrap">+ ออมเพิ่ม</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="padding:12px 14px;display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--b)">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--blul);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">✈️</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">เที่ยวญี่ปุ่น</div><div style="font-size:10px;color:var(--t3)">เป้า 60,000 บ. · ต.ค. 2026</div></div>
+          <div style="text-align:right"><div style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--ambd)">28%</div></div>
+        </div>
+        <div style="padding:8px 14px 10px">
+          <div class="bar-bg" style="margin-bottom:4px"><div class="bar-f" style="width:28%;background:var(--ambd)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3)"><span>ออมไปแล้ว <span style="font-family:'DM Mono',monospace">16,800</span> บ.</span><span>ต้องออม 4,800/เดือน</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PORTFOLIO ══ -->
+  <div class="scr off" id="sc-t">
+    <div class="ph"><div><div class="ph-t">พอร์ตการลงทุน</div><div class="ph-s">delay 15 นาที</div></div><button class="ib">➕</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px;background:var(--sur);border-bottom:1px solid var(--b)">
+      <div style="background:var(--s2);border-radius:10px;padding:9px 11px"><div style="font-size:10px;color:var(--t3)">มูลค่าพอร์ต</div><div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;margin-top:3px">฿248,420</div></div>
+      <div style="background:var(--s2);border-radius:10px;padding:9px 11px"><div style="font-size:10px;color:var(--t3)">กำไร/ขาดทุน</div><div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--up);margin-top:3px">+฿12,840</div></div>
+      <div style="background:var(--s2);border-radius:10px;padding:9px 11px"><div style="font-size:10px;color:var(--t3)">ต้นทุนรวม</div><div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--t2);margin-top:3px">฿235,580</div></div>
+      <div style="background:var(--s2);border-radius:10px;padding:9px 11px"><div style="font-size:10px;color:var(--t3)">%กำไร</div><div style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--up);margin-top:3px">+5.45%</div></div>
+    </div>
+    <div class="card" style="margin:12px 16px 16px">
+      <div class="row"><div style="min-width:44px"><div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600">PTT</div><div style="font-size:10px;color:var(--t3)">500 หุ้น</div></div><div style="flex:1"><div style="font-size:11px;color:var(--t3)">ต้นทุน 35.00 · ปัจจุบัน 33.25</div><div style="margin-top:3px"><span class="badge" style="background:var(--upl);color:var(--up)">ซื้อ 7/10</span></div></div><div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--dn)">-฿875</div><div style="font-size:10px;color:var(--dn);margin-top:1px">▼ -5.0%</div></div></div>
+      <div class="row"><div style="min-width:44px"><div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600">NVDA</div><div style="font-size:10px;color:var(--t3)">10 shares</div></div><div style="flex:1"><div style="font-size:11px;color:var(--t3)">ต้นทุน $95 · ปัจจุบัน $118.40</div><div style="margin-top:3px"><span class="badge" style="background:var(--dnl);color:var(--dn)">ขาย 6/10</span></div></div><div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--up)">+$234</div><div style="font-size:10px;color:var(--up);margin-top:1px">▲ +24.6%</div></div></div>
+      <div class="row"><div style="min-width:44px"><div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#9A7B2E">ทอง</div><div style="font-size:10px;color:var(--t3)">2 บาทหนัก</div></div><div style="flex:1"><div style="font-size:11px;color:var(--t3)">ต้นทุน 43,500 · ปัจจุบัน 47,850</div><div style="margin-top:3px"><span class="badge" style="background:var(--upl);color:var(--up)">ซื้อ 8/10</span></div></div><div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--up)">+฿8,700</div><div style="font-size:10px;color:var(--up);margin-top:1px">▲ +10.0%</div></div></div>
+    </div>
+  </div>
+
+  <!-- ══ NEWS + MONTHLY SUMMARY ══ -->
+  <div class="scr off" id="sc-n">
+    <div class="ph"><div><div class="ph-t">ข่าว + สรุปเดือน</div><div class="ph-s">อัปเดต 07:00 ทุกวัน</div></div><button class="ib">🔄</button></div>
+    <div style="padding:0 16px;margin-top:12px">
+      <div class="sec-t" style="margin-bottom:10px">ข่าววันนี้ (AI สรุป)</div>
+      <div class="card">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--b)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">PTT</span>
+            <span class="badge" style="background:var(--upl);color:var(--up)">ซื้อ 7/10</span>
+            <span style="font-size:10px;color:var(--t3);margin-left:auto">วันนี้ 07:00</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.6">📰 ปตท. ประกาศแผนลงทุน EV Infrastructure มูลค่า 5 พันล้านบาท อาจส่งผลบวกต่อ sentiment ระยะกลาง ปัจจัยที่ควรติดตาม: ราคาน้ำมันดิบ Brent</div>
+        </div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--b)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">NVDA</span>
+            <span class="badge" style="background:var(--dnl);color:var(--dn)">ขาย 6/10</span>
+            <span style="font-size:10px;color:var(--t3);margin-left:auto">วันนี้ 07:00</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.6">📰 Nvidia เผย order AI chip จาก Asia เพิ่มขึ้น 40% ราคาอาจได้รับแรงหนุนระยะสั้น แต่ RSI ยังอยู่ใน overbought zone ควรติดตาม earnings ที่จะประกาศใน 2 สัปดาห์</div>
+        </div>
+        <div style="padding:12px 14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600">ทองคำ</span>
+            <span class="badge" style="background:var(--upl);color:var(--up)">ซื้อ 8/10</span>
+            <span style="font-size:10px;color:var(--t3);margin-left:auto">วันนี้ 07:00</span>
+          </div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.6">📰 Fed ส่งสัญญาณอาจลดดอกเบี้ยไตรมาส 3 กดดันค่าเงิน USD ส่งผลให้ทองคำอาจได้รับแรงหนุน</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px;margin-top:14px;margin-bottom:16px">
+      <div class="sec-t" style="margin-bottom:10px">สรุปรายเดือน (1 พ.ค. 69)</div>
+      <div style="background:var(--ac);border-radius:16px;padding:14px 16px;color:white">
+        <div style="font-size:11px;opacity:.7;margin-bottom:6px">สรุป Watchlist พฤษภาคม 2569 · Claude Sonnet</div>
+        <div style="font-size:12px;line-height:1.7;opacity:.9">ภาพรวมเดือนนี้ตลาดหุ้นไทยยังคง sideways โดย PTT มี technical ชี้ไปทางบวกหลัง MACD crossover แต่ EMA ยังเป็น downtrend NVDA ยืนเหนือ resistance ใหม่ได้ ทองคำแข็งค่าสอดคล้องกับ signal ที่ให้ไว้ต้นเดือน<br><br>ปัจจัยที่ควรติดตามในเดือนหน้า: Fed meeting, ราคาน้ำมัน, ผลประกอบการ Q2</div>
+        <div style="margin-top:10px;font-size:10px;opacity:.65;border-top:1px solid rgba(255,255,255,.2);padding-top:8px">สรุปจาก technical + ข่าวสาธารณะ ไม่ใช่คำแนะนำลงทุน</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS ══ -->
+  <div class="scr off" id="sc-m">
+    <div class="ph"><div class="ph-t">ตั้งค่า</div></div>
+    <div class="sec">
+      <div class="sec-t" style="margin-bottom:8px">บัญชี</div>
+      <div class="card">
+        <div class="row">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;color:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;flex-shrink:0">B</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">คุณแบงค์</div><div style="font-size:11px;color:var(--t3);margin-top:1px">sync จาก LINE</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec" style="margin-top:14px">
+      <div class="sec-t" style="margin-bottom:8px">การแจ้งเตือน</div>
+      <div class="card">
+        <div class="row"><div style="font-size:16px">🌅</div><div style="flex:1"><div style="font-size:13px;font-weight:500">Morning Summary</div><div style="font-size:11px;color:var(--t3);margin-top:1px">push ทุกวัน 08:00</div></div><div class="tog on"><div class="tog-k"></div></div></div>
+        <div class="row"><div style="font-size:16px">🎯</div><div style="flex:1"><div style="font-size:13px;font-weight:500">แจ้งเตือนงบประมาณ</div><div style="font-size:11px;color:var(--t3);margin-top:1px">เมื่อใช้ถึง 80% และเกิน</div></div><div class="tog on"><div class="tog-k"></div></div></div>
+        <div class="row"><div style="font-size:16px">📈</div><div style="flex:1"><div style="font-size:13px;font-weight:500">สัญญาณ ≥7 หรือ ≤3</div><div style="font-size:11px;color:var(--t3);margin-top:1px">ทุก 30 นาที ช่วงตลาดเปิด</div></div><div class="tog on"><div class="tog-k"></div></div></div>
+        <div class="row"><div style="font-size:16px">📰</div><div style="flex:1"><div style="font-size:13px;font-weight:500">ข่าวรายวัน (ใน Morning)</div><div style="font-size:11px;color:var(--t3);margin-top:1px">ดึงข่าว 07:00 รวมใน 08:00</div></div><div class="tog on"><div class="tog-k"></div></div></div>
+        <div class="row"><div style="font-size:16px">📊</div><div style="flex:1"><div style="font-size:13px;font-weight:500">สรุปรายเดือน</div><div style="font-size:11px;color:var(--t3);margin-top:1px">วันที่ 1 ทุกเดือน 08:30</div></div><div class="tog on"><div class="tog-k"></div></div></div>
+      </div>
+    </div>
+    <div class="sec" style="margin-top:14px">
+      <div class="sec-t" style="margin-bottom:8px">เชื่อมต่อ</div>
+      <div class="card">
+        <div class="row"><div style="font-size:16px">📅</div><div style="flex:1"><div style="font-size:13px;font-weight:500">Google Calendar</div><div style="font-size:11px;color:var(--up);margin-top:1px">● เชื่อมต่อแล้ว · sync 07:58</div></div><button style="padding:5px 12px;border-radius:20px;border:1px solid var(--bm);background:var(--sur);font-size:11px;color:var(--t2);cursor:pointer">ยกเลิก</button></div>
+        <div class="row"><div style="font-size:16px">📈</div><div style="flex:1"><div style="font-size:13px;font-weight:500">Finnhub (ข่าว)</div><div style="font-size:11px;color:var(--up);margin-top:1px">● เชื่อมต่อแล้ว · ฟรี</div></div><span class="badge" style="background:var(--al);color:var(--ac)">Active</span></div>
+      </div>
+    </div>
+    <div class="sec" style="margin-top:14px;margin-bottom:16px">
+      <div class="sec-t" style="margin-bottom:8px">ข้อมูล</div>
+      <div class="card">
+        <div class="row" style="cursor:pointer"><div style="font-size:16px">📤</div><div style="flex:1"><div style="font-size:13px;font-weight:500">Export ข้อมูลทั้งหมด</div><div style="font-size:11px;color:var(--t3);margin-top:1px">ดาวน์โหลด CSV</div></div><span style="font-size:13px;color:var(--t3)">›</span></div>
+        <div class="row" style="cursor:pointer"><div style="font-size:16px">🗑️</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--dn)">ลบบัญชีและข้อมูลทั้งหมด</div></div><span style="font-size:13px;color:var(--t3)">›</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab on" id="t-d" onclick="sw('d',null,this)"><div class="tab-ic">🏠</div><span class="tab-lb">หน้าหลัก</span></div>
+    <div class="tab" id="t-a" onclick="sw('a',null,this)"><div class="tab-ic">📅</div><span class="tab-lb">นัดหมาย</span></div>
+    <div class="tab" id="t-f" onclick="sw('f',null,this)"><div class="tab-ic">💰</div><span class="tab-lb">การเงิน</span></div>
+    <div class="tab" id="t-p" onclick="sw('p',null,this)"><div class="tab-ic">📈</div><span class="tab-lb">สัญญาณ</span></div>
+    <div class="tab" id="t-m" onclick="sw('m',null,this)"><div class="tab-ic">⚙️</div><span class="tab-lb">ตั้งค่า</span></div>
+  </div>
+</div>
+
+<style>
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+</style>
+<script>
+const all=['d','f','s','b','a','p','g','t','n','m']
+const tabMap={d:'t-d',f:'t-f',a:'t-a',p:'t-p',m:'t-m'}
+function sw(name,navEl,tabEl){
+  all.forEach(id=>{
+    const el=document.getElementById('sc-'+id)
+    if(el) el.classList.toggle('off',id!==name)
+  })
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'))
+  if(tabMap[name]){
+    const t=document.getElementById(tabMap[name])
+    if(t) t.classList.add('on')
+  }
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('on'))
+  if(navEl) navEl.classList.add('on')
+  else document.querySelectorAll('.nav-item').forEach(el=>{
+    if((el.getAttribute('onclick')||'').includes("'"+name+"'")) el.classList.add('on')
+  })
+}
+</script>
+</body>
+</html>

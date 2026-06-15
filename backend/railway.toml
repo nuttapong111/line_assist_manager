@@ -1,0 +1,7 @@
+[build]
+buildCommand = "npm run build && npm run db:migrate"
+
+[deploy]
+startCommand = "node dist/app.js"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #F7F6F2;
+  --surface: #FFFFFF;
+  --surface-2: #EEEDE8;
+  --text-1: #18170F;
+  --text-2: #636259;
+  --text-3: #9B9A94;
+  --accent: #2A5C45;
+  --accent-mid: #3D7A5E;
+  --accent-light: #E6F0EB;
+  --amber: #B8721A;
+  --amber-light: #FBF0E0;
+  --red: #B83232;
+  --red-light: #FAEBE8;
+  --blue: #2655A0;
+  --blue-light: #E8EEFA;
+  --border: rgba(0, 0, 0, 0.07);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: 'Noto Sans Thai', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.animate-pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
