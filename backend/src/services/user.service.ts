@@ -2,7 +2,7 @@ import { db } from '../lib/db'
 import { users, budgetCategories } from '../lib/schema'
 import { eq } from 'drizzle-orm'
 import type { User } from '../types'
-import { bangkokDayRange, bangkokToday } from '../lib/datetime'
+import { bangkokDayRange, bangkokToday, nextMonthStart } from '../lib/datetime'
 
 const DEFAULT_CATEGORIES = [
   { name: 'อาหาร', icon: '🍜', color: '#2A5C45' },
@@ -71,7 +71,7 @@ export async function getUserStats(userId: string) {
     .where(and(
       eqOp(transactions.userId, userId),
       gte(transactions.transactionDate, `${month}-01`),
-      lt(transactions.transactionDate, `${month}-32`)
+      lt(transactions.transactionDate, nextMonthStart(month))
     ))
 
   const expenses = txs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0)

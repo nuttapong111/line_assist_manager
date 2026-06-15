@@ -1,6 +1,7 @@
 import { db } from '../lib/db'
 import { transactions, budgetCategories } from '../lib/schema'
 import { eq, and, gte, lt, desc, sql } from 'drizzle-orm'
+import { nextMonthStart } from '../lib/datetime'
 
 export async function getTransactions(
   userId: string,
@@ -9,7 +10,7 @@ export async function getTransactions(
   offset = 0
 ) {
   const start = `${month}-01`
-  const end = `${month}-32`
+  const end = nextMonthStart(month)
 
   const rows = await db
     .select({
@@ -95,9 +96,24 @@ export async function deleteTransaction(userId: string, id: string) {
   await db.delete(transactions).where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
 }
 
+export async function getDailySummary(userId: string, date: string) {
+  const txs = await db
+    .select()
+    .from(transactions)
+    .where(and(
+      eq(transactions.userId, userId),
+      eq(transactions.transactionDate, date),
+    ))
+
+  const expenses = txs.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0)
+  const income = txs.filter(t => t.type === 'INCOME').reduce((s, t) => s + Number(t.amount), 0)
+
+  return { expenses, income, balance: income - expenses, transaction_count: txs.length, transactions: txs }
+}
+
 export async function getMonthlySummary(userId: string, month: string) {
   const start = `${month}-01`
-  const end = `${month}-32`
+  const end = nextMonthStart(month)
 
   const txs = await db
     .select()

@@ -1,6 +1,7 @@
 import { db } from '../lib/db'
 import { budgets, budgetCategories, transactions } from '../lib/schema'
 import { eq, and, gte, lt } from 'drizzle-orm'
+import { nextMonthStart } from '../lib/datetime'
 import type { BudgetSummary } from '../types'
 
 export async function getBudgetCategories(userId: string) {
@@ -29,7 +30,7 @@ export async function getBudgets(userId: string, month: string) {
     .where(and(eq(budgets.userId, userId), eq(budgets.month, month)))
 
   const start = `${month}-01`
-  const end = `${month}-32`
+  const end = nextMonthStart(month)
   const txs = await db
     .select()
     .from(transactions)
@@ -106,7 +107,7 @@ export async function getBudgetSummaryByCategory(
     .limit(1)
 
   const start = `${month}-01`
-  const end = `${month}-32`
+  const end = nextMonthStart(month)
   const txs = await db
     .select()
     .from(transactions)

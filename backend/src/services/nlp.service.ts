@@ -152,7 +152,36 @@ function resolveAppointmentDateTime(text: string, hour: number, minute: number):
   return { date, time }
 }
 
-/** ถามรายการนัด (ไม่ใช่สร้างนัดใหม่) */
+/** ถามสรุปรายรับ-รายจ่าย */
+export function parseExpenseQueryLocal(text: string): NLPResult | null {
+  const t = text.trim()
+  if (isStockRelatedText(t)) return null
+  if (!/สรุป|ใช้ไป|รายจ่าย|รายรับ|การเงิน|งบ|เท่าไหร่|เหลือเท่าไหร่/i.test(t)) return null
+
+  if (/วันนี้|พรุ่งนี้/.test(t)) {
+    const date = /พรุ่งนี้/.test(t) ? tomorrowStr() : todayStr()
+    return {
+      intent: 'QUERY',
+      confidence: 0.92,
+      data: { queryType: 'DAILY_SUMMARY', date },
+    }
+  }
+
+  if (/เดือนนี้|สรุป|งบ|ใช้ไป|เท่าไหร่/.test(t)) {
+    return {
+      intent: 'QUERY',
+      confidence: 0.88,
+      data: { queryType: 'MONTHLY_SUMMARY', period: 'this_month' },
+    }
+  }
+
+  return null
+}
+
+export function isExpenseQueryText(text: string): boolean {
+  return parseExpenseQueryLocal(text) !== null
+}
+
 export function isAppointmentQueryText(text: string): boolean {
   const t = text.trim()
   if (!/นัด|นัดหมาย|ประชุม/i.test(t)) return false
@@ -265,6 +294,9 @@ export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | nu
   const apptQuery = parseAppointmentQueryLocal(trimmed)
   if (apptQuery) return apptQuery
 
+  const expenseQuery = parseExpenseQueryLocal(trimmed)
+  if (expenseQuery) return expenseQuery
+
   if (/ใช้ไป|สรุป|งบเหลือ|เท่าไหร่/.test(trimmed) && !isStockRelatedText(trimmed)) {
     return { intent: 'QUERY', confidence: 0.85, data: { queryType: 'MONTHLY_SUMMARY', period: 'this_month' } }
   }
@@ -298,6 +330,12 @@ export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | nu
 }
 
 export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPResult> {
+  const expenseQuery = parseExpenseQueryLocal(text)
+  if (expenseQuery) {
+    expenseQuery.raw_text = text
+    return expenseQuery
+  }
+
   const apptQuery = parseAppointmentQueryLocal(text)
   if (apptQuery) {
     apptQuery.raw_text = text

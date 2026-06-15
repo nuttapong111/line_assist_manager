@@ -1,9 +1,8 @@
 import type { NLPResult } from '../types'
-import { getMonthlySummary } from './finance.service'
+import { getMonthlySummary, getDailySummary } from './finance.service'
 import { getBudgets } from './budget.service'
 import { getAppointmentsRange } from './appointment.service'
 import { bangkokToday, bangkokTomorrow } from '../lib/datetime'
-import { INVESTMENT_DISCLAIMER } from '../types'
 import { formatBangkokTime } from '../lib/datetime'
 
 export function buildConfirmFlexMessage(nlp: NLPResult) {
@@ -112,7 +111,31 @@ export function buildSuccessMessage(type: string, data: Record<string, unknown>,
 
 export async function buildQueryReply(userId: string, data: Record<string, unknown> | null) {
   const queryType = data?.queryType || 'MONTHLY_SUMMARY'
-  const month = new Date().toISOString().slice(0, 7)
+  const month = bangkokToday().slice(0, 7)
+
+  if (queryType === 'DAILY_SUMMARY') {
+    const date = String(data?.date || bangkokToday())
+    const dayLabel = date === bangkokToday() ? 'วันนี้'
+      : date === bangkokTomorrow() ? 'พรุ่งนี้'
+        : date
+
+    const summary = await getDailySummary(userId, date)
+    let text = `📊 สรุปรายจ่าย${dayLabel} (${date})\n`
+    text += `รายรับ: ฿${summary.income.toLocaleString()}\n`
+    text += `รายจ่าย: ฿${summary.expenses.toLocaleString()}\n`
+    text += `คงเหลือ: ฿${summary.balance.toLocaleString()}\n`
+    if (summary.transaction_count > 0) {
+      text += `\nรายการ (${summary.transaction_count} รายการ):\n`
+      const lines = summary.transactions
+        .filter(t => t.type === 'EXPENSE')
+        .map(t => `• ฿${Number(t.amount).toLocaleString()} ${t.description || '(ไม่มีรายละเอียด)'}`)
+      if (lines.length > 0) text += lines.join('\n')
+      else text += '• ไม่มีรายจ่าย'
+    } else {
+      text += '\nยังไม่มีรายการวันนี้'
+    }
+    return { type: 'text' as const, text }
+  }
 
   if (queryType === 'MONTHLY_SUMMARY' || queryType === 'BUDGET_STATUS') {
     const summary = await getMonthlySummary(userId, month)
@@ -126,7 +149,6 @@ export async function buildQueryReply(userId: string, data: Record<string, unkno
     if (totalBudget > 0) {
       text += `งบรวม: ฿${totalBudget.toLocaleString()} (ใช้ ${Math.round((summary.expenses / totalBudget) * 100)}%)\n`
     }
-    text += `\n${INVESTMENT_DISCLAIMER}`
     return { type: 'text' as const, text }
   }
 

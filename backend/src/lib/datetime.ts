@@ -51,4 +51,17 @@ export function bangkokDayRange(dateStr: string): { start: Date; end: Date } {
   return { start, end }
 }
 
-export const BANGKOK_TZ = TZ
+/** วันแรกของเดือนถัดไป YYYY-MM-DD (ใช้เป็น exclusive end ใน query) */
+export function nextMonthStart(month: string): string {
+  const [y, m] = month.split('-').map(Number)
+  if (m >= 12) return `${y + 1}-01-01`
+  return `${y}-${String(m + 1).padStart(2, '0')}-01`
+}
+
+/** วันสุดท้ายของเดือน YYYY-MM-DD */
+export function monthEndDate(month: string): string {
+  const [y, m] = month.split('-').map(Number)
+  const lastDay = new Date(y, m, 0).getDate()
+  return `${month}-${String(lastDay).padStart(2, '0')}`
+}
+
