@@ -7,6 +7,15 @@ import { sendPushWithQuotaCheck, lineClient } from '../services/push.service'
 import { getBudgetSummaryByCategory, resolveCategoryId } from '../services/budget.service'
 import { createTransaction } from '../services/finance.service'
 import { createAppointment } from '../services/appointment.service'
+import {
+  setChatMode,
+  setPendingConfirm,
+  getChatContext,
+  clearChatContext,
+  isConfirmText,
+  isCancelText,
+  type PendingType,
+} from '../services/chat-context.service'
 
 const router = Router()
 
@@ -26,6 +35,20 @@ router.post('/',
     await Promise.allSettled(events.map(handleEvent))
   }
 )
+
+function parsePostbackPayload(raw: string | null): Record<string, unknown> {
+  if (!raw) return {}
+  try {
+    return JSON.parse(raw)
+  } catch {
+    try {
+      return JSON.parse(decodeURIComponent(raw))
+    } catch {
+      console.error('[webhook] Failed to parse postback payload:', raw)
+      return {}
+    }
+  }
+}
 
 async function handleEvent(event: WebhookEvent) {
   const lineUserId = event.source?.userId
@@ -47,9 +70,83 @@ async function handleEvent(event: WebhookEvent) {
   }
 }
 
+async function confirmExpense(
+  replyToken: string,
+  user: { id: string },
+  lineUserId: string,
+  payload: Record<string, unknown>,
+) {
+  const categoryId = await resolveCategoryId(user.id, String(payload.category || 'OTHER'))
+  await createTransaction(user.id, {
+    type: String(payload.type || 'EXPENSE'),
+    amount: Number(payload.amount),
+    description: String(payload.description || ''),
+    categoryId,
+    transactionDate: String(payload.date || new Date().toISOString().split('T')[0]),
+    source: 'CHAT',
+  })
+  const month = new Date().toISOString().slice(0, 7)
+  const budget = categoryId
+    ? await getBudgetSummaryByCategory(user.id, categoryId, month)
+    : null
+  await lineClient.replyMessage(replyToken, buildSuccessMessage('expense', payload, budget))
+  if (budget && budget.pct_used >= 80) {
+    await sendPushWithQuotaCheck(user.id, lineUserId, {
+      type: 'text',
+      text: `⚠️ หมวด${budget.category_name}: ใช้ไป ${budget.pct_used}% แล้วนะครับ (เหลือ ฿${budget.remaining.toLocaleString()})`,
+    })
+  }
+}
+
+async function confirmAppointment(replyToken: string, user: { id: string }, payload: Record<string, unknown>) {
+  const date = String(payload.date || new Date().toISOString().split('T')[0])
+  const time = String(payload.time || '09:00')
+  const startAt = `${date}T${time}:00`
+  await createAppointment(user.id, {
+    title: String(payload.title || 'นัดหมาย'),
+    location: payload.location ? String(payload.location) : undefined,
+    category: String(payload.category || 'PERSONAL'),
+    startAt,
+    reminderMin: Number(payload.reminderMinutes || 60),
+    source: 'CHAT',
+  })
+  await lineClient.replyMessage(replyToken, buildSuccessMessage('appointment', payload))
+}
+
 async function handleTextMessage(event: any, user: any, lineUserId: string) {
   const text: string = event.message.text.trim()
-  const nlp = await parseMessage(text)
+  const ctx = getChatContext(lineUserId)
+
+  if (isCancelText(text)) {
+    clearChatContext(lineUserId)
+    await lineClient.replyMessage(event.replyToken, { type: 'text', text: 'ยกเลิกแล้วครับ' })
+    return
+  }
+
+  if (isConfirmText(text) && !ctx?.pending) {
+    return
+  }
+
+  if (isConfirmText(text) && ctx?.pending) {
+    try {
+      const { type, data } = ctx.pending
+      if (type === 'EXPENSE' || type === 'INCOME') {
+        await confirmExpense(event.replyToken, user, lineUserId, data)
+      } else if (type === 'APPOINTMENT') {
+        await confirmAppointment(event.replyToken, user, data)
+      }
+      clearChatContext(lineUserId)
+    } catch (err) {
+      console.error('[webhook] confirm from text failed:', err)
+      await lineClient.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'บันทึกไม่สำเร็จครับ ลองใหม่อีกครั้งนะครับ',
+      })
+    }
+    return
+  }
+
+  const nlp = await parseMessage(text, ctx?.mode)
 
   if (nlp.intent === 'UNKNOWN' || nlp.confidence < 0.6) {
     await lineClient.replyMessage(event.replyToken, {
@@ -60,11 +157,18 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
   }
 
   if (nlp.intent === 'QUERY') {
+    clearChatContext(lineUserId)
     const reply = await buildQueryReply(user.id, nlp.data)
     await lineClient.replyMessage(event.replyToken, reply)
     return
   }
 
+  const pendingType: PendingType =
+    nlp.intent === 'INCOME' ? 'INCOME'
+      : nlp.intent === 'APPOINTMENT' ? 'APPOINTMENT'
+        : 'EXPENSE'
+
+  setPendingConfirm(lineUserId, pendingType, nlp.data || {})
   await lineClient.replyMessage(event.replyToken, buildConfirmFlexMessage(nlp) as any)
 }
 
@@ -72,70 +176,78 @@ async function handlePostback(event: any, user: any, lineUserId: string) {
   const params = new URLSearchParams(event.postback.data)
   const action = params.get('action')
 
-  switch (action) {
-    case 'CONFIRM_EXPENSE': {
-      const payload = JSON.parse(params.get('payload') || '{}')
-      const categoryId = await resolveCategoryId(user.id, payload.category || 'OTHER')
-      const tx = await createTransaction(user.id, {
-        type: payload.type || 'EXPENSE',
-        amount: payload.amount,
-        description: payload.description,
-        categoryId,
-        transactionDate: payload.date,
-        source: 'CHAT',
-      })
-      const month = new Date().toISOString().slice(0, 7)
-      const budget = categoryId
-        ? await getBudgetSummaryByCategory(user.id, categoryId, month)
-        : null
-      await lineClient.replyMessage(event.replyToken, buildSuccessMessage('expense', payload, budget))
-      if (budget && budget.pct_used >= 80) {
-        await sendPushWithQuotaCheck(user.id, lineUserId, {
-          type: 'text',
-          text: `⚠️ หมวด${budget.category_name}: ใช้ไป ${budget.pct_used}% แล้วนะครับ (เหลือ ฿${budget.remaining.toLocaleString()})`,
-        })
+  try {
+    switch (action) {
+      case 'CONFIRM_EXPENSE': {
+        const payload = parsePostbackPayload(params.get('payload'))
+        if (!payload.amount) {
+          const ctx = getChatContext(lineUserId)
+          if (ctx?.pending?.type === 'EXPENSE' || ctx?.pending?.type === 'INCOME') {
+            await confirmExpense(event.replyToken, user, lineUserId, ctx.pending.data)
+            clearChatContext(lineUserId)
+            return
+          }
+          throw new Error('Missing expense payload')
+        }
+        await confirmExpense(event.replyToken, user, lineUserId, payload)
+        clearChatContext(lineUserId)
+        break
       }
-      break
+      case 'CONFIRM_APPOINTMENT': {
+        const payload = parsePostbackPayload(params.get('payload'))
+        if (!payload.title && !payload.date) {
+          const ctx = getChatContext(lineUserId)
+          if (ctx?.pending?.type === 'APPOINTMENT') {
+            await confirmAppointment(event.replyToken, user, ctx.pending.data)
+            clearChatContext(lineUserId)
+            return
+          }
+          throw new Error('Missing appointment payload')
+        }
+        await confirmAppointment(event.replyToken, user, payload)
+        clearChatContext(lineUserId)
+        break
+      }
+      case 'CANCEL':
+        clearChatContext(lineUserId)
+        await lineClient.replyMessage(event.replyToken, { type: 'text', text: 'ยกเลิกแล้วครับ' })
+        break
+      case 'ADD_APPOINTMENT':
+        setChatMode(lineUserId, 'APPOINTMENT')
+        await lineClient.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '📅 พิมนัดหมายได้เลยครับ\n"นัดประชุมพรุ่งนี้บ่ายสอง"\n"ทานข้าว 11โมง"\n"หมอฟันวันเสาร์ 10 โมง"',
+        })
+        break
+      case 'ADD_EXPENSE':
+        setChatMode(lineUserId, 'EXPENSE')
+        await lineClient.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '💸 พิมรายจ่ายได้เลยครับ\n"กาแฟ 85"\n"ค่าน้ำมัน 500 เดินทาง"',
+        })
+        break
+      case 'SUMMARY': {
+        clearChatContext(lineUserId)
+        const reply = await buildQueryReply(user.id, { queryType: 'MONTHLY_SUMMARY', period: 'this_month' })
+        await lineClient.replyMessage(event.replyToken, reply)
+        break
+      }
+      case 'ADD_REMINDER':
+        setChatMode(lineUserId, 'REMINDER')
+        await lineClient.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '🔔 พิมเตือนได้เลยครับ\n"เตือนจ่ายค่าไฟวันที่ 15"\n"อย่าลืมประชุม 14:00"',
+        })
+        break
+      default:
+        break
     }
-    case 'CONFIRM_APPOINTMENT': {
-      const payload = JSON.parse(params.get('payload') || '{}')
-      const startAt = `${payload.date}T${payload.time}:00`
-      await createAppointment(user.id, {
-        title: payload.title,
-        location: payload.location,
-        category: payload.category,
-        startAt,
-        reminderMin: payload.reminderMinutes || 60,
-        source: 'CHAT',
-      })
-      await lineClient.replyMessage(event.replyToken, buildSuccessMessage('appointment', payload))
-      break
-    }
-    case 'ADD_APPOINTMENT':
-      await lineClient.replyMessage(event.replyToken, {
-        type: 'text',
-        text: '📅 พิมนัดหมายได้เลยครับ\n"นัดประชุมพรุ่งนี้บ่ายสอง"\n"หมอฟันวันเสาร์ 10 โมง"',
-      })
-      break
-    case 'ADD_EXPENSE':
-      await lineClient.replyMessage(event.replyToken, {
-        type: 'text',
-        text: '💸 พิมรายจ่ายได้เลยครับ\n"กาแฟ 85"\n"ค่าน้ำมัน 500 เดินทาง"',
-      })
-      break
-    case 'SUMMARY': {
-      const reply = await buildQueryReply(user.id, { queryType: 'MONTHLY_SUMMARY', period: 'this_month' })
-      await lineClient.replyMessage(event.replyToken, reply)
-      break
-    }
-    case 'ADD_REMINDER':
-      await lineClient.replyMessage(event.replyToken, {
-        type: 'text',
-        text: '🔔 พิมเตือนได้เลยครับ\n"เตือนจ่ายค่าไฟวันที่ 15"\n"อย่าลืมประชุม 14:00"',
-      })
-      break
-    default:
-      break
+  } catch (err) {
+    console.error('[webhook] postback error:', action, err)
+    await lineClient.replyMessage(event.replyToken, {
+      type: 'text',
+      text: 'บันทึกไม่สำเร็จครับ ลองพิมรายการใหม่อีกครั้งนะครับ',
+    })
   }
 }
 
