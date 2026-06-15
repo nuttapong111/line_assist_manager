@@ -206,13 +206,22 @@ export function parseAppointmentQueryLocal(text: string): NLPResult | null {
   }
 }
 
+/** มีตัวเลขที่น่าจะเป็นจำนวนเงิน (ไม่ใช่เวลา) */
+function hasExpenseAmount(text: string): boolean {
+  if (TIME_HINT.test(text)) return false
+  return /(\d+(?:\.\d+)?)\s*(?:บาท|บ\.?)?(?!\s*โมง)/.test(text)
+}
+
 /** Rule-based นัดหมาย */
 export function parseAppointmentLocal(text: string): NLPResult | null {
   const trimmed = text.trim()
   if (isAppointmentQueryText(trimmed)) return null
 
-  const hasAppointmentHint = /นัด|ประชุม|หมอ|พบ|ทาน|กิน|ข้าว|เตือน|meeting|appointment/i.test(trimmed)
   const time = parseTimeFromText(trimmed)
+  // "ข้าว 150", "กาแฟ 85" → รายจ่าย ไม่ใช่นัดหมาย
+  if (!time && hasExpenseAmount(trimmed)) return null
+
+  const hasAppointmentHint = /นัด|ประชุม|หมอ|พบ|ทาน|กิน|เตือน|meeting|appointment/i.test(trimmed)
 
   if (!time && !hasAppointmentHint) return null
   if (!time && hasAppointmentHint) {
@@ -259,7 +268,7 @@ export function parseExpenseLocal(text: string): NLPResult | null {
 
   const amount = parseFloat(numMatch[1])
   const isIncome = /รับ|ได้|เงินเดือน|โบนัส|income/i.test(trimmed)
-  const isExpense = /กิน|ซื้อ|จ่าย|ค่า|ช้อป|กาแฟ|อาหาร|bts|mrt|แท็กซี่/i.test(trimmed) || !isIncome
+  const isExpense = /กิน|ซื้อ|จ่าย|ค่า|ช้อป|กาแฟ|อาหาร|ข้าว|bts|mrt|แท็กซี่/i.test(trimmed) || !isIncome
 
   if (isIncome) {
     return {
@@ -311,17 +320,19 @@ export function parseMessageLocal(text: string, mode?: ChatMode): NLPResult | nu
     if (symbol) return { intent: 'STOCK_QUERY', confidence: 0.9, data: { symbol } }
   }
 
-  if (mode === 'APPOINTMENT' || mode === 'REMINDER' || TIME_HINT.test(trimmed)) {
-    const appt = parseAppointmentLocal(trimmed)
-    if (appt) return appt
-  }
-
   if (mode === 'EXPENSE') {
     const expense = parseExpenseLocal(trimmed)
     if (expense) return expense
   }
 
   if (!mode) {
+    const expense = parseExpenseLocal(trimmed)
+    if (expense) return expense
+    const appt = parseAppointmentLocal(trimmed)
+    if (appt) return appt
+  }
+
+  if (mode === 'APPOINTMENT' || mode === 'REMINDER' || TIME_HINT.test(trimmed)) {
     const appt = parseAppointmentLocal(trimmed)
     if (appt) return appt
   }
@@ -352,20 +363,21 @@ export async function parseMessage(text: string, mode?: ChatMode): Promise<NLPRe
     if (symbol) return { intent: 'STOCK_QUERY', confidence: 0.9, data: { symbol }, raw_text: text }
   }
 
+  // รายจ่าย — จับก่อนนัดหมาย/Gemini เมื่อมีตัวเลขจำนวนเงิน
+  if (mode === 'EXPENSE' || !TIME_HINT.test(text)) {
+    const expense = parseExpenseLocal(text)
+    if (expense) {
+      expense.raw_text = text
+      return expense
+    }
+  }
+
   // นัดหมาย + เวลาไทย → ใช้ local ก่อนเสมอ (แม่นกว่า Gemini)
   if (mode === 'APPOINTMENT' || mode === 'REMINDER' || TIME_HINT.test(text)) {
     const appt = parseAppointmentLocal(text)
     if (appt) {
       appt.raw_text = text
       return appt
-    }
-  }
-
-  if (mode === 'EXPENSE') {
-    const expense = parseExpenseLocal(text)
-    if (expense) {
-      expense.raw_text = text
-      return expense
     }
   }
 
