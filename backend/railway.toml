@@ -1,7 +1,8 @@
+# Used when Railway Root Directory = backend/
 [build]
-buildCommand = "npm run build && npm run db:migrate"
+buildCommand = "npm run build"
 
 [deploy]
-startCommand = "node dist/app.js"
+startCommand = "npm run db:migrate && npm start"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3

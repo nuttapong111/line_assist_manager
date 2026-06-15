@@ -1,8 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk'
 import { uploadSlip } from '../lib/storage'
+import { getGeminiModel, parseJsonFromText } from '../lib/gemini'
 import type { NLPResult } from '../types'
-
-const client = new Anthropic()
 
 export const NLP_SYSTEM_PROMPT = `
 You are a Thai personal assistant that extracts structured data from Thai text messages.
@@ -48,19 +46,16 @@ function buildSystemPrompt(): string {
 
 export async function parseMessage(text: string): Promise<NLPResult> {
   try {
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 512,
-      system: buildSystemPrompt(),
-      messages: [{ role: 'user', content: text }],
+    const model = getGeminiModel(true)
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text }] }],
+      systemInstruction: buildSystemPrompt(),
     })
 
-    const content = response.content[0]
-    if (content.type !== 'text') throw new Error('Unexpected response type')
-
-    const result = JSON.parse(content.text) as NLPResult
-    result.raw_text = text
-    return result
+    const responseText = result.response.text()
+    const parsed = parseJsonFromText(responseText) as NLPResult
+    parsed.raw_text = text
+    return parsed
   } catch (err) {
     console.error('NLP parse error:', err)
     return { intent: 'UNKNOWN', confidence: 0, data: null, raw_text: text }
@@ -70,28 +65,16 @@ export async function parseMessage(text: string): Promise<NLPResult> {
 export async function scanSlip(userId: string, buffer: Buffer, mimetype: string) {
   const imageUrl = await uploadSlip(userId, buffer, mimetype)
   const base64 = buffer.toString('base64')
+  const mimeType = mimetype === 'image/png' ? 'image/png' : 'image/jpeg'
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 512,
-    messages: [{
-      role: 'user',
-      content: [
-        {
-          type: 'image',
-          source: { type: 'base64', media_type: mimetype as 'image/jpeg' | 'image/png', data: base64 },
-        },
-        {
-          type: 'text',
-          text: 'อ่านสลิปโอนเงินนี้ ตอบ JSON เท่านั้น: { "amount": number, "date": "YYYY-MM-DD", "time": "HH:MM", "merchant_name": string, "sender_bank": string, "slip_type": string }',
-        },
-      ],
-    }],
-  })
+  const model = getGeminiModel(true)
+  const result = await model.generateContent([
+    { inlineData: { data: base64, mimeType } },
+  {
+      text: 'อ่านสลิปโอนเงินนี้ ตอบ JSON เท่านั้น: { "amount": number, "date": "YYYY-MM-DD", "time": "HH:MM", "merchant_name": string, "sender_bank": string, "slip_type": string }',
+    },
+  ])
 
-  const content = response.content[0]
-  if (content.type !== 'text') throw new Error('OCR failed')
-
-  const parsed = JSON.parse(content.text)
+  const parsed = parseJsonFromText(result.response.text()) as Record<string, unknown>
   return { ...parsed, image_url: imageUrl }
 }

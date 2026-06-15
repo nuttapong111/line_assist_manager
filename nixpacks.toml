@@ -1,0 +1,12 @@
+# Monorepo: build backend from repo root (Railway default root)
+[phases.setup]
+nixPkgs = ["nodejs_22"]
+
+[phases.install]
+cmds = ["cd backend && npm ci"]
+
+[phases.build]
+cmds = ["cd backend && npm run build"]
+
+[start]
+cmd = "cd backend && npm run db:migrate && npm start"

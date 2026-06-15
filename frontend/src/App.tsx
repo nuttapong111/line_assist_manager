@@ -38,9 +38,12 @@ function AppLayout() {
 
 export default function App() {
   const [ready, setReady] = useState(false)
+  const [initError, setInitError] = useState<string | null>(null)
 
   useEffect(() => {
-    initLiff().finally(() => setReady(true))
+    initLiff()
+      .catch((err) => setInitError(err instanceof Error ? err.message : 'LIFF init failed'))
+      .finally(() => setReady(true))
   }, [])
 
   if (!ready) {
@@ -49,6 +52,18 @@ export default function App() {
         <div className="text-center">
           <div className="w-12 h-12 rounded-[14px] bg-[#2A5C45] flex items-center justify-center text-white text-[24px] mx-auto mb-3">🤖</div>
           <p className="text-[14px] text-[#636259]">กำลังโหลด MyAssist...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (initError) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#F7F6F2] px-6">
+        <div className="text-center max-w-sm">
+          <p className="text-[16px] font-medium text-[#B83232] mb-2">ไม่สามารถเข้าสู่ระบบได้</p>
+          <p className="text-[13px] text-[#636259]">{initError}</p>
+          <p className="text-[12px] text-[#9B9A94] mt-3">เปิดแอปจาก LINE และตรวจสอบ VITE_LIFF_ID</p>
         </div>
       </div>
     )

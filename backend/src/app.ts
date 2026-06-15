@@ -16,14 +16,30 @@ import gcalRouter from './routes/gcal'
 import { Router } from 'express'
 import * as gcal from './services/gcal.service'
 import { startScheduler } from './services/scheduler'
+import { verifyOAuthState } from './lib/oauth-state'
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }))
-app.use(express.json())
+const corsOrigins: string[] = []
+if (process.env.FRONTEND_URL) corsOrigins.push(process.env.FRONTEND_URL)
+if (process.env.NODE_ENV !== 'production') {
+  corsOrigins.push('http://localhost:5173', 'http://127.0.0.1:5173')
+}
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || corsOrigins.length === 0 || corsOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(null, false)
+    }
+  },
+  credentials: true,
+}))
+app.use(express.json({ limit: '1mb' }))
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 
@@ -32,11 +48,16 @@ app.use('/webhook', webhookRouter)
 const gcalCallbackRouter = Router()
 gcalCallbackRouter.get('/callback', async (req, res) => {
   const { code, state } = req.query
-  if (code && state) {
-    await gcal.handleCallback(code as string, state as string)
+  if (!code || !state || typeof code !== 'string' || typeof state !== 'string') {
+    return res.status(400).send('Missing code or state')
+  }
+  try {
+    const userId = verifyOAuthState(state)
+    await gcal.handleCallback(code, userId)
     res.send('Google Calendar connected! You can close this window.')
-  } else {
-    res.status(400).send('Missing code or state')
+  } catch (err) {
+    console.error('[gcal] callback error:', err)
+    res.status(400).send('Invalid or expired authorization request')
   }
 })
 app.use('/api/gcal', gcalCallbackRouter)

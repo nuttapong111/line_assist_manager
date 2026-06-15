@@ -3,6 +3,7 @@ import { googleCalendarTokens } from '../lib/schema'
 import { eq } from 'drizzle-orm'
 import { google } from 'googleapis'
 import { createAppointment } from './appointment.service'
+import { signOAuthState } from '../lib/oauth-state'
 
 function getOAuth2Client() {
   return new google.auth.OAuth2(
@@ -17,7 +18,7 @@ export function getAuthUrl(userId: string) {
   return oauth2.generateAuthUrl({
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/calendar.readonly'],
-    state: userId,
+    state: signOAuthState(userId),
     prompt: 'consent',
   })
 }

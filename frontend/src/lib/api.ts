@@ -1,20 +1,27 @@
-import { getLineUserId } from './liff'
+import { getAccessToken } from './liff'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
-async function getHeaders(): Promise<HeadersInit> {
-  const userId = await getLineUserId()
-  return {
-    'Content-Type': 'application/json',
-    'x-line-user-id': userId,
+async function getAuthHeaders(contentType = true): Promise<HeadersInit> {
+  const token = await getAccessToken()
+  const headers: Record<string, string> = {}
+
+  if (contentType) {
+    headers['Content-Type'] = 'application/json'
   }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  return headers
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers = await getHeaders()
+  const headers = await getAuthHeaders()
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
-    headers: { ...headers, ...(init?.headers ?? {}) },
+    headers: { ...headers, ...(init?.headers as Record<string, string> ?? {}) },
   })
   const json = await res.json()
   if (!res.ok) throw new Error(json.message ?? 'API error')
@@ -52,15 +59,17 @@ export const api = {
   },
   ocr: {
     scanSlip: async (file: File) => {
-      const userId = await getLineUserId()
+      const headers = await getAuthHeaders(false)
       const form = new FormData()
       form.append('file', file)
       const res = await fetch(`${BASE_URL}/ocr/slip`, {
         method: 'POST',
-        headers: { 'x-line-user-id': userId },
+        headers,
         body: form,
       })
-      return res.json()
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.message ?? 'OCR failed')
+      return json
     },
   },
   user: {
