@@ -53,7 +53,11 @@ app.use(cors({
   },
   credentials: true,
 }))
-app.get('/health', (_req, res) => res.json({ status: 'ok' }))
+app.get('/health', (_req, res) => res.json({
+  status: 'ok',
+  features: ['stock-chat', 'watchlist-chat', 'morning-summary'],
+  build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'local',
+}))
 
 // Webhook ต้องอยู่ก่อน express.json() — LINE ต้องใช้ raw body ตรวจ signature
 app.use('/webhook', webhookRouter)

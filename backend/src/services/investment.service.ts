@@ -62,7 +62,9 @@ export function isStockRelatedText(text: string): boolean {
 }
 
 export function isAddWatchlistText(text: string): boolean {
-  return /ติดตาม|watchlist|เพิ่มหุ้น|เพิ่มในรายการ/i.test(text) && !!extractSymbolFromText(text)
+  const symbol = extractSymbolFromText(text)
+  if (!symbol) return false
+  return /ติดตาม|watchlist|เพิ่มหุ้น|เพิ่มในรายการ|^เพิ่ม\s+/i.test(text.trim())
 }
 
 export async function analyzeSymbol(symbol: string) {

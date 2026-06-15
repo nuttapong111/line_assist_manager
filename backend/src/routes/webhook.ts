@@ -16,7 +16,7 @@ import {
   isCancelText,
   type PendingType,
 } from '../services/chat-context.service'
-import { buildStockQueryReply, addSymbolToWatchlist } from '../services/investment.service'
+import { buildStockQueryReply, addSymbolToWatchlist, isAddWatchlistText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
 
 const router = Router()
 
@@ -143,12 +143,29 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
       return
     }
 
+    // หุ้น / watchlist — จับตรงๆ ก่อน NLP (ไม่พึ่ง Gemini)
+    if (isAddWatchlistText(text)) {
+      const symbol = extractSymbolFromText(text)
+      if (symbol) {
+        const reply = await addSymbolToWatchlist(user.id, symbol)
+        await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+        return
+      }
+    }
+
+    const stockSymbol = extractSymbolFromText(text)
+    if (stockSymbol && isStockRelatedText(text) && !isAddWatchlistText(text)) {
+      const reply = await buildStockQueryReply(stockSymbol)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
     const nlp = await parseMessage(text, ctx?.mode)
 
     if (nlp.intent === 'UNKNOWN' || nlp.confidence < 0.6) {
       await lineClient.replyMessage(event.replyToken, {
         type: 'text',
-        text: 'ขอโทษครับ ไม่เข้าใจ 😅\nลองพิม เช่น:\n"นัดหมอพรุ่งนี้ 10 โมง"\n"กาแฟ 85 อาหาร"\n"ใช้ไปเท่าไหร่เดือนนี้"',
+        text: 'ขอโทษครับ ไม่เข้าใจ 😅\nลองพิม เช่น:\n"NVDA ตอนนี้เป็นอย่างไร"\n"ติดตาม PTT"\n"นัดหมอพรุ่งนี้ 10 โมง"\n"กาแฟ 85 อาหาร"',
       })
       return
     }
@@ -251,6 +268,12 @@ async function handlePostback(event: any, user: any, lineUserId: string) {
         await lineClient.replyMessage(event.replyToken, {
           type: 'text',
           text: '🔔 พิมเตือนได้เลยครับ\n"เตือนจ่ายค่าไฟวันที่ 15"\n"อย่าลืมประชุม 14:00"',
+        })
+        break
+      case 'ADD_WATCHLIST':
+        await lineClient.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '📈 พิมติดตามหุ้นได้เลยครับ\n"ติดตาม NVDA"\n"ติดตาม PTT"\n"watchlist AAPL"\n\nดูวิเคราะห์: "NVDA ตอนนี้เป็นอย่างไร"',
         })
         break
       default:
