@@ -247,6 +247,15 @@ export async function getCachedTopScores(limit = 3) {
 
 export async function ensureMarketScanInitialized(): Promise<void> {
   const [state] = await db.select().from(marketScanState).where(eq(marketScanState.id, SCAN_STATE_ID)).limit(1)
+
+  const needsFullRefresh = hasFinnhubKey()
+    && (!state || state.totalSymbols < 200)
+
+  if (needsFullRefresh) {
+    await refreshMarketSymbolList()
+    return
+  }
+
   if (!state || state.totalSymbols === 0) {
     await refreshMarketSymbolList()
   } else {
