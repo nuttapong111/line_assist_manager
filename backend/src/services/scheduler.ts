@@ -68,7 +68,11 @@ export function startScheduler() {
 
   // Morning investment summary 08:00 Bangkok
   cron.schedule('0 8 * * *', async () => {
-    try { await sendMorningInvestmentSummaries() } catch (err) { console.error('Morning summary cron error:', err) }
+    try {
+      const { clearDailyPicksCache } = await import('./recommendation.service')
+      clearDailyPicksCache()
+      await sendMorningInvestmentSummaries()
+    } catch (err) { console.error('Morning summary cron error:', err) }
   }, { timezone: 'Asia/Bangkok' })
 
   // Google Calendar sync every 15 minutes

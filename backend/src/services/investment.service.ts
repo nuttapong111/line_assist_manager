@@ -244,12 +244,12 @@ function formatTopStockPicks(
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
   const {
-    getCachedBuySignals,
     getCachedTopScores,
     getMarketScanProgress,
     formatScanBreakdownLabel,
     runMarketScanBatches,
   } = await import('./market-scanner.service')
+  const { getStableDailyBuySignals } = await import('./recommendation.service')
 
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
@@ -257,13 +257,13 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
   const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
   const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
 
-  // เร่งสแกนหลาย batch ในพื้นหลัง
   runMarketScanBatches(5).catch(err => console.error('[investment] background scan failed:', err))
 
-  const buyRows = await getCachedBuySignals(5)
+  const { picks: buyRows, lockedForToday } = await getStableDailyBuySignals(5)
   const scannedPos = Math.min(progress.cursor, progress.total)
+  const lockNote = lockedForToday ? '🔒 รายการนี้คงที่ทั้งวัน (อัปเดตใหม่พรุ่งนี้)' : ''
   const progressLine = progress.total > 0
-    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}`
+    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}${lockNote ? `\n${lockNote}` : ''}`
     : '🔄 กำลังเริ่มสแกนทั้งตลาดในพื้นหลัง...'
 
   const toAnalysis = (row: typeof buyRows[0]): StockAnalysis => ({

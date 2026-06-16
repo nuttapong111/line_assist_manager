@@ -14,6 +14,16 @@ function isValidUsSymbol(symbol: string): boolean {
   return /^[A-Z0-9-]+$/.test(symbol)
 }
 
+function isJunkUsListing(symbol: string, name: string): boolean {
+  const n = name.toUpperCase()
+  if (/\b(WARRANT|WARRANTS|RIGHTS?|UNITS?)\b/.test(n)) return true
+  const sym = symbol.toUpperCase()
+  if (sym.endsWith('WS') || sym.endsWith('WT') || sym.endsWith('RT') || sym.endsWith('RW')) return true
+  if (sym.endsWith('U') && n.includes('UNIT')) return true
+  if (sym.endsWith('R') && n.includes('RIGHT')) return true
+  return false
+}
+
 function parseNasdaqListed(text: string): UsMarketSymbol[] {
   const rows: UsMarketSymbol[] = []
   const lines = text.trim().split('\n')
@@ -21,7 +31,7 @@ function parseNasdaqListed(text: string): UsMarketSymbol[] {
     const parts = lines[i].split('|')
     if (parts.length < 8) continue
     const [symbol, name, , testIssue, , , etfFlag] = parts
-    if (testIssue === 'Y' || !isValidUsSymbol(symbol)) continue
+    if (testIssue === 'Y' || !isValidUsSymbol(symbol) || isJunkUsListing(symbol, name)) continue
     rows.push({
       symbol,
       displayName: name.slice(0, 120),
@@ -39,7 +49,7 @@ function parseOtherListed(text: string): UsMarketSymbol[] {
     const parts = lines[i].split('|')
     if (parts.length < 8) continue
     const [symbol, name, , , etfFlag, , testIssue] = parts
-    if (testIssue === 'Y' || !isValidUsSymbol(symbol)) continue
+    if (testIssue === 'Y' || !isValidUsSymbol(symbol) || isJunkUsListing(symbol, name)) continue
     rows.push({
       symbol,
       displayName: name.slice(0, 120),
