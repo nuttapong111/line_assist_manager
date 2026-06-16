@@ -1,0 +1,4388 @@
+[
+{
+"symbol": "7UP",
+"displayName": "เซเว่น ยูทิลิตี้ส์ แอนด์ พาวเวอร์",
+"market": "SET",
+"yahooSymbol": "7UP.BK"
+},
+{
+"symbol": "A",
+"displayName": "อารียา พรอพเพอร์ตี้",
+"market": "SET",
+"yahooSymbol": "A.BK"
+},
+{
+"symbol": "AAV",
+"displayName": "เอเชีย เอวิเอชั่น",
+"market": "SET",
+"yahooSymbol": "AAV.BK"
+},
+{
+"symbol": "ABPIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐานโรงไฟฟ้า อมตะ บี.กริม เพาเวอร์",
+"market": "SET",
+"yahooSymbol": "ABPIF.BK"
+},
+{
+"symbol": "ACC",
+"displayName": "แอดวานซ์ คอนเนคชั่น คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "ACC.BK"
+},
+{
+"symbol": "ADVANC",
+"displayName": "แอดวานซ์ อินโฟร์ เซอร์วิส",
+"market": "SET",
+"yahooSymbol": "ADVANC.BK"
+},
+{
+"symbol": "AEC",
+"displayName": "บริษัทหลักทรัพย์ เออีซี",
+"market": "SET",
+"yahooSymbol": "AEC.BK"
+},
+{
+"symbol": "AEONTS",
+"displayName": "อิออน ธนสินทรัพย์ (ไทยแลนด์)",
+"market": "SET",
+"yahooSymbol": "AEONTS.BK"
+},
+{
+"symbol": "AFC",
+"displayName": "เอเซียไฟเบอร์",
+"market": "SET",
+"yahooSymbol": "AFC.BK"
+},
+{
+"symbol": "AH",
+"displayName": "อาปิโก ไฮเทค",
+"market": "SET",
+"yahooSymbol": "AH.BK"
+},
+{
+"symbol": "AHC",
+"displayName": "โรงพยาบาลเอกชล",
+"market": "SET",
+"yahooSymbol": "AHC.BK"
+},
+{
+"symbol": "AI",
+"displayName": "เอเชียน อินซูเลเตอร์",
+"market": "SET",
+"yahooSymbol": "AI.BK"
+},
+{
+"symbol": "AIMCG",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าอสังหาริมทรัพย์ เอไอเอ็ม คอมเ",
+"market": "SET",
+"yahooSymbol": "AIMCG.BK"
+},
+{
+"symbol": "AIMIRT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าอสังหาริมทรัพย์ เอไอเอ็ม อินด",
+"market": "SET",
+"yahooSymbol": "AIMIRT.BK"
+},
+{
+"symbol": "AIT",
+"displayName": "แอ็ดวานซ์ อินฟอร์เมชั่น เทคโนโลยี",
+"market": "SET",
+"yahooSymbol": "AIT.BK"
+},
+{
+"symbol": "AJ",
+"displayName": "เอ.เจ.พลาสท์",
+"market": "SET",
+"yahooSymbol": "AJ.BK"
+},
+{
+"symbol": "AJA",
+"displayName": "เอเจ แอดวานซ์ เทคโนโลยี",
+"market": "SET",
+"yahooSymbol": "AJA.BK"
+},
+{
+"symbol": "AKR",
+"displayName": "เอกรัฐวิศวกรรม",
+"market": "SET",
+"yahooSymbol": "AKR.BK"
+},
+{
+"symbol": "ALLA",
+"displayName": "ออลล่า",
+"market": "SET",
+"yahooSymbol": "ALLA.BK"
+},
+{
+"symbol": "ALT",
+"displayName": "เอแอลที เทเลคอม",
+"market": "SET",
+"yahooSymbol": "ALT.BK"
+},
+{
+"symbol": "ALUCON",
+"displayName": "อลูคอน",
+"market": "SET",
+"yahooSymbol": "ALUCON.BK"
+},
+{
+"symbol": "AMANAH",
+"displayName": "อะมานะฮ์ ลิสซิ่ง",
+"market": "SET",
+"yahooSymbol": "AMANAH.BK"
+},
+{
+"symbol": "AMATA",
+"displayName": "อมตะ คอร์ปอเรชัน",
+"market": "SET",
+"yahooSymbol": "AMATA.BK"
+},
+{
+"symbol": "AMATAR",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าอมตะซัมมิทโกรท",
+"market": "SET",
+"yahooSymbol": "AMATAR.BK"
+},
+{
+"symbol": "AMATAV",
+"displayName": "อมตะ วีเอ็น",
+"market": "SET",
+"yahooSymbol": "AMATAV.BK"
+},
+{
+"symbol": "AMC",
+"displayName": "เอเซีย เมทัล",
+"market": "SET",
+"yahooSymbol": "AMC.BK"
+},
+{
+"symbol": "ANAN",
+"displayName": "อนันดา ดีเวลลอปเม้นท์",
+"market": "SET",
+"yahooSymbol": "ANAN.BK"
+},
+{
+"symbol": "AOT",
+"displayName": "ท่าอากาศยานไทย",
+"market": "SET",
+"yahooSymbol": "AOT.BK"
+},
+{
+"symbol": "AP",
+"displayName": "เอพี (ไทยแลนด์)",
+"market": "SET",
+"yahooSymbol": "AP.BK"
+},
+{
+"symbol": "APCO",
+"displayName": "เอเชียน ไฟย์โตซูติคอลส์",
+"market": "SET",
+"yahooSymbol": "APCO.BK"
+},
+{
+"symbol": "APCS",
+"displayName": "เอเซีย พรีซิชั่น",
+"market": "SET",
+"yahooSymbol": "APCS.BK"
+},
+{
+"symbol": "APURE",
+"displayName": "อกริเพียว โฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "APURE.BK"
+},
+{
+"symbol": "AQ",
+"displayName": "เอคิว เอสเตท",
+"market": "SET",
+"yahooSymbol": "AQ.BK"
+},
+{
+"symbol": "AQUA",
+"displayName": "อควา คอร์เปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "AQUA.BK"
+},
+{
+"symbol": "AS",
+"displayName": "เอเชียซอฟท์ คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "AS.BK"
+},
+{
+"symbol": "ASAP",
+"displayName": "ซินเนอร์เจติค ออโต้ เพอร์ฟอร์มานซ์",
+"market": "SET",
+"yahooSymbol": "ASAP.BK"
+},
+{
+"symbol": "ASEFA",
+"displayName": "อาซีฟา",
+"market": "SET",
+"yahooSymbol": "ASEFA.BK"
+},
+{
+"symbol": "ASIA",
+"displayName": "เอเชียโฮเต็ล",
+"market": "SET",
+"yahooSymbol": "ASIA.BK"
+},
+{
+"symbol": "ASIAN",
+"displayName": "เอเชี่ยนซี คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "ASIAN.BK"
+},
+{
+"symbol": "ASIMAR",
+"displayName": "เอเชียน มารีน เซอร์วิสส์",
+"market": "SET",
+"yahooSymbol": "ASIMAR.BK"
+},
+{
+"symbol": "ASK",
+"displayName": "เอเซียเสริมกิจลีสซิ่ง",
+"market": "SET",
+"yahooSymbol": "ASK.BK"
+},
+{
+"symbol": "ASP",
+"displayName": "เอเซีย พลัส กรุ๊ป โฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "ASP.BK"
+},
+{
+"symbol": "AWC",
+"displayName": "แอสเสท เวิรด์ คอร์ป",
+"market": "SET",
+"yahooSymbol": "AWC.BK"
+},
+{
+"symbol": "AYUD",
+"displayName": "อลิอันซ์ อยุธยา แคปปิตอล",
+"market": "SET",
+"yahooSymbol": "AYUD.BK"
+},
+{
+"symbol": "B",
+"displayName": "บี จิสติกส์",
+"market": "SET",
+"yahooSymbol": "B.BK"
+},
+{
+"symbol": "B-WORK",
+"displayName": "ทรัสต์เพื่อการลงทุนในสิทธิการเช่าอสังหาริมทรัพย์บัวหลวง ออฟฟิศ",
+"market": "SET",
+"yahooSymbol": "B-WORK.BK"
+},
+{
+"symbol": "B52",
+"displayName": "บี-52 แคปปิตอล",
+"market": "SET",
+"yahooSymbol": "B52.BK"
+},
+{
+"symbol": "BA",
+"displayName": "การบินกรุงเทพ",
+"market": "SET",
+"yahooSymbol": "BA.BK"
+},
+{
+"symbol": "BAFS",
+"displayName": "บริการเชื้อเพลิงการบินกรุงเทพ",
+"market": "SET",
+"yahooSymbol": "BAFS.BK"
+},
+{
+"symbol": "BAM",
+"displayName": "บริษัทบริหารสินทรัพย์ กรุงเทพพาณิชย์",
+"market": "SET",
+"yahooSymbol": "BAM.BK"
+},
+{
+"symbol": "BANPU",
+"displayName": "บ้านปู",
+"market": "SET",
+"yahooSymbol": "BANPU.BK"
+},
+{
+"symbol": "BAT-3K",
+"displayName": "ฮิตาชิ เคมิคอล สโตเรจ แบตเตอรี่ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "BAT-3K.BK"
+},
+{
+"symbol": "BAY",
+"displayName": "ธนาคารกรุงศรีอยุธยา",
+"market": "SET",
+"yahooSymbol": "BAY.BK"
+},
+{
+"symbol": "BBL",
+"displayName": "ธนาคารกรุงเทพ",
+"market": "SET",
+"yahooSymbol": "BBL.BK"
+},
+{
+"symbol": "BCH",
+"displayName": "บางกอก เชน ฮอสปิทอล",
+"market": "SET",
+"yahooSymbol": "BCH.BK"
+},
+{
+"symbol": "BCP",
+"displayName": "บางจาก คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "BCP.BK"
+},
+{
+"symbol": "BCT",
+"displayName": "เบอร์ล่า คาร์บอน (ไทยแลนด์)",
+"market": "SET",
+"yahooSymbol": "BCT.BK"
+},
+{
+"symbol": "BDMS",
+"displayName": "กรุงเทพดุสิตเวชการ",
+"market": "SET",
+"yahooSymbol": "BDMS.BK"
+},
+{
+"symbol": "BEAUTY",
+"displayName": "บิวตี้ คอมมูนิตี้",
+"market": "SET",
+"yahooSymbol": "BEAUTY.BK"
+},
+{
+"symbol": "BEC",
+"displayName": "บีอีซี เวิลด์",
+"market": "SET",
+"yahooSymbol": "BEC.BK"
+},
+{
+"symbol": "BEM",
+"displayName": "ทางด่วนและรถไฟฟ้ากรุงเทพ",
+"market": "SET",
+"yahooSymbol": "BEM.BK"
+},
+{
+"symbol": "BFIT",
+"displayName": "บริษัทเงินทุน ศรีสวัสดิ์",
+"market": "SET",
+"yahooSymbol": "BFIT.BK"
+},
+{
+"symbol": "BGC",
+"displayName": "บีจี คอนเทนเนอร์ กล๊าส",
+"market": "SET",
+"yahooSymbol": "BGC.BK"
+},
+{
+"symbol": "BGRIM",
+"displayName": "บี.กริม เพาเวอร์",
+"market": "SET",
+"yahooSymbol": "BGRIM.BK"
+},
+{
+"symbol": "BH",
+"displayName": "โรงพยาบาลบำรุงราษฎร์",
+"market": "SET",
+"yahooSymbol": "BH.BK"
+},
+{
+"symbol": "BIG",
+"displayName": "บิ๊ก คาเมร่า คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "BIG.BK"
+},
+{
+"symbol": "BJC",
+"displayName": "เบอร์ลี่ ยุคเกอร์",
+"market": "SET",
+"yahooSymbol": "BJC.BK"
+},
+{
+"symbol": "BJCHI",
+"displayName": "บีเจซี เฮฟวี่ อินดัสทรี",
+"market": "SET",
+"yahooSymbol": "BJCHI.BK"
+},
+{
+"symbol": "BKD",
+"displayName": "บางกอก เดค-คอน",
+"market": "SET",
+"yahooSymbol": "BKD.BK"
+},
+{
+"symbol": "BKI",
+"displayName": "กรุงเทพประกันภัย",
+"market": "SET",
+"yahooSymbol": "BKI.BK"
+},
+{
+"symbol": "BLA",
+"displayName": "กรุงเทพประกันชีวิต",
+"market": "SET",
+"yahooSymbol": "BLA.BK"
+},
+{
+"symbol": "BOFFICE",
+"displayName": "ทรัสต์เพื่อการลงทุนในสิทธิการเช่าอสังหาริมทรัพย์ภิรัชออฟฟิศ",
+"market": "SET",
+"yahooSymbol": "BOFFICE.BK"
+},
+{
+"symbol": "BPP",
+"displayName": "บ้านปู เพาเวอร์",
+"market": "SET",
+"yahooSymbol": "BPP.BK"
+},
+{
+"symbol": "BR",
+"displayName": "บางกอกแร้นช์",
+"market": "SET",
+"yahooSymbol": "BR.BK"
+},
+{
+"symbol": "BROCK",
+"displayName": "บ้านร็อคการ์เด้น",
+"market": "SET",
+"yahooSymbol": "BROCK.BK"
+},
+{
+"symbol": "BRR",
+"displayName": "น้ำตาลบุรีรัมย์",
+"market": "SET",
+"yahooSymbol": "BRR.BK"
+},
+{
+"symbol": "BRRGIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐานโรงไฟฟ้ากลุ่มน้ำตาลบุรีรัมย์",
+"market": "SET",
+"yahooSymbol": "BRRGIF.BK"
+},
+{
+"symbol": "BSBM",
+"displayName": "บางสะพานบาร์มิล",
+"market": "SET",
+"yahooSymbol": "BSBM.BK"
+},
+{
+"symbol": "BTNC",
+"displayName": "บูติคนิวซิตี้",
+"market": "SET",
+"yahooSymbol": "BTNC.BK"
+},
+{
+"symbol": "BTS",
+"displayName": "บีทีเอส กรุ๊ป โฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "BTS.BK"
+},
+{
+"symbol": "BTSGIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐานระบบขนส่งมวลชนทางราง บีทีเอสโกรท",
+"market": "SET",
+"yahooSymbol": "BTSGIF.BK"
+},
+{
+"symbol": "BUI",
+"displayName": "บางกอกสหประกันภัย",
+"market": "SET",
+"yahooSymbol": "BUI.BK"
+},
+{
+"symbol": "BWG",
+"displayName": "เบตเตอร์ เวิลด์ กรีน",
+"market": "SET",
+"yahooSymbol": "BWG.BK"
+},
+{
+"symbol": "CBG",
+"displayName": "คาราบาวกรุ๊ป",
+"market": "SET",
+"yahooSymbol": "CBG.BK"
+},
+{
+"symbol": "CCET",
+"displayName": "แคล-คอมพ์ อีเล็คโทรนิคส์ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "CCET.BK"
+},
+{
+"symbol": "CCP",
+"displayName": "ผลิตภัณฑ์คอนกรีตชลบุรี",
+"market": "SET",
+"yahooSymbol": "CCP.BK"
+},
+{
+"symbol": "CEN",
+"displayName": "แคปปิทอล เอ็นจิเนียริ่ง เน็ตเวิร์ค",
+"market": "SET",
+"yahooSymbol": "CEN.BK"
+},
+{
+"symbol": "CENTEL",
+"displayName": "โรงแรมเซ็นทรัลพลาซา",
+"market": "SET",
+"yahooSymbol": "CENTEL.BK"
+},
+{
+"symbol": "CFRESH",
+"displayName": "ซีเฟรชอินดัสตรี",
+"market": "SET",
+"yahooSymbol": "CFRESH.BK"
+},
+{
+"symbol": "CGD",
+"displayName": "คันทรี่ กรุ๊ป ดีเวลลอปเมนท์",
+"market": "SET",
+"yahooSymbol": "CGD.BK"
+},
+{
+"symbol": "CGH",
+"displayName": "คันทรี่ กรุ๊ป โฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "CGH.BK"
+},
+{
+"symbol": "CHARAN",
+"displayName": "จรัญประกันภัย",
+"market": "SET",
+"yahooSymbol": "CHARAN.BK"
+},
+{
+"symbol": "CHG",
+"displayName": "โรงพยาบาลจุฬารัตน์",
+"market": "SET",
+"yahooSymbol": "CHG.BK"
+},
+{
+"symbol": "CHOTI",
+"displayName": "ห้องเย็นโชติวัฒน์หาดใหญ่",
+"market": "SET",
+"yahooSymbol": "CHOTI.BK"
+},
+{
+"symbol": "CI",
+"displayName": "ชาญอิสสระ ดีเวล็อปเมนท์",
+"market": "SET",
+"yahooSymbol": "CI.BK"
+},
+{
+"symbol": "CIMBT",
+"displayName": "ธนาคาร ซีไอเอ็มบี ไทย",
+"market": "SET",
+"yahooSymbol": "CIMBT.BK"
+},
+{
+"symbol": "CITY",
+"displayName": "ซิตี้ สตีล",
+"market": "SET",
+"yahooSymbol": "CITY.BK"
+},
+{
+"symbol": "CK",
+"displayName": "ช.การช่าง",
+"market": "SET",
+"yahooSymbol": "CK.BK"
+},
+{
+"symbol": "CKP",
+"displayName": "ซีเค พาวเวอร์",
+"market": "SET",
+"yahooSymbol": "CKP.BK"
+},
+{
+"symbol": "CM",
+"displayName": "เชียงใหม่โฟรเซ่นฟู้ดส์",
+"market": "SET",
+"yahooSymbol": "CM.BK"
+},
+{
+"symbol": "CMAN",
+"displayName": "เคมีแมน",
+"market": "SET",
+"yahooSymbol": "CMAN.BK"
+},
+{
+"symbol": "CMR",
+"displayName": "เชียงใหม่รามธุรกิจการแพทย์",
+"market": "SET",
+"yahooSymbol": "CMR.BK"
+},
+{
+"symbol": "CNS",
+"displayName": "บริษัทหลักทรัพย์ โนมูระ พัฒนสิน",
+"market": "SET",
+"yahooSymbol": "CNS.BK"
+},
+{
+"symbol": "CNT",
+"displayName": "คริสเตียนีและนีลเส็น (ไทย)",
+"market": "SET",
+"yahooSymbol": "CNT.BK"
+},
+{
+"symbol": "COL",
+"displayName": "ซีโอแอล",
+"market": "SET",
+"yahooSymbol": "COL.BK"
+},
+{
+"symbol": "COTTO",
+"displayName": "เอสซีจี เซรามิกส์",
+"market": "SET",
+"yahooSymbol": "COTTO.BK"
+},
+{
+"symbol": "CPALL",
+"displayName": "ซีพี ออลล์",
+"market": "SET",
+"yahooSymbol": "CPALL.BK"
+},
+{
+"symbol": "CPF",
+"displayName": "เจริญโภคภัณฑ์อาหาร",
+"market": "SET",
+"yahooSymbol": "CPF.BK"
+},
+{
+"symbol": "CPH",
+"displayName": "คาสเซ่อร์พีคโฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "CPH.BK"
+},
+{
+"symbol": "CPI",
+"displayName": "ชุมพรอุตสาหกรรมน้ำมันปาล์ม",
+"market": "SET",
+"yahooSymbol": "CPI.BK"
+},
+{
+"symbol": "CPL",
+"displayName": "ซีพีแอล กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "CPL.BK"
+},
+{
+"symbol": "CPN",
+"displayName": "เซ็นทรัลพัฒนา",
+"market": "SET",
+"yahooSymbol": "CPN.BK"
+},
+{
+"symbol": "CPNCG",
+"displayName": "กองทุนรวมสิทธิการเช่าอสังหาริมทรัพย์ CPN คอมเมอร์เชียล โกรท",
+"market": "SET",
+"yahooSymbol": "CPNCG.BK"
+},
+{
+"symbol": "CPNREIT",
+"displayName": "ทรัสต์เพื่อการลงทุนในสิทธิการเช่าอสังหาริมทรัพย์ CPN รีเทล โกรท",
+"market": "SET",
+"yahooSymbol": "CPNREIT.BK"
+},
+{
+"symbol": "CPT",
+"displayName": "ซีพีที ไดร์ แอนด์ เพาเวอร์",
+"market": "SET",
+"yahooSymbol": "CPT.BK"
+},
+{
+"symbol": "CPTGF",
+"displayName": "กองทุนรวมสิทธิการเช่าอสังหาริมทรัพย์ ซี.พี.ทาวเวอร์ โกรท",
+"market": "SET",
+"yahooSymbol": "CPTGF.BK"
+},
+{
+"symbol": "CPW",
+"displayName": "คอปเปอร์ ไวร์ด",
+"market": "SET",
+"yahooSymbol": "CPW.BK"
+},
+{
+"symbol": "CRANE",
+"displayName": "ชูไก",
+"market": "SET",
+"yahooSymbol": "CRANE.BK"
+},
+{
+"symbol": "CSC",
+"displayName": "ฝาจีบ",
+"market": "SET",
+"yahooSymbol": "CSC.BK"
+},
+{
+"symbol": "CSP",
+"displayName": "ซีเอสพี สตีลเซ็นเตอร์",
+"market": "SET",
+"yahooSymbol": "CSP.BK"
+},
+{
+"symbol": "CSR",
+"displayName": "เทพธานีกรีฑา",
+"market": "SET",
+"yahooSymbol": "CSR.BK"
+},
+{
+"symbol": "CSS",
+"displayName": "คอมมิวนิเคชั่น แอนด์ ซิสเต็มส์ โซลูชั่น",
+"market": "SET",
+"yahooSymbol": "CSS.BK"
+},
+{
+"symbol": "CTW",
+"displayName": "จรุงไทยไวร์แอนด์เคเบิ้ล",
+"market": "SET",
+"yahooSymbol": "CTW.BK"
+},
+{
+"symbol": "CWT",
+"displayName": "ชัยวัฒนา แทนเนอรี่ กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "CWT.BK"
+},
+{
+"symbol": "DCC",
+"displayName": "ไดนาสตี้เซรามิค",
+"market": "SET",
+"yahooSymbol": "DCC.BK"
+},
+{
+"symbol": "DCON",
+"displayName": "ดีคอนโปรดักส์",
+"market": "SET",
+"yahooSymbol": "DCON.BK"
+},
+{
+"symbol": "DDD",
+"displayName": "ดู เดย์ ดรีม",
+"market": "SET",
+"yahooSymbol": "DDD.BK"
+},
+{
+"symbol": "DELTA",
+"displayName": "บริษัทเดลต้า อีเลคโทรนิคส์ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "DELTA.BK"
+},
+{
+"symbol": "DEMCO",
+"displayName": "เด็มโก้",
+"market": "SET",
+"yahooSymbol": "DEMCO.BK"
+},
+{
+"symbol": "DIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐานโทรคมนาคม ดิจิทัล",
+"market": "SET",
+"yahooSymbol": "DIF.BK"
+},
+{
+"symbol": "DOHOME",
+"displayName": "ดูโฮม",
+"market": "SET",
+"yahooSymbol": "DOHOME.BK"
+},
+{
+"symbol": "DREIT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าดุสิตธานี",
+"market": "SET",
+"yahooSymbol": "DREIT.BK"
+},
+{
+"symbol": "DRT",
+"displayName": "ผลิตภัณฑ์ตราเพชร",
+"market": "SET",
+"yahooSymbol": "DRT.BK"
+},
+{
+"symbol": "DTCI",
+"displayName": "ดี.ที.ซี.อินดัสตรี่ส์",
+"market": "SET",
+"yahooSymbol": "DTCI.BK"
+},
+{
+"symbol": "EA",
+"displayName": "พลังงานบริสุทธิ์",
+"market": "SET",
+"yahooSymbol": "EA.BK"
+},
+{
+"symbol": "EASON",
+"displayName": "อีซึ่น เพ้นท์",
+"market": "SET",
+"yahooSymbol": "EASON.BK"
+},
+{
+"symbol": "EASTW",
+"displayName": "จัดการและพัฒนาทรัพยากรน้ำภาคตะวันออก",
+"market": "SET",
+"yahooSymbol": "EASTW.BK"
+},
+{
+"symbol": "ECL",
+"displayName": "ตะวันออกพาณิชย์ลีสซิ่ง",
+"market": "SET",
+"yahooSymbol": "ECL.BK"
+},
+{
+"symbol": "EE",
+"displayName": "อีเทอเนิล เอนเนอยี",
+"market": "SET",
+"yahooSymbol": "EE.BK"
+},
+{
+"symbol": "EGATIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐาน โรงไฟฟ้าพระนครเหนือ ชุดที่ 1 การไฟฟ้าฝ่ายผลิตแห่งประเท",
+"market": "SET",
+"yahooSymbol": "EGATIF.BK"
+},
+{
+"symbol": "EGCO",
+"displayName": "ผลิตไฟฟ้า",
+"market": "SET",
+"yahooSymbol": "EGCO.BK"
+},
+{
+"symbol": "EIC",
+"displayName": "อุตสาหกรรม อีเล็คโทรนิคส์",
+"market": "SET",
+"yahooSymbol": "EIC.BK"
+},
+{
+"symbol": "EKH",
+"displayName": "เอกชัยการแพทย์",
+"market": "SET",
+"yahooSymbol": "EKH.BK"
+},
+{
+"symbol": "EMC",
+"displayName": "อีเอ็มซี",
+"market": "SET",
+"yahooSymbol": "EMC.BK"
+},
+{
+"symbol": "EPCO",
+"displayName": "โรงพิมพ์ตะวันออก",
+"market": "SET",
+"yahooSymbol": "EPCO.BK"
+},
+{
+"symbol": "EPG",
+"displayName": "อีสเทิร์นโพลีเมอร์ กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "EPG.BK"
+},
+{
+"symbol": "ERW",
+"displayName": "ดิ เอราวัณ กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "ERW.BK"
+},
+{
+"symbol": "ERWPF",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์เอราวัณ โฮเทล โกรท",
+"market": "SET",
+"yahooSymbol": "ERWPF.BK"
+},
+{
+"symbol": "ESSO",
+"displayName": "เอสโซ่ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "ESSO.BK"
+},
+{
+"symbol": "ESTAR",
+"displayName": "อีสเทอร์น สตาร์ เรียล เอสเตท",
+"market": "SET",
+"yahooSymbol": "ESTAR.BK"
+},
+{
+"symbol": "EVER",
+"displayName": "เอเวอร์แลนด์",
+"market": "SET",
+"yahooSymbol": "EVER.BK"
+},
+{
+"symbol": "FANCY",
+"displayName": "แฟนซีวู๊ด อินดัสตรีส",
+"market": "SET",
+"yahooSymbol": "FANCY.BK"
+},
+{
+"symbol": "FE",
+"displayName": "ฟาร์อีสท์ เฟมไลน์ ดีดีบี",
+"market": "SET",
+"yahooSymbol": "FE.BK"
+},
+{
+"symbol": "FMT",
+"displayName": "ฟูรูกาวา เม็ททัล (ไทยแลนด์)",
+"market": "SET",
+"yahooSymbol": "FMT.BK"
+},
+{
+"symbol": "FN",
+"displayName": "เอฟเอ็น แฟคตอรี่ เอ๊าท์เลท",
+"market": "SET",
+"yahooSymbol": "FN.BK"
+},
+{
+"symbol": "FNS",
+"displayName": "ฟินันซ่า",
+"market": "SET",
+"yahooSymbol": "FNS.BK"
+},
+{
+"symbol": "FORTH",
+"displayName": "ฟอร์ท คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "FORTH.BK"
+},
+{
+"symbol": "FPT",
+"displayName": "เฟรเซอร์ส พร็อพเพอร์ตี้ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "FPT.BK"
+},
+{
+"symbol": "FSS",
+"displayName": "บริษัทหลักทรัพย์ ฟินันเซีย ไซรัส",
+"market": "SET",
+"yahooSymbol": "FSS.BK"
+},
+{
+"symbol": "FTE",
+"displayName": "ไฟร์เทรดเอ็นจิเนียริ่ง",
+"market": "SET",
+"yahooSymbol": "FTE.BK"
+},
+{
+"symbol": "FTREIT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าอสังหาริมทรัพย์เพื่ออุตสาหกรร",
+"market": "SET",
+"yahooSymbol": "FTREIT.BK"
+},
+{
+"symbol": "FUTUREPF",
+"displayName": "กองทุนรวมสิทธิการเช่าอสังหาริมทรัพย์ฟิวเจอร์พาร์ค",
+"market": "SET",
+"yahooSymbol": "FUTUREPF.BK"
+},
+{
+"symbol": "GAHREIT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์ แกรนด์ โฮสพีทาลิตี้",
+"market": "SET",
+"yahooSymbol": "GAHREIT.BK"
+},
+{
+"symbol": "GBX",
+"displayName": "โกลเบล็ก โฮลดิ้ง แมนเนจเม้นท์",
+"market": "SET",
+"yahooSymbol": "GBX.BK"
+},
+{
+"symbol": "GC",
+"displayName": "โกลบอล คอนเน็คชั่นส์",
+"market": "SET",
+"yahooSymbol": "GC.BK"
+},
+{
+"symbol": "GEL",
+"displayName": "เจนเนอรัล เอนจิเนียริ่ง",
+"market": "SET",
+"yahooSymbol": "GEL.BK"
+},
+{
+"symbol": "GENCO",
+"displayName": "บริษัทบริหารและพัฒนาเพื่อการอนุรักษ์สิ่งแวดล้อม",
+"market": "SET",
+"yahooSymbol": "GENCO.BK"
+},
+{
+"symbol": "GFPT",
+"displayName": "จีเอฟพีที",
+"market": "SET",
+"yahooSymbol": "GFPT.BK"
+},
+{
+"symbol": "GGC",
+"displayName": "โกลบอลกรีนเคมิคอล",
+"market": "SET",
+"yahooSymbol": "GGC.BK"
+},
+{
+"symbol": "GIFT",
+"displayName": "แกรททิทูด อินฟินิท",
+"market": "SET",
+"yahooSymbol": "GIFT.BK"
+},
+{
+"symbol": "GJS",
+"displayName": "จี เจ สตีล",
+"market": "SET",
+"yahooSymbol": "GJS.BK"
+},
+{
+"symbol": "GL",
+"displayName": "กรุ๊ปลีส",
+"market": "SET",
+"yahooSymbol": "GL.BK"
+},
+{
+"symbol": "GLAND",
+"displayName": "แกรนด์ คาแนล แลนด์",
+"market": "SET",
+"yahooSymbol": "GLAND.BK"
+},
+{
+"symbol": "GLOBAL",
+"displayName": "สยามโกลบอลเฮ้าส์",
+"market": "SET",
+"yahooSymbol": "GLOBAL.BK"
+},
+{
+"symbol": "GLOCON",
+"displayName": "โกลบอล คอนซูเมอร์",
+"market": "SET",
+"yahooSymbol": "GLOCON.BK"
+},
+{
+"symbol": "GPI",
+"displayName": "กรังด์ปรีซ์ อินเตอร์เนชั่นแนล",
+"market": "SET",
+"yahooSymbol": "GPI.BK"
+},
+{
+"symbol": "GRAMMY",
+"displayName": "จีเอ็มเอ็ม แกรมมี่",
+"market": "SET",
+"yahooSymbol": "GRAMMY.BK"
+},
+{
+"symbol": "GRAND",
+"displayName": "แกรนด์ แอสเสท โฮเทลส์ แอนด์ พรอพเพอร์ตี้",
+"market": "SET",
+"yahooSymbol": "GRAND.BK"
+},
+{
+"symbol": "GREEN",
+"displayName": "กรีน รีซอร์สเซส",
+"market": "SET",
+"yahooSymbol": "GREEN.BK"
+},
+{
+"symbol": "GSTEEL",
+"displayName": "จี สตีล",
+"market": "SET",
+"yahooSymbol": "GSTEEL.BK"
+},
+{
+"symbol": "GULF",
+"displayName": "กัลฟ์ เอ็นเนอร์จี ดีเวลลอปเมนท์",
+"market": "SET",
+"yahooSymbol": "GULF.BK"
+},
+{
+"symbol": "GUNKUL",
+"displayName": "กันกุลเอ็นจิเนียริ่ง",
+"market": "SET",
+"yahooSymbol": "GUNKUL.BK"
+},
+{
+"symbol": "GVREIT",
+"displayName": "ทรัสต์เพื่อการลงทุนในสิทธิการเช่าอสังหาริมทรัพย์โกลเด้นเวนเจอร์",
+"market": "SET",
+"yahooSymbol": "GVREIT.BK"
+},
+{
+"symbol": "GYT",
+"displayName": "กู๊ดเยียร์(ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "GYT.BK"
+},
+{
+"symbol": "HANA",
+"displayName": "ฮานา ไมโครอิเล็คโทรนิคส",
+"market": "SET",
+"yahooSymbol": "HANA.BK"
+},
+{
+"symbol": "HFT",
+"displayName": "ฮั้วฟง รับเบอร์ (ไทยแลนด์)",
+"market": "SET",
+"yahooSymbol": "HFT.BK"
+},
+{
+"symbol": "HMPRO",
+"displayName": "โฮม โปรดักส์ เซ็นเตอร์",
+"market": "SET",
+"yahooSymbol": "HMPRO.BK"
+},
+{
+"symbol": "HPF",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์และสิทธิการเช่าเหมราชอินดัสเตรียล",
+"market": "SET",
+"yahooSymbol": "HPF.BK"
+},
+{
+"symbol": "HREIT",
+"displayName": "ทรัสต์เพื่อการลงทุนในสิทธิการเช่าอสังหาริมทรัพย์เหมราช",
+"market": "SET",
+"yahooSymbol": "HREIT.BK"
+},
+{
+"symbol": "HTC",
+"displayName": "หาดทิพย์",
+"market": "SET",
+"yahooSymbol": "HTC.BK"
+},
+{
+"symbol": "HTECH",
+"displayName": "แฮลเซี่ยน เทคโนโลยี่",
+"market": "SET",
+"yahooSymbol": "HTECH.BK"
+},
+{
+"symbol": "HUMAN",
+"displayName": "ฮิวแมนิก้า",
+"market": "SET",
+"yahooSymbol": "HUMAN.BK"
+},
+{
+"symbol": "ICC",
+"displayName": "ไอ.ซี.ซี. อินเตอร์เนชั่นแนล",
+"market": "SET",
+"yahooSymbol": "ICC.BK"
+},
+{
+"symbol": "ICHI",
+"displayName": "อิชิตัน กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "ICHI.BK"
+},
+{
+"symbol": "IFEC",
+"displayName": "อินเตอร์ ฟาร์อีสท์ เอ็นเนอร์ยี่ คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "IFEC.BK"
+},
+{
+"symbol": "IFS",
+"displayName": "ไอเอฟเอส แคปปิตอล (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "IFS.BK"
+},
+{
+"symbol": "IHL",
+"displayName": "อินเตอร์ไฮด์",
+"market": "SET",
+"yahooSymbol": "IHL.BK"
+},
+{
+"symbol": "III",
+"displayName": "ทริพเพิล ไอ โลจิสติกส์",
+"market": "SET",
+"yahooSymbol": "III.BK"
+},
+{
+"symbol": "ILINK",
+"displayName": "อินเตอร์ลิ้งค์ คอมมิวนิเคชั่น",
+"market": "SET",
+"yahooSymbol": "ILINK.BK"
+},
+{
+"symbol": "ILM",
+"displayName": "อินเด็กซ์ ลิฟวิ่งมอลล์",
+"market": "SET",
+"yahooSymbol": "ILM.BK"
+},
+{
+"symbol": "IMPACT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์อิมแพ็คโกรท",
+"market": "SET",
+"yahooSymbol": "IMPACT.BK"
+},
+{
+"symbol": "INET",
+"displayName": "อินเทอร์เน็ตประเทศไทย",
+"market": "SET",
+"yahooSymbol": "INET.BK"
+},
+{
+"symbol": "INGRS",
+"displayName": "อิงเกรส อินดัสเตรียล (ไทยแลนด์)",
+"market": "SET",
+"yahooSymbol": "INGRS.BK"
+},
+{
+"symbol": "INOX",
+"displayName": "โพสโค-ไทยน๊อคซ์",
+"market": "SET",
+"yahooSymbol": "INOX.BK"
+},
+{
+"symbol": "INSURE",
+"displayName": "อินทรประกันภัย",
+"market": "SET",
+"yahooSymbol": "INSURE.BK"
+},
+{
+"symbol": "INTUCH",
+"displayName": "อินทัช โฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "INTUCH.BK"
+},
+{
+"symbol": "IRC",
+"displayName": "อีโนเว รับเบอร์ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "IRC.BK"
+},
+{
+"symbol": "IRPC",
+"displayName": "ไออาร์พีซี",
+"market": "SET",
+"yahooSymbol": "IRPC.BK"
+},
+{
+"symbol": "IT",
+"displayName": "ไอที ซิตี้",
+"market": "SET",
+"yahooSymbol": "IT.BK"
+},
+{
+"symbol": "ITD",
+"displayName": "อิตาเลียนไทย ดีเวล๊อปเมนต์",
+"market": "SET",
+"yahooSymbol": "ITD.BK"
+},
+{
+"symbol": "IVL",
+"displayName": "อินโดรามา เวนเจอร์ส",
+"market": "SET",
+"yahooSymbol": "IVL.BK"
+},
+{
+"symbol": "J",
+"displayName": "เจเอเอส แอสเซ็ท",
+"market": "SET",
+"yahooSymbol": "J.BK"
+},
+{
+"symbol": "JAS",
+"displayName": "บริษัทจัสมิน อินเตอร์เนชั่นแนล",
+"market": "SET",
+"yahooSymbol": "JAS.BK"
+},
+{
+"symbol": "JASIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐานบรอดแบนด์อินเทอร์เน็ต จัสมิน",
+"market": "SET",
+"yahooSymbol": "JASIF.BK"
+},
+{
+"symbol": "JCK",
+"displayName": "เจซีเค อินเตอร์เนชั่นแนล",
+"market": "SET",
+"yahooSymbol": "JCK.BK"
+},
+{
+"symbol": "JCT",
+"displayName": "แจ๊กเจียอุตสาหกรรม (ไทย)",
+"market": "SET",
+"yahooSymbol": "JCT.BK"
+},
+{
+"symbol": "JMART",
+"displayName": "เจ มาร์ท",
+"market": "SET",
+"yahooSymbol": "JMART.BK"
+},
+{
+"symbol": "JMT",
+"displayName": "เจ เอ็ม ที เน็ทเวอร์ค เซอร์วิสเซ็ส",
+"market": "SET",
+"yahooSymbol": "JMT.BK"
+},
+{
+"symbol": "JTS",
+"displayName": "จัสมิน เทเลคอม ซิสเต็มส์",
+"market": "SET",
+"yahooSymbol": "JTS.BK"
+},
+{
+"symbol": "JUTHA",
+"displayName": "จุฑานาวี",
+"market": "SET",
+"yahooSymbol": "JUTHA.BK"
+},
+{
+"symbol": "JWD",
+"displayName": "เจดับเบิ้ลยูดี อินโฟโลจิสติกส์",
+"market": "SET",
+"yahooSymbol": "JWD.BK"
+},
+{
+"symbol": "KAMART",
+"displayName": "คาร์มาร์ท",
+"market": "SET",
+"yahooSymbol": "KAMART.BK"
+},
+{
+"symbol": "KBANK",
+"displayName": "ธนาคารกสิกรไทย",
+"market": "SET",
+"yahooSymbol": "KBANK.BK"
+},
+{
+"symbol": "KBS",
+"displayName": "น้ำตาลครบุรี",
+"market": "SET",
+"yahooSymbol": "KBS.BK"
+},
+{
+"symbol": "KCAR",
+"displayName": "กรุงไทยคาร์เร้นท์ แอนด์ ลีส",
+"market": "SET",
+"yahooSymbol": "KCAR.BK"
+},
+{
+"symbol": "KCE",
+"displayName": "เคซีอี อีเลคโทรนิคส์",
+"market": "SET",
+"yahooSymbol": "KCE.BK"
+},
+{
+"symbol": "KDH",
+"displayName": "ธนบุรี เมดิเคิล เซ็นเตอร์",
+"market": "SET",
+"yahooSymbol": "KDH.BK"
+},
+{
+"symbol": "KGI",
+"displayName": "บริษัทหลักทรัพย์ เคจีไอ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "KGI.BK"
+},
+{
+"symbol": "KKC",
+"displayName": "กุลธรเคอร์บี้",
+"market": "SET",
+"yahooSymbol": "KKC.BK"
+},
+{
+"symbol": "KKP",
+"displayName": "ธนาคารเกียรตินาคิน",
+"market": "SET",
+"yahooSymbol": "KKP.BK"
+},
+{
+"symbol": "KSL",
+"displayName": "น้ำตาลขอนแก่น",
+"market": "SET",
+"yahooSymbol": "KSL.BK"
+},
+{
+"symbol": "KTB",
+"displayName": "ธนาคารกรุงไทย",
+"market": "SET",
+"yahooSymbol": "KTB.BK"
+},
+{
+"symbol": "KTC",
+"displayName": "บัตรกรุงไทย",
+"market": "SET",
+"yahooSymbol": "KTC.BK"
+},
+{
+"symbol": "KTECH",
+"displayName": "เคเทค คอนสตรัคชั่น",
+"market": "SET",
+"yahooSymbol": "KTECH.BK"
+},
+{
+"symbol": "KWC",
+"displayName": "กรุงเทพโสภณ",
+"market": "SET",
+"yahooSymbol": "KWC.BK"
+},
+{
+"symbol": "KWG",
+"displayName": "คิง ไว กรุ๊ป (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "KWG.BK"
+},
+{
+"symbol": "KYE",
+"displayName": "กันยงอีเลคทริก",
+"market": "SET",
+"yahooSymbol": "KYE.BK"
+},
+{
+"symbol": "L&E",
+"displayName": "ไลท์ติ้ง แอนด์ อีควิปเมนท์",
+"market": "SET",
+"yahooSymbol": "L&E.BK"
+},
+{
+"symbol": "LALIN",
+"displayName": "ลลิล พร็อพเพอร์ตี้",
+"market": "SET",
+"yahooSymbol": "LALIN.BK"
+},
+{
+"symbol": "LANNA",
+"displayName": "ลานนารีซอร์สเซส",
+"market": "SET",
+"yahooSymbol": "LANNA.BK"
+},
+{
+"symbol": "LEE",
+"displayName": "ลีพัฒนาผลิตภัณฑ์",
+"market": "SET",
+"yahooSymbol": "LEE.BK"
+},
+{
+"symbol": "LH",
+"displayName": "บริษัทแลนด์แอนด์เฮ้าส์",
+"market": "SET",
+"yahooSymbol": "LH.BK"
+},
+{
+"symbol": "LHFG",
+"displayName": "แอล เอช ไฟแนนซ์เชียล กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "LHFG.BK"
+},
+{
+"symbol": "LHHOTEL",
+"displayName": "ทรัสต์เพื่อการลงทุนในสิทธิการเช่าอสังหาริมทรัพย์ แอล เอช โฮเทล",
+"market": "SET",
+"yahooSymbol": "LHHOTEL.BK"
+},
+{
+"symbol": "LHK",
+"displayName": "โลหะกิจ เม็ททอล",
+"market": "SET",
+"yahooSymbol": "LHK.BK"
+},
+{
+"symbol": "LHSC",
+"displayName": "ทรัสต์เพื่อการลงทุนในสิทธิการเช่าอสังหาริมทรัพย์ แอล เอช ช้อปปิ้ง เซ็นเตอร์",
+"market": "SET",
+"yahooSymbol": "LHSC.BK"
+},
+{
+"symbol": "LOXLEY",
+"displayName": "ล็อกซเล่ย์",
+"market": "SET",
+"yahooSymbol": "LOXLEY.BK"
+},
+{
+"symbol": "LPH",
+"displayName": "โรงพยาบาล ลาดพร้าว",
+"market": "SET",
+"yahooSymbol": "LPH.BK"
+},
+{
+"symbol": "LPN",
+"displayName": "แอล.พี.เอ็น.ดีเวลลอปเมนท์",
+"market": "SET",
+"yahooSymbol": "LPN.BK"
+},
+{
+"symbol": "LRH",
+"displayName": "ลากูน่า รีสอร์ท แอนด์ โฮเท็ล",
+"market": "SET",
+"yahooSymbol": "LRH.BK"
+},
+{
+"symbol": "LST",
+"displayName": "ล่ำสูง (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "LST.BK"
+},
+{
+"symbol": "LUXF",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์ลักซ์ชัวรี่",
+"market": "SET",
+"yahooSymbol": "LUXF.BK"
+},
+{
+"symbol": "M",
+"displayName": "เอ็มเค เรสโตรองต์ กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "M.BK"
+},
+{
+"symbol": "M-CHAI",
+"displayName": "โรงพยาบาลมหาชัย",
+"market": "SET",
+"yahooSymbol": "M-CHAI.BK"
+},
+{
+"symbol": "M-II",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์ และสิทธิการเช่า เอ็มเอฟซี อินดัสเตรียล อินเวสเมนท์",
+"market": "SET",
+"yahooSymbol": "M-II.BK"
+},
+{
+"symbol": "M-PAT",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์เอ็มเอฟซี ป่าตอง เฮอริเทจ",
+"market": "SET",
+"yahooSymbol": "M-PAT.BK"
+},
+{
+"symbol": "M-STOR",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์เอ็มเอฟซี-สแตรทิจิกสโตเรจฟันด์",
+"market": "SET",
+"yahooSymbol": "M-STOR.BK"
+},
+{
+"symbol": "MACO",
+"displayName": "มาสเตอร์ แอด",
+"market": "SET",
+"yahooSymbol": "MACO.BK"
+},
+{
+"symbol": "MAJOR",
+"displayName": "เมเจอร์ ซีนีเพล็กซ์ กรุ้ป",
+"market": "SET",
+"yahooSymbol": "MAJOR.BK"
+},
+{
+"symbol": "MAKRO",
+"displayName": "สยามแม็คโคร",
+"market": "SET",
+"yahooSymbol": "MAKRO.BK"
+},
+{
+"symbol": "MALEE",
+"displayName": "มาลีกรุ๊ป",
+"market": "SET",
+"yahooSymbol": "MALEE.BK"
+},
+{
+"symbol": "MANRIN",
+"displayName": "แมนดารินโฮเต็ล",
+"market": "SET",
+"yahooSymbol": "MANRIN.BK"
+},
+{
+"symbol": "MATCH",
+"displayName": "แม็ทชิ่ง แม็กซิไมซ์ โซลูชั่น",
+"market": "SET",
+"yahooSymbol": "MATCH.BK"
+},
+{
+"symbol": "MATI",
+"displayName": "มติชน",
+"market": "SET",
+"yahooSymbol": "MATI.BK"
+},
+{
+"symbol": "MAX",
+"displayName": "แมกซ์ เมทัล คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "MAX.BK"
+},
+{
+"symbol": "MBK",
+"displayName": "เอ็ม บี เค",
+"market": "SET",
+"yahooSymbol": "MBK.BK"
+},
+{
+"symbol": "MBKET",
+"displayName": "บริษัทหลักทรัพย์ เมย์แบงก์ กิมเอ็ง (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "MBKET.BK"
+},
+{
+"symbol": "MC",
+"displayName": "แม็คกรุ๊ป",
+"market": "SET",
+"yahooSymbol": "MC.BK"
+},
+{
+"symbol": "MCOT",
+"displayName": "อสมท",
+"market": "SET",
+"yahooSymbol": "MCOT.BK"
+},
+{
+"symbol": "MCS",
+"displayName": "เอ็ม.ซี.เอส.สตีล",
+"market": "SET",
+"yahooSymbol": "MCS.BK"
+},
+{
+"symbol": "MDX",
+"displayName": "เอ็ม ดี เอ็กซ์",
+"market": "SET",
+"yahooSymbol": "MDX.BK"
+},
+{
+"symbol": "MEGA",
+"displayName": "เมก้า ไลฟ์ไซแอ็นซ์",
+"market": "SET",
+"yahooSymbol": "MEGA.BK"
+},
+{
+"symbol": "METCO",
+"displayName": "บริษัทมูราโมโต้ อีเล็คตรอน (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "METCO.BK"
+},
+{
+"symbol": "MFC",
+"displayName": "บริษัทหลักทรัพย์จัดการกองทุน เอ็มเอฟซี",
+"market": "SET",
+"yahooSymbol": "MFC.BK"
+},
+{
+"symbol": "MFEC",
+"displayName": "เอ็ม เอฟ อี ซี",
+"market": "SET",
+"yahooSymbol": "MFEC.BK"
+},
+{
+"symbol": "MIDA",
+"displayName": "ไมด้า แอสเซ็ท",
+"market": "SET",
+"yahooSymbol": "MIDA.BK"
+},
+{
+"symbol": "MILL",
+"displayName": "มิลล์คอน สตีล",
+"market": "SET",
+"yahooSymbol": "MILL.BK"
+},
+{
+"symbol": "MINT",
+"displayName": "ไมเนอร์ อินเตอร์เนชั่นแนล",
+"market": "SET",
+"yahooSymbol": "MINT.BK"
+},
+{
+"symbol": "MIT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์เอ็มเอฟซีอินดัสเตรียล",
+"market": "SET",
+"yahooSymbol": "MIT.BK"
+},
+{
+"symbol": "MJD",
+"displayName": "เมเจอร์ ดีเวลลอปเม้นท์",
+"market": "SET",
+"yahooSymbol": "MJD.BK"
+},
+{
+"symbol": "MK",
+"displayName": "มั่นคงเคหะการ",
+"market": "SET",
+"yahooSymbol": "MK.BK"
+},
+{
+"symbol": "ML",
+"displayName": "ไมด้า ลิสซิ่ง",
+"market": "SET",
+"yahooSymbol": "ML.BK"
+},
+{
+"symbol": "MNIT2",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์นิชดาธานี 2",
+"market": "SET",
+"yahooSymbol": "MNIT2.BK"
+},
+{
+"symbol": "MNRF",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์มัลติเนชั่นแนลเรสซิเดนซ์ฟันด์",
+"market": "SET",
+"yahooSymbol": "MNRF.BK"
+},
+{
+"symbol": "MODERN",
+"displayName": "โมเดอร์นฟอร์มกรุ๊ป",
+"market": "SET",
+"yahooSymbol": "MODERN.BK"
+},
+{
+"symbol": "MONO",
+"displayName": "โมโน เทคโนโลยี",
+"market": "SET",
+"yahooSymbol": "MONO.BK"
+},
+{
+"symbol": "MPIC",
+"displayName": "เอ็ม พิคเจอร์ส เอ็นเตอร์เทนเม้นท์",
+"market": "SET",
+"yahooSymbol": "MPIC.BK"
+},
+{
+"symbol": "MSC",
+"displayName": "เมโทรซิสเต็มส์คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "MSC.BK"
+},
+{
+"symbol": "MTC",
+"displayName": "เมืองไทย แคปปิตอล",
+"market": "SET",
+"yahooSymbol": "MTC.BK"
+},
+{
+"symbol": "MTI",
+"displayName": "เมืองไทยประกันภัย",
+"market": "SET",
+"yahooSymbol": "MTI.BK"
+},
+{
+"symbol": "NC",
+"displayName": "นิวซิตี้ (กรุงเทพฯ)",
+"market": "SET",
+"yahooSymbol": "NC.BK"
+},
+{
+"symbol": "NCH",
+"displayName": "เอ็น. ซี. เฮ้าส์ซิ่ง",
+"market": "SET",
+"yahooSymbol": "NCH.BK"
+},
+{
+"symbol": "NEP",
+"displayName": "เอ็นอีพี อสังหาริมทรัพย์ และอุตสาหกรรม",
+"market": "SET",
+"yahooSymbol": "NEP.BK"
+},
+{
+"symbol": "NER",
+"displayName": "นอร์ทอีส รับเบอร์",
+"market": "SET",
+"yahooSymbol": "NER.BK"
+},
+{
+"symbol": "NEW",
+"displayName": "วัฒนาการแพทย์",
+"market": "SET",
+"yahooSymbol": "NEW.BK"
+},
+{
+"symbol": "NEX",
+"displayName": "เน็กซ์ พอยท์",
+"market": "SET",
+"yahooSymbol": "NEX.BK"
+},
+{
+"symbol": "NFC",
+"displayName": "เอ็นเอฟซี",
+"market": "SET",
+"yahooSymbol": "NFC.BK"
+},
+{
+"symbol": "NKI",
+"displayName": "นวกิจประกันภัย",
+"market": "SET",
+"yahooSymbol": "NKI.BK"
+},
+{
+"symbol": "NNCL",
+"displayName": "นวนคร",
+"market": "SET",
+"yahooSymbol": "NNCL.BK"
+},
+{
+"symbol": "NOBLE",
+"displayName": "โนเบิล ดีเวลลอปเมนท์",
+"market": "SET",
+"yahooSymbol": "NOBLE.BK"
+},
+{
+"symbol": "NOK",
+"displayName": "สายการบินนกแอร์",
+"market": "SET",
+"yahooSymbol": "NOK.BK"
+},
+{
+"symbol": "NSI",
+"displayName": "บริษัทนำสินประกันภัย",
+"market": "SET",
+"yahooSymbol": "NSI.BK"
+},
+{
+"symbol": "NTV",
+"displayName": "โรงพยาบาลนนทเวช",
+"market": "SET",
+"yahooSymbol": "NTV.BK"
+},
+{
+"symbol": "NVD",
+"displayName": "เนอวานา ไดอิ",
+"market": "SET",
+"yahooSymbol": "NVD.BK"
+},
+{
+"symbol": "NWR",
+"displayName": "บริษัทเนาวรัตน์พัฒนาการ",
+"market": "SET",
+"yahooSymbol": "NWR.BK"
+},
+{
+"symbol": "NYT",
+"displayName": "นามยง เทอร์มินัล",
+"market": "SET",
+"yahooSymbol": "NYT.BK"
+},
+{
+"symbol": "OCC",
+"displayName": "โอ ซี ซี",
+"market": "SET",
+"yahooSymbol": "OCC.BK"
+},
+{
+"symbol": "OGC",
+"displayName": "โอเชียนกลาส",
+"market": "SET",
+"yahooSymbol": "OGC.BK"
+},
+{
+"symbol": "OHTL",
+"displayName": "โอเอชทีแอล",
+"market": "SET",
+"yahooSymbol": "OHTL.BK"
+},
+{
+"symbol": "OISHI",
+"displayName": "โออิชิ กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "OISHI.BK"
+},
+{
+"symbol": "ORI",
+"displayName": "ออริจิ้น พร็อพเพอร์ตี้",
+"market": "SET",
+"yahooSymbol": "ORI.BK"
+},
+{
+"symbol": "OSP",
+"displayName": "โอสถสภา",
+"market": "SET",
+"yahooSymbol": "OSP.BK"
+},
+{
+"symbol": "PACE",
+"displayName": "เพซ ดีเวลลอปเมนท์ คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "PACE.BK"
+},
+{
+"symbol": "PAE",
+"displayName": "พีเออี (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "PAE.BK"
+},
+{
+"symbol": "PAF",
+"displayName": "แพนเอเซียฟุตแวร์",
+"market": "SET",
+"yahooSymbol": "PAF.BK"
+},
+{
+"symbol": "PAP",
+"displayName": "แปซิฟิกไพพ์",
+"market": "SET",
+"yahooSymbol": "PAP.BK"
+},
+{
+"symbol": "PATO",
+"displayName": "พาโตเคมีอุตสาหกรรม",
+"market": "SET",
+"yahooSymbol": "PATO.BK"
+},
+{
+"symbol": "PB",
+"displayName": "เพรซิเดนท์ เบเกอรี่",
+"market": "SET",
+"yahooSymbol": "PB.BK"
+},
+{
+"symbol": "PCSGH",
+"displayName": "พี.ซี.เอส.แมชีน กรุ๊ปโฮลดิ้ง",
+"market": "SET",
+"yahooSymbol": "PCSGH.BK"
+},
+{
+"symbol": "PDI",
+"displayName": "ผาแดงอินดัสทรี",
+"market": "SET",
+"yahooSymbol": "PDI.BK"
+},
+{
+"symbol": "PDJ",
+"displayName": "แพรนด้า จิวเวลรี่",
+"market": "SET",
+"yahooSymbol": "PDJ.BK"
+},
+{
+"symbol": "PE",
+"displayName": "พรีเมียร์เอ็นเตอร์ไพรซ์",
+"market": "SET",
+"yahooSymbol": "PE.BK"
+},
+{
+"symbol": "PERM",
+"displayName": "เพิ่มสินสตีลเวิคส์",
+"market": "SET",
+"yahooSymbol": "PERM.BK"
+},
+{
+"symbol": "PF",
+"displayName": "พร็อพเพอร์ตี้ เพอร์เฟค",
+"market": "SET",
+"yahooSymbol": "PF.BK"
+},
+{
+"symbol": "PG",
+"displayName": "ประชาอาภรณ์",
+"market": "SET",
+"yahooSymbol": "PG.BK"
+},
+{
+"symbol": "PK",
+"displayName": "พัฒน์กล",
+"market": "SET",
+"yahooSymbol": "PK.BK"
+},
+{
+"symbol": "PL",
+"displayName": "ภัทรลิสซิ่ง",
+"market": "SET",
+"yahooSymbol": "PL.BK"
+},
+{
+"symbol": "PLANB",
+"displayName": "แพลน บี มีเดีย",
+"market": "SET",
+"yahooSymbol": "PLANB.BK"
+},
+{
+"symbol": "PLAT",
+"displayName": "เดอะ แพลทินัม กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "PLAT.BK"
+},
+{
+"symbol": "PLE",
+"displayName": "เพาเวอร์ไลน์ เอ็นจิเนียริ่ง",
+"market": "SET",
+"yahooSymbol": "PLE.BK"
+},
+{
+"symbol": "PM",
+"displayName": "พรีเมียร์ มาร์เก็ตติ้ง",
+"market": "SET",
+"yahooSymbol": "PM.BK"
+},
+{
+"symbol": "PMTA",
+"displayName": "พีเอ็ม โทรีเซน เอเชีย โฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "PMTA.BK"
+},
+{
+"symbol": "POLAR",
+"displayName": "โพลาริส แคปปิตัล",
+"market": "SET",
+"yahooSymbol": "POLAR.BK"
+},
+{
+"symbol": "POMPUI",
+"displayName": "ผลิตภัณฑ์อาหารกว้างไพศาล",
+"market": "SET",
+"yahooSymbol": "POMPUI.BK"
+},
+{
+"symbol": "POPF",
+"displayName": "กองทุนรวมสิทธิการเช่าอสังหาริมทรัพย์ไพร์มออฟฟิศ",
+"market": "SET",
+"yahooSymbol": "POPF.BK"
+},
+{
+"symbol": "PORT",
+"displayName": "สหไทย เทอร์มินอล",
+"market": "SET",
+"yahooSymbol": "PORT.BK"
+},
+{
+"symbol": "POST",
+"displayName": "บางกอก โพสต์",
+"market": "SET",
+"yahooSymbol": "POST.BK"
+},
+{
+"symbol": "PPF",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์ปิ่นทอง อินดัสเตรียล ปาร์ค",
+"market": "SET",
+"yahooSymbol": "PPF.BK"
+},
+{
+"symbol": "PPP",
+"displayName": "พรีเมียร์ โพรดักส์",
+"market": "SET",
+"yahooSymbol": "PPP.BK"
+},
+{
+"symbol": "PPPM",
+"displayName": "พีพี ไพร์ม",
+"market": "SET",
+"yahooSymbol": "PPPM.BK"
+},
+{
+"symbol": "PR9",
+"displayName": "โรงพยาบาลพระรามเก้า",
+"market": "SET",
+"yahooSymbol": "PR9.BK"
+},
+{
+"symbol": "PRAKIT",
+"displayName": "ประกิต โฮลดิ้งส์",
+"market": "SET",
+"yahooSymbol": "PRAKIT.BK"
+},
+{
+"symbol": "PREB",
+"displayName": "พรีบิลท์",
+"market": "SET",
+"yahooSymbol": "PREB.BK"
+},
+{
+"symbol": "PRECHA",
+"displayName": "ปรีชากรุ๊ป",
+"market": "SET",
+"yahooSymbol": "PRECHA.BK"
+},
+{
+"symbol": "PRG",
+"displayName": "ปทุมไรซมิล แอนด์ แกรนารี",
+"market": "SET",
+"yahooSymbol": "PRG.BK"
+},
+{
+"symbol": "PRIME",
+"displayName": "ไพร์ม โรด เพาเวอร์",
+"market": "SET",
+"yahooSymbol": "PRIME.BK"
+},
+{
+"symbol": "PRINC",
+"displayName": "พริ้นซิเพิล แคปิตอล",
+"market": "SET",
+"yahooSymbol": "PRINC.BK"
+},
+{
+"symbol": "PRM",
+"displayName": "พริมา มารีน",
+"market": "SET",
+"yahooSymbol": "PRM.BK"
+},
+{
+"symbol": "PRO",
+"displayName": "โปรเฟสชั่นแนล เวสต์ เทคโนโลยี (1999)",
+"market": "SET",
+"yahooSymbol": "PRO.BK"
+},
+{
+"symbol": "PSH",
+"displayName": "พฤกษา โฮลดิ้ง",
+"market": "SET",
+"yahooSymbol": "PSH.BK"
+},
+{
+"symbol": "PSL",
+"displayName": "พรีเชียส ชิพปิ้ง",
+"market": "SET",
+"yahooSymbol": "PSL.BK"
+},
+{
+"symbol": "PT",
+"displayName": "พรีเมียร์ เทคโนโลยี",
+"market": "SET",
+"yahooSymbol": "PT.BK"
+},
+{
+"symbol": "PTG",
+"displayName": "พีทีจี เอ็นเนอยี",
+"market": "SET",
+"yahooSymbol": "PTG.BK"
+},
+{
+"symbol": "PTL",
+"displayName": "โพลีเพล็กซ์ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "PTL.BK"
+},
+{
+"symbol": "PTT",
+"displayName": "ปตท.",
+"market": "SET",
+"yahooSymbol": "PTT.BK"
+},
+{
+"symbol": "PTTEP",
+"displayName": "ปตท. สำรวจและผลิตปิโตรเลียม",
+"market": "SET",
+"yahooSymbol": "PTTEP.BK"
+},
+{
+"symbol": "PTTGC",
+"displayName": "พีทีที โกลบอล เคมิคอล",
+"market": "SET",
+"yahooSymbol": "PTTGC.BK"
+},
+{
+"symbol": "PYLON",
+"displayName": "ไพลอน",
+"market": "SET",
+"yahooSymbol": "PYLON.BK"
+},
+{
+"symbol": "Q-CON",
+"displayName": "ควอลิตี้คอนสตรัคชั่นโปรดัคส์",
+"market": "SET",
+"yahooSymbol": "Q-CON.BK"
+},
+{
+"symbol": "QHPF",
+"displayName": "กองทุนรวมสิทธิการเช่าอสังหาริมทรัพย์ควอลิตี้ เฮ้าส์",
+"market": "SET",
+"yahooSymbol": "QHPF.BK"
+},
+{
+"symbol": "RAM",
+"displayName": "โรงพยาบาลรามคำแหง",
+"market": "SET",
+"yahooSymbol": "RAM.BK"
+},
+{
+"symbol": "RATCH",
+"displayName": "ราช กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "RATCH.BK"
+},
+{
+"symbol": "RBF",
+"displayName": "อาร์ แอนด์ บี ฟู้ด ซัพพลาย",
+"market": "SET",
+"yahooSymbol": "RBF.BK"
+},
+{
+"symbol": "RCL",
+"displayName": "อาร์ ซี แอล",
+"market": "SET",
+"yahooSymbol": "RCL.BK"
+},
+{
+"symbol": "RICH",
+"displayName": "ริช เอเชีย คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "RICH.BK"
+},
+{
+"symbol": "RICHY",
+"displayName": "ริชี่ เพลซ 2002",
+"market": "SET",
+"yahooSymbol": "RICHY.BK"
+},
+{
+"symbol": "RJH",
+"displayName": "โรงพยาบาลราชธานี",
+"market": "SET",
+"yahooSymbol": "RJH.BK"
+},
+{
+"symbol": "RML",
+"displayName": "ไรมอน แลนด์",
+"market": "SET",
+"yahooSymbol": "RML.BK"
+},
+{
+"symbol": "ROCK",
+"displayName": "ร้อกเวิธ",
+"market": "SET",
+"yahooSymbol": "ROCK.BK"
+},
+{
+"symbol": "ROH",
+"displayName": "โรงแรมรอยัล ออคิด (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "ROH.BK"
+},
+{
+"symbol": "ROJNA",
+"displayName": "สวนอุตสาหกรรมโรจนะ",
+"market": "SET",
+"yahooSymbol": "ROJNA.BK"
+},
+{
+"symbol": "RPC",
+"displayName": "อาร์พีซีจี",
+"market": "SET",
+"yahooSymbol": "RPC.BK"
+},
+{
+"symbol": "RSP",
+"displayName": "ริช สปอร์ต",
+"market": "SET",
+"yahooSymbol": "RSP.BK"
+},
+{
+"symbol": "S",
+"displayName": "สิงห์ เอสเตท",
+"market": "SET",
+"yahooSymbol": "S.BK"
+},
+{
+"symbol": "S & J",
+"displayName": "บ.เอส แอนด์ เจ อินเตอร์เนชั่นแนล เอนเตอร์ไพรส์",
+"market": "SET",
+"yahooSymbol": "S & J.BK"
+},
+{
+"symbol": "S11",
+"displayName": "เอส 11 กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "S11.BK"
+},
+{
+"symbol": "SABINA",
+"displayName": "ซาบีน่า",
+"market": "SET",
+"yahooSymbol": "SABINA.BK"
+},
+{
+"symbol": "SAFARI",
+"displayName": "ซาฟารีเวิลด์",
+"market": "SET",
+"yahooSymbol": "SAFARI.BK"
+},
+{
+"symbol": "SAM",
+"displayName": "สามชัย สตีล อินดัสทรี",
+"market": "SET",
+"yahooSymbol": "SAM.BK"
+},
+{
+"symbol": "SAMART",
+"displayName": "สามารถคอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "SAMART.BK"
+},
+{
+"symbol": "SAMCO",
+"displayName": "สัมมากร",
+"market": "SET",
+"yahooSymbol": "SAMCO.BK"
+},
+{
+"symbol": "SAMTEL",
+"displayName": "สามารถเทลคอม",
+"market": "SET",
+"yahooSymbol": "SAMTEL.BK"
+},
+{
+"symbol": "SAPPE",
+"displayName": "เซ็ปเป้",
+"market": "SET",
+"yahooSymbol": "SAPPE.BK"
+},
+{
+"symbol": "SAT",
+"displayName": "สมบูรณ์ แอ๊ดวานซ์ เทคโนโลยี",
+"market": "SET",
+"yahooSymbol": "SAT.BK"
+},
+{
+"symbol": "SAUCE",
+"displayName": "ไทยเทพรส",
+"market": "SET",
+"yahooSymbol": "SAUCE.BK"
+},
+{
+"symbol": "SAWAD",
+"displayName": "ศรีสวัสดิ์ คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "SAWAD.BK"
+},
+{
+"symbol": "SC",
+"displayName": "เอสซี แอสเสท คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "SC.BK"
+},
+{
+"symbol": "SCB",
+"displayName": "ธนาคารไทยพาณิชย์",
+"market": "SET",
+"yahooSymbol": "SCB.BK"
+},
+{
+"symbol": "SCC",
+"displayName": "ปูนซิเมนต์ไทย",
+"market": "SET",
+"yahooSymbol": "SCC.BK"
+},
+{
+"symbol": "SCCC",
+"displayName": "ปูนซีเมนต์นครหลวง",
+"market": "SET",
+"yahooSymbol": "SCCC.BK"
+},
+{
+"symbol": "SCG",
+"displayName": "สหโคเจน (ชลบุรี)",
+"market": "SET",
+"yahooSymbol": "SCG.BK"
+},
+{
+"symbol": "SCI",
+"displayName": "เอสซีไอ อีเลคตริค",
+"market": "SET",
+"yahooSymbol": "SCI.BK"
+},
+{
+"symbol": "SCN",
+"displayName": "สแกน อินเตอร์",
+"market": "SET",
+"yahooSymbol": "SCN.BK"
+},
+{
+"symbol": "SCP",
+"displayName": "ทักษิณคอนกรีต",
+"market": "SET",
+"yahooSymbol": "SCP.BK"
+},
+{
+"symbol": "SDC",
+"displayName": "สามารถ ดิจิตอล",
+"market": "SET",
+"yahooSymbol": "SDC.BK"
+},
+{
+"symbol": "SE-ED",
+"displayName": "ซีเอ็ดยูเคชั่น",
+"market": "SET",
+"yahooSymbol": "SE-ED.BK"
+},
+{
+"symbol": "SEAFCO",
+"displayName": "ซีฟโก้",
+"market": "SET",
+"yahooSymbol": "SEAFCO.BK"
+},
+{
+"symbol": "SENA",
+"displayName": "เสนาดีเวลลอปเม้นท์",
+"market": "SET",
+"yahooSymbol": "SENA.BK"
+},
+{
+"symbol": "SF",
+"displayName": "สยามฟิวเจอร์ดีเวลอปเมนท์",
+"market": "SET",
+"yahooSymbol": "SF.BK"
+},
+{
+"symbol": "SFLEX",
+"displayName": "สตาร์เฟล็กซ์",
+"market": "SET",
+"yahooSymbol": "SFLEX.BK"
+},
+{
+"symbol": "SFP",
+"displayName": "อาหารสยาม",
+"market": "SET",
+"yahooSymbol": "SFP.BK"
+},
+{
+"symbol": "SGP",
+"displayName": "สยามแก๊ส แอนด์ ปิโตรเคมีคัลส์",
+"market": "SET",
+"yahooSymbol": "SGP.BK"
+},
+{
+"symbol": "SHANG",
+"displayName": "แชงกรี-ลา โฮเต็ล",
+"market": "SET",
+"yahooSymbol": "SHANG.BK"
+},
+{
+"symbol": "SIAM",
+"displayName": "สยามสตีลอินเตอร์เนชั่นแนล",
+"market": "SET",
+"yahooSymbol": "SIAM.BK"
+},
+{
+"symbol": "SINGER",
+"displayName": "ซิงเกอร์ประเทศไทย",
+"market": "SET",
+"yahooSymbol": "SINGER.BK"
+},
+{
+"symbol": "SIRI",
+"displayName": "แสนสิริ",
+"market": "SET",
+"yahooSymbol": "SIRI.BK"
+},
+{
+"symbol": "SIRIP",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์แสนสิริ ไพร์มออฟฟิศ",
+"market": "SET",
+"yahooSymbol": "SIRIP.BK"
+},
+{
+"symbol": "SIS",
+"displayName": "เอสไอเอส ดิสทริบิวชั่น (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "SIS.BK"
+},
+{
+"symbol": "SISB",
+"displayName": "เอสไอเอสบี",
+"market": "SET",
+"yahooSymbol": "SISB.BK"
+},
+{
+"symbol": "SITHAI",
+"displayName": "ศรีไทยซุปเปอร์แวร์",
+"market": "SET",
+"yahooSymbol": "SITHAI.BK"
+},
+{
+"symbol": "SKE",
+"displayName": "สากล เอนเนอยี",
+"market": "SET",
+"yahooSymbol": "SKE.BK"
+},
+{
+"symbol": "SKN",
+"displayName": "ส.กิจชัย เอ็นเตอร์ไพรส์",
+"market": "SET",
+"yahooSymbol": "SKN.BK"
+},
+{
+"symbol": "SLP",
+"displayName": "สาลี่ พริ้นท์ติ้ง",
+"market": "SET",
+"yahooSymbol": "SLP.BK"
+},
+{
+"symbol": "SMIT",
+"displayName": "สหมิตรเครื่องกล",
+"market": "SET",
+"yahooSymbol": "SMIT.BK"
+},
+{
+"symbol": "SMK",
+"displayName": "สินมั่นคงประกันภัย",
+"market": "SET",
+"yahooSymbol": "SMK.BK"
+},
+{
+"symbol": "SMPC",
+"displayName": "สหมิตรถังแก๊ส",
+"market": "SET",
+"yahooSymbol": "SMPC.BK"
+},
+{
+"symbol": "SMT",
+"displayName": "สตาร์ส ไมโครอิเล็กทรอนิกส์ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "SMT.BK"
+},
+{
+"symbol": "SNC",
+"displayName": "เอส เอ็น ซี ฟอร์เมอร์",
+"market": "SET",
+"yahooSymbol": "SNC.BK"
+},
+{
+"symbol": "SNP",
+"displayName": "เอส แอนด์ พี ซินดิเคท",
+"market": "SET",
+"yahooSymbol": "SNP.BK"
+},
+{
+"symbol": "SOLAR",
+"displayName": "โซลาร์ตรอน",
+"market": "SET",
+"yahooSymbol": "SOLAR.BK"
+},
+{
+"symbol": "SORKON",
+"displayName": "ส. ขอนแก่นฟู้ดส์",
+"market": "SET",
+"yahooSymbol": "SORKON.BK"
+},
+{
+"symbol": "SPACK",
+"displayName": "เอส. แพ็ค แอนด์ พริ้นท์",
+"market": "SET",
+"yahooSymbol": "SPACK.BK"
+},
+{
+"symbol": "SPALI",
+"displayName": "ศุภาลัย",
+"market": "SET",
+"yahooSymbol": "SPALI.BK"
+},
+{
+"symbol": "SPC",
+"displayName": "สหพัฒนพิบูล",
+"market": "SET",
+"yahooSymbol": "SPC.BK"
+},
+{
+"symbol": "SPCG",
+"displayName": "เอสพีซีจี",
+"market": "SET",
+"yahooSymbol": "SPCG.BK"
+},
+{
+"symbol": "SPF",
+"displayName": "กองทุนรวมสิทธิการเช่าอสังหาริมทรัพย์สนามบินสมุย",
+"market": "SET",
+"yahooSymbol": "SPF.BK"
+},
+{
+"symbol": "SPG",
+"displayName": "สยามภัณฑ์กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "SPG.BK"
+},
+{
+"symbol": "SPI",
+"displayName": "สหพัฒนาอินเตอร์โฮลดิ้ง",
+"market": "SET",
+"yahooSymbol": "SPI.BK"
+},
+{
+"symbol": "SPRC",
+"displayName": "สตาร์ ปิโตรเลียม รีไฟน์นิ่ง",
+"market": "SET",
+"yahooSymbol": "SPRC.BK"
+},
+{
+"symbol": "SQ",
+"displayName": "สหกลอิควิปเมนท์",
+"market": "SET",
+"yahooSymbol": "SQ.BK"
+},
+{
+"symbol": "SRICHA",
+"displayName": "ศรีราชาคอนสตรัคชั่น",
+"market": "SET",
+"yahooSymbol": "SRICHA.BK"
+},
+{
+"symbol": "SRIPANWA",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์โรงแรมศรีพันวา",
+"market": "SET",
+"yahooSymbol": "SRIPANWA.BK"
+},
+{
+"symbol": "SSC",
+"displayName": "เสริมสุข",
+"market": "SET",
+"yahooSymbol": "SSC.BK"
+},
+{
+"symbol": "SSF",
+"displayName": "สุรพลฟู้ดส์",
+"market": "SET",
+"yahooSymbol": "SSF.BK"
+},
+{
+"symbol": "SSI",
+"displayName": "สหวิริยาสตีลอินดัสตรี",
+"market": "SET",
+"yahooSymbol": "SSI.BK"
+},
+{
+"symbol": "SSP",
+"displayName": "เสริมสร้าง พาวเวอร์ คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "SSP.BK"
+},
+{
+"symbol": "SSSC",
+"displayName": "ศูนย์บริการเหล็กสยาม",
+"market": "SET",
+"yahooSymbol": "SSSC.BK"
+},
+{
+"symbol": "SST",
+"displayName": "ทรัพย์ศรีไทย",
+"market": "SET",
+"yahooSymbol": "SST.BK"
+},
+{
+"symbol": "SSTRT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์ทรัพย์ศรีไทย",
+"market": "SET",
+"yahooSymbol": "SSTRT.BK"
+},
+{
+"symbol": "STA",
+"displayName": "ศรีตรังแอโกรอินดัสทรี",
+"market": "SET",
+"yahooSymbol": "STA.BK"
+},
+{
+"symbol": "STANLY",
+"displayName": "ไทยสแตนเลย์การไฟฟ้า",
+"market": "SET",
+"yahooSymbol": "STANLY.BK"
+},
+{
+"symbol": "STEC",
+"displayName": "ซิโน-ไทย เอ็นจีเนียริ่งแอนด์คอนสตรัคชั่น",
+"market": "SET",
+"yahooSymbol": "STEC.BK"
+},
+{
+"symbol": "STHAI",
+"displayName": "ซันไทยอุตสาหกรรมถุงมือยาง",
+"market": "SET",
+"yahooSymbol": "STHAI.BK"
+},
+{
+"symbol": "STPI",
+"displayName": "เอสทีพี แอนด์ ไอ",
+"market": "SET",
+"yahooSymbol": "STPI.BK"
+},
+{
+"symbol": "SUC",
+"displayName": "สหยูเนี่ยน",
+"market": "SET",
+"yahooSymbol": "SUC.BK"
+},
+{
+"symbol": "SUPER",
+"displayName": "ซุปเปอร์ เอนเนอร์ยี คอร์เปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "SUPER.BK"
+},
+{
+"symbol": "SUPEREIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐานโรงไฟฟ้า ซุปเปอร์ เอนเนอร์ยี",
+"market": "SET",
+"yahooSymbol": "SUPEREIF.BK"
+},
+{
+"symbol": "SUSCO",
+"displayName": "ซัสโก้",
+"market": "SET",
+"yahooSymbol": "SUSCO.BK"
+},
+{
+"symbol": "SUTHA",
+"displayName": "สุธากัญจน์",
+"market": "SET",
+"yahooSymbol": "SUTHA.BK"
+},
+{
+"symbol": "SVH",
+"displayName": "สมิติเวช",
+"market": "SET",
+"yahooSymbol": "SVH.BK"
+},
+{
+"symbol": "SVI",
+"displayName": "เอสวีไอ",
+"market": "SET",
+"yahooSymbol": "SVI.BK"
+},
+{
+"symbol": "SVOA",
+"displayName": "เอสวีโอเอ",
+"market": "SET",
+"yahooSymbol": "SVOA.BK"
+},
+{
+"symbol": "SYMC",
+"displayName": "ซิมโฟนี่ คอมมูนิเคชั่น",
+"market": "SET",
+"yahooSymbol": "SYMC.BK"
+},
+{
+"symbol": "SYNEX",
+"displayName": "ซินเน็ค (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "SYNEX.BK"
+},
+{
+"symbol": "SYNTEC",
+"displayName": "ซินเท็ค คอนสตรัคชั่น",
+"market": "SET",
+"yahooSymbol": "SYNTEC.BK"
+},
+{
+"symbol": "TAE",
+"displayName": "ไทย อะโกร เอ็นเนอร์ยี่",
+"market": "SET",
+"yahooSymbol": "TAE.BK"
+},
+{
+"symbol": "TASCO",
+"displayName": "ทิปโก้แอสฟัลท์",
+"market": "SET",
+"yahooSymbol": "TASCO.BK"
+},
+{
+"symbol": "TBSP",
+"displayName": "ทีบีเอสพี",
+"market": "SET",
+"yahooSymbol": "TBSP.BK"
+},
+{
+"symbol": "TC",
+"displayName": "ทรอปิคอลแคนนิ่ง (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "TC.BK"
+},
+{
+"symbol": "TCAP",
+"displayName": "ทุนธนชาต",
+"market": "SET",
+"yahooSymbol": "TCAP.BK"
+},
+{
+"symbol": "TCC",
+"displayName": "ไทย แคปปิตอล คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "TCC.BK"
+},
+{
+"symbol": "TCCC",
+"displayName": "ไทยเซ็นทรัลเคมี",
+"market": "SET",
+"yahooSymbol": "TCCC.BK"
+},
+{
+"symbol": "TCJ",
+"displayName": "ที.ซี.เจ.เอเซีย",
+"market": "SET",
+"yahooSymbol": "TCJ.BK"
+},
+{
+"symbol": "TCMC",
+"displayName": "ทีซีเอ็ม คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "TCMC.BK"
+},
+{
+"symbol": "TEAM",
+"displayName": "ทีมพรีซิชั่น",
+"market": "SET",
+"yahooSymbol": "TEAM.BK"
+},
+{
+"symbol": "TEAMG",
+"displayName": "ทีม คอนซัลติ้ง เอนจิเนียริ่ง แอนด์ แมเนจเมนท์",
+"market": "SET",
+"yahooSymbol": "TEAMG.BK"
+},
+{
+"symbol": "TFFIF",
+"displayName": "กองทุนรวมโครงสร้างพื้นฐานเพื่ออนาคตประเทศไทย",
+"market": "SET",
+"yahooSymbol": "TFFIF.BK"
+},
+{
+"symbol": "TFG",
+"displayName": "ไทยฟู้ดส์ กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "TFG.BK"
+},
+{
+"symbol": "TFI",
+"displayName": "ไทยฟิล์มอินดัสตรี่",
+"market": "SET",
+"yahooSymbol": "TFI.BK"
+},
+{
+"symbol": "TFMAMA",
+"displayName": "ไทยเพรซิเดนท์ฟูดส์",
+"market": "SET",
+"yahooSymbol": "TFMAMA.BK"
+},
+{
+"symbol": "TGPRO",
+"displayName": "ไทย-เยอรมัน โปรดักส์",
+"market": "SET",
+"yahooSymbol": "TGPRO.BK"
+},
+{
+"symbol": "TH",
+"displayName": "ตงฮั้ว โฮลดิ้ง",
+"market": "SET",
+"yahooSymbol": "TH.BK"
+},
+{
+"symbol": "THAI",
+"displayName": "การบินไทย",
+"market": "SET",
+"yahooSymbol": "THAI.BK"
+},
+{
+"symbol": "THANI",
+"displayName": "ราชธานีลิสซิ่ง",
+"market": "SET",
+"yahooSymbol": "THANI.BK"
+},
+{
+"symbol": "THCOM",
+"displayName": "ไทยคม",
+"market": "SET",
+"yahooSymbol": "THCOM.BK"
+},
+{
+"symbol": "THE",
+"displayName": "เดอะ สตีล",
+"market": "SET",
+"yahooSymbol": "THE.BK"
+},
+{
+"symbol": "THG",
+"displayName": "ธนบุรี เฮลท์แคร์ กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "THG.BK"
+},
+{
+"symbol": "THIP",
+"displayName": "ทานตะวันอุตสาหกรรม",
+"market": "SET",
+"yahooSymbol": "THIP.BK"
+},
+{
+"symbol": "THL",
+"displayName": "ทุ่งคาฮาเบอร์",
+"market": "SET",
+"yahooSymbol": "THL.BK"
+},
+{
+"symbol": "THRE",
+"displayName": "ไทยรับประกันภัยต่อ",
+"market": "SET",
+"yahooSymbol": "THRE.BK"
+},
+{
+"symbol": "THREL",
+"displayName": "ไทยรีประกันชีวิต",
+"market": "SET",
+"yahooSymbol": "THREL.BK"
+},
+{
+"symbol": "TIP",
+"displayName": "ทิพยประกันภัย",
+"market": "SET",
+"yahooSymbol": "TIP.BK"
+},
+{
+"symbol": "TIPCO",
+"displayName": "ทิปโก้ฟูดส์",
+"market": "SET",
+"yahooSymbol": "TIPCO.BK"
+},
+{
+"symbol": "TISCO",
+"displayName": "ทิสโก้ไฟแนนเชียลกรุ๊ป",
+"market": "SET",
+"yahooSymbol": "TISCO.BK"
+},
+{
+"symbol": "TIW",
+"displayName": "ไทยแลนด์ไอออนเวิคส์",
+"market": "SET",
+"yahooSymbol": "TIW.BK"
+},
+{
+"symbol": "TK",
+"displayName": "ฐิติกร",
+"market": "SET",
+"yahooSymbol": "TK.BK"
+},
+{
+"symbol": "TKN",
+"displayName": "เถ้าแก่น้อย ฟู๊ดแอนด์มาร์เก็ตติ้ง",
+"market": "SET",
+"yahooSymbol": "TKN.BK"
+},
+{
+"symbol": "TKS",
+"displayName": "ที.เค.เอส. เทคโนโลยี",
+"market": "SET",
+"yahooSymbol": "TKS.BK"
+},
+{
+"symbol": "TKT",
+"displayName": "ที.กรุงไทยอุตสาหกรรม",
+"market": "SET",
+"yahooSymbol": "TKT.BK"
+},
+{
+"symbol": "TLHPF",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์ ไทยแลนด์ โฮสพีทาลิตี้",
+"market": "SET",
+"yahooSymbol": "TLHPF.BK"
+},
+{
+"symbol": "TMB",
+"displayName": "ธนาคารทหารไทย",
+"market": "SET",
+"yahooSymbol": "TMB.BK"
+},
+{
+"symbol": "TMD",
+"displayName": "อุตสาหกรรมถังโลหะไทย",
+"market": "SET",
+"yahooSymbol": "TMD.BK"
+},
+{
+"symbol": "TMT",
+"displayName": "ทีเอ็มที สตีล",
+"market": "SET",
+"yahooSymbol": "TMT.BK"
+},
+{
+"symbol": "TNITY",
+"displayName": "ทรีนีตี้ วัฒนา",
+"market": "SET",
+"yahooSymbol": "TNITY.BK"
+},
+{
+"symbol": "TNL",
+"displayName": "ธนูลักษณ์",
+"market": "SET",
+"yahooSymbol": "TNL.BK"
+},
+{
+"symbol": "TNPC",
+"displayName": "ไทยนามพลาสติกส์",
+"market": "SET",
+"yahooSymbol": "TNPC.BK"
+},
+{
+"symbol": "TNPF",
+"displayName": "กองทุนรวมอสังหาริมทรัพย์และสิทธิการเช่าตรีนิตี้",
+"market": "SET",
+"yahooSymbol": "TNPF.BK"
+},
+{
+"symbol": "TNR",
+"displayName": "ไทยนิปปอนรับเบอร์อินดัสตรี้",
+"market": "SET",
+"yahooSymbol": "TNR.BK"
+},
+{
+"symbol": "TOA",
+"displayName": "ทีโอเอ เพ้นท์ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "TOA.BK"
+},
+{
+"symbol": "TOG",
+"displayName": "ไทยออพติคอล กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "TOG.BK"
+},
+{
+"symbol": "TOP",
+"displayName": "ไทยออยล์",
+"market": "SET",
+"yahooSymbol": "TOP.BK"
+},
+{
+"symbol": "TOPP",
+"displayName": "ไทย โอ.พี.พี.",
+"market": "SET",
+"yahooSymbol": "TOPP.BK"
+},
+{
+"symbol": "TPA",
+"displayName": "ไทยโพลีอะคริลิค",
+"market": "SET",
+"yahooSymbol": "TPA.BK"
+},
+{
+"symbol": "TPBI",
+"displayName": "ทีพีบีไอ",
+"market": "SET",
+"yahooSymbol": "TPBI.BK"
+},
+{
+"symbol": "TPCORP",
+"displayName": "เท็กซ์ไทล์เพรสทีจ",
+"market": "SET",
+"yahooSymbol": "TPCORP.BK"
+},
+{
+"symbol": "TPIPL",
+"displayName": "ทีพีไอ โพลีน",
+"market": "SET",
+"yahooSymbol": "TPIPL.BK"
+},
+{
+"symbol": "TPIPP",
+"displayName": "ทีพีไอ โพลีน เพาเวอร์",
+"market": "SET",
+"yahooSymbol": "TPIPP.BK"
+},
+{
+"symbol": "TPOLY",
+"displayName": "ไทยโพลีคอนส์",
+"market": "SET",
+"yahooSymbol": "TPOLY.BK"
+},
+{
+"symbol": "TPP",
+"displayName": "ไทยบรรจุภัณฑ์และการพิมพ์",
+"market": "SET",
+"yahooSymbol": "TPP.BK"
+},
+{
+"symbol": "TPRIME",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าไทยแลนด์ ไพร์ม พร็อพเพอร์ตี้",
+"market": "SET",
+"yahooSymbol": "TPRIME.BK"
+},
+{
+"symbol": "TQM",
+"displayName": "ทีคิวเอ็ม คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "TQM.BK"
+},
+{
+"symbol": "TR",
+"displayName": "ไทยเรยอน",
+"market": "SET",
+"yahooSymbol": "TR.BK"
+},
+{
+"symbol": "TRC",
+"displayName": "ทีอาร์ซี คอนสตรัคชั่น",
+"market": "SET",
+"yahooSymbol": "TRC.BK"
+},
+{
+"symbol": "TRITN",
+"displayName": "ไทรทัน โฮลดิ้ง",
+"market": "SET",
+"yahooSymbol": "TRITN.BK"
+},
+{
+"symbol": "TRU",
+"displayName": "ไทยรุ่งยูเนียนคาร์",
+"market": "SET",
+"yahooSymbol": "TRU.BK"
+},
+{
+"symbol": "TRUBB",
+"displayName": "ไทยรับเบอร์ลาเท็คซ์กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "TRUBB.BK"
+},
+{
+"symbol": "TRUE",
+"displayName": "ทรู คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "TRUE.BK"
+},
+{
+"symbol": "TSC",
+"displayName": "ไทยสตีลเคเบิล",
+"market": "SET",
+"yahooSymbol": "TSC.BK"
+},
+{
+"symbol": "TSE",
+"displayName": "ไทย โซล่าร์ เอ็นเนอร์ยี่",
+"market": "SET",
+"yahooSymbol": "TSE.BK"
+},
+{
+"symbol": "TSI",
+"displayName": "ไทยเศรษฐกิจประกันภัย",
+"market": "SET",
+"yahooSymbol": "TSI.BK"
+},
+{
+"symbol": "TSR",
+"displayName": "เธียรสุรัตน์",
+"market": "SET",
+"yahooSymbol": "TSR.BK"
+},
+{
+"symbol": "TSTE",
+"displayName": "ไทยชูการ์ เทอร์มิเนิ้ล",
+"market": "SET",
+"yahooSymbol": "TSTE.BK"
+},
+{
+"symbol": "TSTH",
+"displayName": "ทาทา สตีล (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "TSTH.BK"
+},
+{
+"symbol": "TTA",
+"displayName": "โทรีเซนไทย เอเยนต์ซีส์",
+"market": "SET",
+"yahooSymbol": "TTA.BK"
+},
+{
+"symbol": "TTCL",
+"displayName": "ทีทีซีแอล",
+"market": "SET",
+"yahooSymbol": "TTCL.BK"
+},
+{
+"symbol": "TTI",
+"displayName": "โรงงานผ้าไทย",
+"market": "SET",
+"yahooSymbol": "TTI.BK"
+},
+{
+"symbol": "TTT",
+"displayName": "โทเร เท็กซ์ไทล์ (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "TTT.BK"
+},
+{
+"symbol": "TTW",
+"displayName": "ทีทีดับบลิว",
+"market": "SET",
+"yahooSymbol": "TTW.BK"
+},
+{
+"symbol": "TU",
+"displayName": "ไทยยูเนี่ยน กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "TU.BK"
+},
+{
+"symbol": "TVI",
+"displayName": "ประกันภัยไทยวิวัฒน์",
+"market": "SET",
+"yahooSymbol": "TVI.BK"
+},
+{
+"symbol": "TVO",
+"displayName": "น้ำมันพืชไทย",
+"market": "SET",
+"yahooSymbol": "TVO.BK"
+},
+{
+"symbol": "TWP",
+"displayName": "ไทยไวร์โพรดัคท์",
+"market": "SET",
+"yahooSymbol": "TWP.BK"
+},
+{
+"symbol": "TWPC",
+"displayName": "ไทยวา",
+"market": "SET",
+"yahooSymbol": "TWPC.BK"
+},
+{
+"symbol": "TWZ",
+"displayName": "ทีดับบลิวแซด คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "TWZ.BK"
+},
+{
+"symbol": "TYCN",
+"displayName": "บริษัทไทยคูน เวิลด์ไวด์ กรุ๊ป (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "TYCN.BK"
+},
+{
+"symbol": "U",
+"displayName": "ยู ซิตี้",
+"market": "SET",
+"yahooSymbol": "U.BK"
+},
+{
+"symbol": "UAC",
+"displayName": "ยูเอซี โกลบอล",
+"market": "SET",
+"yahooSymbol": "UAC.BK"
+},
+{
+"symbol": "UMI",
+"displayName": "สหโมเสคอุตสาหกรรม",
+"market": "SET",
+"yahooSymbol": "UMI.BK"
+},
+{
+"symbol": "UNIQ",
+"displayName": "ยูนิค เอ็นจิเนียริ่ง แอนด์ คอนสตรัคชั่น",
+"market": "SET",
+"yahooSymbol": "UNIQ.BK"
+},
+{
+"symbol": "UOBKH",
+"displayName": "บริษัทหลักทรัพย์ ยูโอบี เคย์เฮียน (ประเทศไทย)",
+"market": "SET",
+"yahooSymbol": "UOBKH.BK"
+},
+{
+"symbol": "UP",
+"displayName": "ยูเนี่ยนพลาสติก",
+"market": "SET",
+"yahooSymbol": "UP.BK"
+},
+{
+"symbol": "UPF",
+"displayName": "ยูเนี่ยนไพโอเนียร์",
+"market": "SET",
+"yahooSymbol": "UPF.BK"
+},
+{
+"symbol": "UPOIC",
+"displayName": "สหอุตสาหกรรมน้ำมันปาล์ม",
+"market": "SET",
+"yahooSymbol": "UPOIC.BK"
+},
+{
+"symbol": "URBNPF",
+"displayName": "กองทุนรวมสิทธิการเช่าอสังหาริมทรัพย์เออร์บานา",
+"market": "SET",
+"yahooSymbol": "URBNPF.BK"
+},
+{
+"symbol": "UT",
+"displayName": "ยูเนี่ยนอุตสาหกรรมสิ่งทอ",
+"market": "SET",
+"yahooSymbol": "UT.BK"
+},
+{
+"symbol": "UTP",
+"displayName": "ยูไนเต็ด เปเปอร์",
+"market": "SET",
+"yahooSymbol": "UTP.BK"
+},
+{
+"symbol": "UV",
+"displayName": "ยูนิเวนเจอร์",
+"market": "SET",
+"yahooSymbol": "UV.BK"
+},
+{
+"symbol": "VARO",
+"displayName": "วโรปกรณ์",
+"market": "SET",
+"yahooSymbol": "VARO.BK"
+},
+{
+"symbol": "VGI",
+"displayName": "วีจีไอ",
+"market": "SET",
+"yahooSymbol": "VGI.BK"
+},
+{
+"symbol": "VI",
+"displayName": "เวนเจอร์ อินคอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "VI.BK"
+},
+{
+"symbol": "VIBHA",
+"displayName": "โรงพยาบาลวิภาวดี",
+"market": "SET",
+"yahooSymbol": "VIBHA.BK"
+},
+{
+"symbol": "VIH",
+"displayName": "ศรีวิชัยเวชวิวัฒน์",
+"market": "SET",
+"yahooSymbol": "VIH.BK"
+},
+{
+"symbol": "VNG",
+"displayName": "วนชัย กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "VNG.BK"
+},
+{
+"symbol": "VNT",
+"displayName": "วีนิไทย",
+"market": "SET",
+"yahooSymbol": "VNT.BK"
+},
+{
+"symbol": "VPO",
+"displayName": "วิจิตรภัณฑ์ปาล์มออยล์",
+"market": "SET",
+"yahooSymbol": "VPO.BK"
+},
+{
+"symbol": "VRANDA",
+"displayName": "วีรันดา รีสอร์ท",
+"market": "SET",
+"yahooSymbol": "VRANDA.BK"
+},
+{
+"symbol": "WACOAL",
+"displayName": "ไทยวาโก้",
+"market": "SET",
+"yahooSymbol": "WACOAL.BK"
+},
+{
+"symbol": "WAVE",
+"displayName": "เวฟ เอ็นเตอร์เทนเมนท์",
+"market": "SET",
+"yahooSymbol": "WAVE.BK"
+},
+{
+"symbol": "WG",
+"displayName": "ไว้ท์กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "WG.BK"
+},
+{
+"symbol": "WHA",
+"displayName": "ดับบลิวเอชเอ คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "WHA.BK"
+},
+{
+"symbol": "WHABT",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าดับบลิวเอชเอ บิสซิเนส คอมเพล็",
+"market": "SET",
+"yahooSymbol": "WHABT.BK"
+},
+{
+"symbol": "WHART",
+"displayName": "ทรัสต์เพื่อการลงทุนในอสังหาริมทรัพย์และสิทธิการเช่าดับบลิวเอชเอ พรีเมี่ยม โกรท",
+"market": "SET",
+"yahooSymbol": "WHART.BK"
+},
+{
+"symbol": "WHAUP",
+"displayName": "ดับบลิวเอชเอ ยูทิลิตี้ส์ แอนด์ พาวเวอร์",
+"market": "SET",
+"yahooSymbol": "WHAUP.BK"
+},
+{
+"symbol": "WICE",
+"displayName": "ไวส์ โลจิสติกส์",
+"market": "SET",
+"yahooSymbol": "WICE.BK"
+},
+{
+"symbol": "WIIK",
+"displayName": "วิค",
+"market": "SET",
+"yahooSymbol": "WIIK.BK"
+},
+{
+"symbol": "WIN",
+"displayName": "สวนอุตสาหกรรม วินโคสท์",
+"market": "SET",
+"yahooSymbol": "WIN.BK"
+},
+{
+"symbol": "WORK",
+"displayName": "เวิร์คพอยท์ เอ็นเทอร์เทนเมนท์",
+"market": "SET",
+"yahooSymbol": "WORK.BK"
+},
+{
+"symbol": "WORLD",
+"displayName": "เวิลด์ คอร์ปอเรชั่น",
+"market": "SET",
+"yahooSymbol": "WORLD.BK"
+},
+{
+"symbol": "WP",
+"displayName": "ดับบลิวพี เอ็นเนอร์ยี่",
+"market": "SET",
+"yahooSymbol": "WP.BK"
+},
+{
+"symbol": "WPH",
+"displayName": "โรงพยาบาลวัฒนแพทย์ ตรัง",
+"market": "SET",
+"yahooSymbol": "WPH.BK"
+},
+{
+"symbol": "YCI",
+"displayName": "ยงไทย",
+"market": "SET",
+"yahooSymbol": "YCI.BK"
+},
+{
+"symbol": "ZEN",
+"displayName": "เซ็น คอร์ปอเรชั่น กรุ๊ป",
+"market": "SET",
+"yahooSymbol": "ZEN.BK"
+},
+{
+"symbol": "ZMICO",
+"displayName": "บริษัทหลักทรัพย์ ซีมิโก้",
+"market": "SET",
+"yahooSymbol": "ZMICO.BK"
+},
+{
+"symbol": "2S",
+"displayName": "2 เอส เมทัล",
+"market": "MAI",
+"yahooSymbol": "2S.BK"
+},
+{
+"symbol": "A5",
+"displayName": "แอสเซท ไฟว์ กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "A5.BK"
+},
+{
+"symbol": "ABICO",
+"displayName": "เอบิโก้ โฮลดิ้งส์",
+"market": "MAI",
+"yahooSymbol": "ABICO.BK"
+},
+{
+"symbol": "ABM",
+"displayName": "เอเชีย ไบโอแมส",
+"market": "MAI",
+"yahooSymbol": "ABM.BK"
+},
+{
+"symbol": "ACAP",
+"displayName": "เอเชีย แคปปิตอล กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "ACAP.BK"
+},
+{
+"symbol": "ACG",
+"displayName": "ออโตคอร์ป โฮลดิ้ง",
+"market": "MAI",
+"yahooSymbol": "ACG.BK"
+},
+{
+"symbol": "ADB",
+"displayName": "แอ็พพลาย ดีบี",
+"market": "MAI",
+"yahooSymbol": "ADB.BK"
+},
+{
+"symbol": "AF",
+"displayName": "ไอร่า แฟคตอริ่ง",
+"market": "MAI",
+"yahooSymbol": "AF.BK"
+},
+{
+"symbol": "AGE",
+"displayName": "เอเชีย กรีน เอนเนอจี",
+"market": "MAI",
+"yahooSymbol": "AGE.BK"
+},
+{
+"symbol": "AIE",
+"displayName": "เอไอ เอนเนอร์จี",
+"market": "MAI",
+"yahooSymbol": "AIE.BK"
+},
+{
+"symbol": "AIRA",
+"displayName": "ไอร่า แคปปิตอล",
+"market": "MAI",
+"yahooSymbol": "AIRA.BK"
+},
+{
+"symbol": "AKP",
+"displayName": "อัคคีปราการ",
+"market": "MAI",
+"yahooSymbol": "AKP.BK"
+},
+{
+"symbol": "AMA",
+"displayName": "อาม่า มารีน",
+"market": "MAI",
+"yahooSymbol": "AMA.BK"
+},
+{
+"symbol": "APP",
+"displayName": "แอพพลิแคด",
+"market": "MAI",
+"yahooSymbol": "APP.BK"
+},
+{
+"symbol": "ARIN",
+"displayName": "อรินสิริ แลนด์",
+"market": "MAI",
+"yahooSymbol": "ARIN.BK"
+},
+{
+"symbol": "ARIP",
+"displayName": "เออาร์ไอพี",
+"market": "MAI",
+"yahooSymbol": "ARIP.BK"
+},
+{
+"symbol": "ARROW",
+"displayName": "แอร์โรว์ ซินดิเคท",
+"market": "MAI",
+"yahooSymbol": "ARROW.BK"
+},
+{
+"symbol": "ASN",
+"displayName": "เอเอสเอ็น โบรกเกอร์",
+"market": "MAI",
+"yahooSymbol": "ASN.BK"
+},
+{
+"symbol": "ATP30",
+"displayName": "เอทีพี 30",
+"market": "MAI",
+"yahooSymbol": "ATP30.BK"
+},
+{
+"symbol": "AU",
+"displayName": "อาฟเตอร์ ยู",
+"market": "MAI",
+"yahooSymbol": "AU.BK"
+},
+{
+"symbol": "AUCT",
+"displayName": "สหการประมูล",
+"market": "MAI",
+"yahooSymbol": "AUCT.BK"
+},
+{
+"symbol": "BC",
+"displayName": "บูทิค คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "BC.BK"
+},
+{
+"symbol": "BGT",
+"displayName": "บีจีที คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "BGT.BK"
+},
+{
+"symbol": "BIZ",
+"displayName": "บิสซิเนสอะไลเม้นท์",
+"market": "MAI",
+"yahooSymbol": "BIZ.BK"
+},
+{
+"symbol": "BM",
+"displayName": "บางกอกชีทเม็ททัล",
+"market": "MAI",
+"yahooSymbol": "BM.BK"
+},
+{
+"symbol": "BOL",
+"displayName": "บิซิเนส ออนไลน์",
+"market": "MAI",
+"yahooSymbol": "BOL.BK"
+},
+{
+"symbol": "BROOK",
+"displayName": "บรุ๊คเคอร์ กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "BROOK.BK"
+},
+{
+"symbol": "BSM",
+"displayName": "บิวเดอสมาร์ท",
+"market": "MAI",
+"yahooSymbol": "BSM.BK"
+},
+{
+"symbol": "BTW",
+"displayName": "บีที เวลธ์ อินดัสตรีส์",
+"market": "MAI",
+"yahooSymbol": "BTW.BK"
+},
+{
+"symbol": "CAZ",
+"displayName": "ซี เอ แซด (ประเทศไทย)",
+"market": "MAI",
+"yahooSymbol": "CAZ.BK"
+},
+{
+"symbol": "CHAYO",
+"displayName": "ชโย กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "CHAYO.BK"
+},
+{
+"symbol": "CHEWA",
+"displayName": "ชีวาทัย",
+"market": "MAI",
+"yahooSymbol": "CHEWA.BK"
+},
+{
+"symbol": "CHO",
+"displayName": "ช ทวี",
+"market": "MAI",
+"yahooSymbol": "CHO.BK"
+},
+{
+"symbol": "CHOW",
+"displayName": "เชาว์ สตีล อินดัสทรี้",
+"market": "MAI",
+"yahooSymbol": "CHOW.BK"
+},
+{
+"symbol": "CHUO",
+"displayName": "ชูโอ เซ็นโก (ประเทศไทย)",
+"market": "MAI",
+"yahooSymbol": "CHUO.BK"
+},
+{
+"symbol": "CIG",
+"displayName": "ซี.ไอ.กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "CIG.BK"
+},
+{
+"symbol": "CMC",
+"displayName": "เจ้าพระยามหานคร",
+"market": "MAI",
+"yahooSymbol": "CMC.BK"
+},
+{
+"symbol": "CMO",
+"displayName": "ซีเอ็มโอ",
+"market": "MAI",
+"yahooSymbol": "CMO.BK"
+},
+{
+"symbol": "COLOR",
+"displayName": "สาลี่ คัลเล่อร์",
+"market": "MAI",
+"yahooSymbol": "COLOR.BK"
+},
+{
+"symbol": "COMAN",
+"displayName": "โคแมนชี่ อินเตอร์เนชั่นแนล",
+"market": "MAI",
+"yahooSymbol": "COMAN.BK"
+},
+{
+"symbol": "CPR",
+"displayName": "ซีพีอาร์ โกมุ อินดัสเตรียล",
+"market": "MAI",
+"yahooSymbol": "CPR.BK"
+},
+{
+"symbol": "CRD",
+"displayName": "เชียงใหม่ริมดอย",
+"market": "MAI",
+"yahooSymbol": "CRD.BK"
+},
+{
+"symbol": "DCORP",
+"displayName": "ดีมีเตอร์ คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "DCORP.BK"
+},
+{
+"symbol": "DIMET",
+"displayName": "ไดเมท (สยาม)",
+"market": "MAI",
+"yahooSymbol": "DIMET.BK"
+},
+{
+"symbol": "DOD",
+"displayName": "ดีโอดี ไบโอเทค",
+"market": "MAI",
+"yahooSymbol": "DOD.BK"
+},
+{
+"symbol": "ECF",
+"displayName": "อีสต์โคสท์เฟอร์นิเทค",
+"market": "MAI",
+"yahooSymbol": "ECF.BK"
+},
+{
+"symbol": "ETE",
+"displayName": "บูรพา เทคนิคอล เอ็นจิเนียริ่ง",
+"market": "MAI",
+"yahooSymbol": "ETE.BK"
+},
+{
+"symbol": "FLOYD",
+"displayName": "ฟลอยด์",
+"market": "MAI",
+"yahooSymbol": "FLOYD.BK"
+},
+{
+"symbol": "FPI",
+"displayName": "ฟอร์จูน พาร์ท อินดัสตรี้",
+"market": "MAI",
+"yahooSymbol": "FPI.BK"
+},
+{
+"symbol": "FSMART",
+"displayName": "ฟอร์ท สมาร์ท เซอร์วิส",
+"market": "MAI",
+"yahooSymbol": "FSMART.BK"
+},
+{
+"symbol": "FVC",
+"displayName": "ฟิลเตอร์ วิชั่น",
+"market": "MAI",
+"yahooSymbol": "FVC.BK"
+},
+{
+"symbol": "GCAP",
+"displayName": "จี แคปปิตอล",
+"market": "MAI",
+"yahooSymbol": "GCAP.BK"
+},
+{
+"symbol": "GSC",
+"displayName": "โกลบอล เซอร์วิส เซ็นเตอร์",
+"market": "MAI",
+"yahooSymbol": "GSC.BK"
+},
+{
+"symbol": "GTB",
+"displayName": "เจตาแบค",
+"market": "MAI",
+"yahooSymbol": "GTB.BK"
+},
+{
+"symbol": "HARN",
+"displayName": "หาญ เอ็นจิเนียริ่ง โซลูชั่นส์",
+"market": "MAI",
+"yahooSymbol": "HARN.BK"
+},
+{
+"symbol": "HPT",
+"displayName": "โฮม พอตเทอรี่",
+"market": "MAI",
+"yahooSymbol": "HPT.BK"
+},
+{
+"symbol": "HYDRO",
+"displayName": "ไฮโดรเท็ค",
+"market": "MAI",
+"yahooSymbol": "HYDRO.BK"
+},
+{
+"symbol": "ICN",
+"displayName": "อินฟอร์เมชั่น แอนด์ คอมมิวนิเคชั่น เน็ทเวิร์คส",
+"market": "MAI",
+"yahooSymbol": "ICN.BK"
+},
+{
+"symbol": "IMH",
+"displayName": "โรงพยาบาลอินเตอร์เมดิคัล แคร์ แอนด์ แล็บ",
+"market": "MAI",
+"yahooSymbol": "IMH.BK"
+},
+{
+"symbol": "INSET",
+"displayName": "อินฟราเซท",
+"market": "MAI",
+"yahooSymbol": "INSET.BK"
+},
+{
+"symbol": "IP",
+"displayName": "อินเตอร์ ฟาร์มา",
+"market": "MAI",
+"yahooSymbol": "IP.BK"
+},
+{
+"symbol": "IRCP",
+"displayName": "อินเตอร์เนชั่นแนล รีเสริช คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "IRCP.BK"
+},
+{
+"symbol": "ITEL",
+"displayName": "อินเตอร์ลิ้งค์ เทเลคอม",
+"market": "MAI",
+"yahooSymbol": "ITEL.BK"
+},
+{
+"symbol": "JKN",
+"displayName": "เจเคเอ็น โกลบอล มีเดีย",
+"market": "MAI",
+"yahooSymbol": "JKN.BK"
+},
+{
+"symbol": "JSP",
+"displayName": "เจ. เอส. พี. พร็อพเพอร์ตี้",
+"market": "MAI",
+"yahooSymbol": "JSP.BK"
+},
+{
+"symbol": "JUBILE",
+"displayName": "ยูบิลลี่ เอ็นเตอร์ไพรส์",
+"market": "MAI",
+"yahooSymbol": "JUBILE.BK"
+},
+{
+"symbol": "KASET",
+"displayName": "ไทยฮา",
+"market": "MAI",
+"yahooSymbol": "KASET.BK"
+},
+{
+"symbol": "KCM",
+"displayName": "เค.ซี.เมททอลชีท",
+"market": "MAI",
+"yahooSymbol": "KCM.BK"
+},
+{
+"symbol": "KIAT",
+"displayName": "เกียรติธนา ขนส่ง",
+"market": "MAI",
+"yahooSymbol": "KIAT.BK"
+},
+{
+"symbol": "KOOL",
+"displayName": "มาสเตอร์คูล อินเตอร์เนชั่นแนล",
+"market": "MAI",
+"yahooSymbol": "KOOL.BK"
+},
+{
+"symbol": "KUMWEL",
+"displayName": "คัมเวล คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "KUMWEL.BK"
+},
+{
+"symbol": "KUN",
+"displayName": "วิลล่า คุณาลัย",
+"market": "MAI",
+"yahooSymbol": "KUN.BK"
+},
+{
+"symbol": "KWM",
+"displayName": "เค. ดับบลิว. เม็ททัล เวิร์ค",
+"market": "MAI",
+"yahooSymbol": "KWM.BK"
+},
+{
+"symbol": "LDC",
+"displayName": "แอลดีซี เด็นทัล",
+"market": "MAI",
+"yahooSymbol": "LDC.BK"
+},
+{
+"symbol": "LIT",
+"displayName": "ลีซ อิท",
+"market": "MAI",
+"yahooSymbol": "LIT.BK"
+},
+{
+"symbol": "MBAX",
+"displayName": "มัลติแบกซ์",
+"market": "MAI",
+"yahooSymbol": "MBAX.BK"
+},
+{
+"symbol": "META",
+"displayName": "เมตะ คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "META.BK"
+},
+{
+"symbol": "MGT",
+"displayName": "เมกาเคม (ประเทศไทย)",
+"market": "MAI",
+"yahooSymbol": "MGT.BK"
+},
+{
+"symbol": "MM",
+"displayName": "มัดแมน",
+"market": "MAI",
+"yahooSymbol": "MM.BK"
+},
+{
+"symbol": "MOONG",
+"displayName": "มุ่งพัฒนา อินเตอร์แนชชั่นแนล",
+"market": "MAI",
+"yahooSymbol": "MOONG.BK"
+},
+{
+"symbol": "MPG",
+"displayName": "เอ็มพีจี คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "MPG.BK"
+},
+{
+"symbol": "MVP",
+"displayName": "เอ็ม วิชั่น",
+"market": "MAI",
+"yahooSymbol": "MVP.BK"
+},
+{
+"symbol": "NCL",
+"displayName": "เอ็นซีแอล อินเตอร์เนชั่นแนล โลจิสติกส์",
+"market": "MAI",
+"yahooSymbol": "NCL.BK"
+},
+{
+"symbol": "NDR",
+"displayName": "เอ็น.ดี.รับเบอร์",
+"market": "MAI",
+"yahooSymbol": "NDR.BK"
+},
+{
+"symbol": "NETBAY",
+"displayName": "เน็ตเบย์",
+"market": "MAI",
+"yahooSymbol": "NETBAY.BK"
+},
+{
+"symbol": "NEWS",
+"displayName": "นิวส์ เน็ตเวิร์ค คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "NEWS.BK"
+},
+{
+"symbol": "NINE",
+"displayName": "เนชั่น อินเตอร์เนชั่นแนล เอ็ดดูเทนเมนท์",
+"market": "MAI",
+"yahooSymbol": "NINE.BK"
+},
+{
+"symbol": "NPK",
+"displayName": "นิวพลัสนิตติ้ง",
+"market": "MAI",
+"yahooSymbol": "NPK.BK"
+},
+{
+"symbol": "OTO",
+"displayName": "วันทูวัน คอนแทคส์",
+"market": "MAI",
+"yahooSymbol": "OTO.BK"
+},
+{
+"symbol": "PDG",
+"displayName": "พรอดดิจิ",
+"market": "MAI",
+"yahooSymbol": "PDG.BK"
+},
+{
+"symbol": "PHOL",
+"displayName": "ผลธัญญะ",
+"market": "MAI",
+"yahooSymbol": "PHOL.BK"
+},
+{
+"symbol": "PICO",
+"displayName": "ปิโก (ไทยแลนด์)",
+"market": "MAI",
+"yahooSymbol": "PICO.BK"
+},
+{
+"symbol": "PIMO",
+"displayName": "ไพโอเนียร์ มอเตอร์",
+"market": "MAI",
+"yahooSymbol": "PIMO.BK"
+},
+{
+"symbol": "PJW",
+"displayName": "ปัญจวัฒนาพลาสติก",
+"market": "MAI",
+"yahooSymbol": "PJW.BK"
+},
+{
+"symbol": "PLANET",
+"displayName": "แพลนเน็ต คอมมิวนิเคชั่น เอเชีย",
+"market": "MAI",
+"yahooSymbol": "PLANET.BK"
+},
+{
+"symbol": "PPM",
+"displayName": "พรพรหมเม็ททอล",
+"market": "MAI",
+"yahooSymbol": "PPM.BK"
+},
+{
+"symbol": "PPS",
+"displayName": "โปรเจค แพลนนิ่ง เซอร์วิส",
+"market": "MAI",
+"yahooSymbol": "PPS.BK"
+},
+{
+"symbol": "PROUD",
+"displayName": "พราว เรียล เอสเตท",
+"market": "MAI",
+"yahooSymbol": "PROUD.BK"
+},
+{
+"symbol": "PSTC",
+"displayName": "เพาเวอร์ โซลูชั่น เทคโนโลยี",
+"market": "MAI",
+"yahooSymbol": "PSTC.BK"
+},
+{
+"symbol": "QLT",
+"displayName": "ควอลลีเทค",
+"market": "MAI",
+"yahooSymbol": "QLT.BK"
+},
+{
+"symbol": "QTC",
+"displayName": "คิวทีซี เอนเนอร์ยี่",
+"market": "MAI",
+"yahooSymbol": "QTC.BK"
+},
+{
+"symbol": "RP",
+"displayName": "ท่าเรือราชาเฟอร์รี่",
+"market": "MAI",
+"yahooSymbol": "RP.BK"
+},
+{
+"symbol": "RWI",
+"displayName": "ระยองไวร์ อินดัสตรีส์",
+"market": "MAI",
+"yahooSymbol": "RWI.BK"
+},
+{
+"symbol": "SAAM",
+"displayName": "เอสเอเอเอ็ม เอ็นเนอร์ยี่ ดีเวลลอปเมนท์",
+"market": "MAI",
+"yahooSymbol": "SAAM.BK"
+},
+{
+"symbol": "SALEE",
+"displayName": "สาลี่อุตสาหกรรม",
+"market": "MAI",
+"yahooSymbol": "SALEE.BK"
+},
+{
+"symbol": "SANKO",
+"displayName": "ซังโกะ ไดคาซติ้ง (ประเทศไทย)",
+"market": "MAI",
+"yahooSymbol": "SANKO.BK"
+},
+{
+"symbol": "SE",
+"displayName": "สยามอีสต์ โซลูชั่น",
+"market": "MAI",
+"yahooSymbol": "SE.BK"
+},
+{
+"symbol": "SEAOIL",
+"displayName": "ซีออยล์",
+"market": "MAI",
+"yahooSymbol": "SEAOIL.BK"
+},
+{
+"symbol": "SELIC",
+"displayName": "ซีลิค คอร์พ",
+"market": "MAI",
+"yahooSymbol": "SELIC.BK"
+},
+{
+"symbol": "SGF",
+"displayName": "เอสจีเอฟ แคปปิตอล",
+"market": "MAI",
+"yahooSymbol": "SGF.BK"
+},
+{
+"symbol": "SIMAT",
+"displayName": "ไซแมท เทคโนโลยี",
+"market": "MAI",
+"yahooSymbol": "SIMAT.BK"
+},
+{
+"symbol": "SKY",
+"displayName": "สกาย ไอซีที",
+"market": "MAI",
+"yahooSymbol": "SKY.BK"
+},
+{
+"symbol": "SMART",
+"displayName": "สมาร์ทคอนกรีต",
+"market": "MAI",
+"yahooSymbol": "SMART.BK"
+},
+{
+"symbol": "SONIC",
+"displayName": "โซนิค อินเตอร์เฟรท",
+"market": "MAI",
+"yahooSymbol": "SONIC.BK"
+},
+{
+"symbol": "SPA",
+"displayName": "สยามเวลเนสกรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "SPA.BK"
+},
+{
+"symbol": "SPVI",
+"displayName": "เอส พี วี ไอ",
+"market": "MAI",
+"yahooSymbol": "SPVI.BK"
+},
+{
+"symbol": "SR",
+"displayName": "สยามราช",
+"market": "MAI",
+"yahooSymbol": "SR.BK"
+},
+{
+"symbol": "STAR",
+"displayName": "สตาร์ ยูนิเวอร์แซล เน็ตเวิร์ค",
+"market": "MAI",
+"yahooSymbol": "STAR.BK"
+},
+{
+"symbol": "STC",
+"displayName": "เอสทีซี คอนกรีตโปรดัคท์",
+"market": "MAI",
+"yahooSymbol": "STC.BK"
+},
+{
+"symbol": "STI",
+"displayName": "สโตนเฮ้นจ์ อินเตอร์",
+"market": "MAI",
+"yahooSymbol": "STI.BK"
+},
+{
+"symbol": "SUN",
+"displayName": "ซันสวีท",
+"market": "MAI",
+"yahooSymbol": "SUN.BK"
+},
+{
+"symbol": "SWC",
+"displayName": "เชอร์วู้ด คอร์ปอเรชั่น (ประเทศไทย)",
+"market": "MAI",
+"yahooSymbol": "SWC.BK"
+},
+{
+"symbol": "T",
+"displayName": "ที เอ็นจิเนียร์ริ่ง คอร์เปอร์เรชั่น",
+"market": "MAI",
+"yahooSymbol": "T.BK"
+},
+{
+"symbol": "TACC",
+"displayName": "ที.เอ.ซี. คอนซูเมอร์",
+"market": "MAI",
+"yahooSymbol": "TACC.BK"
+},
+{
+"symbol": "TAKUNI",
+"displayName": "ทาคูนิ กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "TAKUNI.BK"
+},
+{
+"symbol": "TAPAC",
+"displayName": "ทาพาโก้",
+"market": "MAI",
+"yahooSymbol": "TAPAC.BK"
+},
+{
+"symbol": "THANA",
+"displayName": "ธนาสิริ กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "THANA.BK"
+},
+{
+"symbol": "THMUI",
+"displayName": "ไทยมุ้ย คอร์ปอเรชั่น",
+"market": "MAI",
+"yahooSymbol": "THMUI.BK"
+},
+{
+"symbol": "TIGER",
+"displayName": "ไทย อิงเกอร์ โฮลดิ้ง",
+"market": "MAI",
+"yahooSymbol": "TIGER.BK"
+},
+{
+"symbol": "TITLE",
+"displayName": "ร่มโพธิ์ พร็อพเพอร์ตี้",
+"market": "MAI",
+"yahooSymbol": "TITLE.BK"
+},
+{
+"symbol": "TM",
+"displayName": "เทคโนเมดิคัล",
+"market": "MAI",
+"yahooSymbol": "TM.BK"
+},
+{
+"symbol": "TMC",
+"displayName": "ที.เอ็ม.ซี. อุตสาหกรรม",
+"market": "MAI",
+"yahooSymbol": "TMC.BK"
+},
+{
+"symbol": "TMI",
+"displayName": "ธีระมงคล อุตสาหกรรม",
+"market": "MAI",
+"yahooSymbol": "TMI.BK"
+},
+{
+"symbol": "TMILL",
+"displayName": "ที เอส ฟลาวมิลล์",
+"market": "MAI",
+"yahooSymbol": "TMILL.BK"
+},
+{
+"symbol": "TMW",
+"displayName": "ไทยมิตซูวา",
+"market": "MAI",
+"yahooSymbol": "TMW.BK"
+},
+{
+"symbol": "TNDT",
+"displayName": "ไทย เอ็น ดี ที",
+"market": "MAI",
+"yahooSymbol": "TNDT.BK"
+},
+{
+"symbol": "TNH",
+"displayName": "โรงพยาบาลไทยนครินทร์",
+"market": "MAI",
+"yahooSymbol": "TNH.BK"
+},
+{
+"symbol": "TPAC",
+"displayName": "พลาสติค และหีบห่อไทย",
+"market": "MAI",
+"yahooSymbol": "TPAC.BK"
+},
+{
+"symbol": "TPLAS",
+"displayName": "ไทยอุตสาหกรรมพลาสติก (1994)",
+"market": "MAI",
+"yahooSymbol": "TPLAS.BK"
+},
+{
+"symbol": "TPS",
+"displayName": "เดอะแพรคทิเคิลโซลูชั่น",
+"market": "MAI",
+"yahooSymbol": "TPS.BK"
+},
+{
+"symbol": "TRT",
+"displayName": "ถิรไทย",
+"market": "MAI",
+"yahooSymbol": "TRT.BK"
+},
+{
+"symbol": "TSF",
+"displayName": "ทรีซิกตี้ไฟว์",
+"market": "MAI",
+"yahooSymbol": "TSF.BK"
+},
+{
+"symbol": "TVD",
+"displayName": "ทีวี ไดเร็ค",
+"market": "MAI",
+"yahooSymbol": "TVD.BK"
+},
+{
+"symbol": "TVT",
+"displayName": "ทีวี ธันเดอร์",
+"market": "MAI",
+"yahooSymbol": "TVT.BK"
+},
+{
+"symbol": "UBIS",
+"displayName": "ยูบิส (เอเชีย)",
+"market": "MAI",
+"yahooSymbol": "UBIS.BK"
+},
+{
+"symbol": "UEC",
+"displayName": "ยูนิมิต เอนจิเนียริ่ง",
+"market": "MAI",
+"yahooSymbol": "UEC.BK"
+},
+{
+"symbol": "UKEM",
+"displayName": "ยูเนี่ยน ปิโตรเคมีคอล",
+"market": "MAI",
+"yahooSymbol": "UKEM.BK"
+},
+{
+"symbol": "UMS",
+"displayName": "ยูนิค ไมนิ่ง เซอร์วิสเซส",
+"market": "MAI",
+"yahooSymbol": "UMS.BK"
+},
+{
+"symbol": "UPA",
+"displayName": "ยูไนเต็ด เพาเวอร์ ออฟ เอเชีย",
+"market": "MAI",
+"yahooSymbol": "UPA.BK"
+},
+{
+"symbol": "UREKA",
+"displayName": "ยูเรกา ดีไซน์",
+"market": "MAI",
+"yahooSymbol": "UREKA.BK"
+},
+{
+"symbol": "UWC",
+"displayName": "เอื้อวิทยา",
+"market": "MAI",
+"yahooSymbol": "UWC.BK"
+},
+{
+"symbol": "VCOM",
+"displayName": "วินท์คอม เทคโนโลยี",
+"market": "MAI",
+"yahooSymbol": "VCOM.BK"
+},
+{
+"symbol": "VL",
+"displayName": "วี.แอล.เอ็นเตอร์ไพรส์",
+"market": "MAI",
+"yahooSymbol": "VL.BK"
+},
+{
+"symbol": "WINNER",
+"displayName": "วินเนอร์กรุ๊ป เอ็นเตอร์ไพรซ์",
+"market": "MAI",
+"yahooSymbol": "WINNER.BK"
+},
+{
+"symbol": "XO",
+"displayName": "เอ็กโซติค ฟู้ด",
+"market": "MAI",
+"yahooSymbol": "XO.BK"
+},
+{
+"symbol": "YGG",
+"displayName": "อิ๊กดราซิล กรุ๊ป",
+"market": "MAI",
+"yahooSymbol": "YGG.BK"
+},
+{
+"symbol": "YUASA",
+"displayName": "ยัวซ่าแบตเตอรี่ ประเทศไทย",
+"market": "MAI",
+"yahooSymbol": "YUASA.BK"
+},
+{
+"symbol": "ZIGA",
+"displayName": "ซิก้า อินโนเวชั่น",
+"market": "MAI",
+"yahooSymbol": "ZIGA.BK"
+}
+]

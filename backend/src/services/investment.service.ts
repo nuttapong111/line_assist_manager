@@ -15,6 +15,7 @@ import {
   formatAssetPrice,
   THAI_MARKET_SYMBOLS,
 } from '../data/market-universe'
+import { isThaiListedSymbol } from '../data/thai-set-symbols'
 
 /** คะแนนรวม (normalized -1..1) ที่ถือว่ามีสัญญาณซื้อน่าพิจารณา */
 export const BUY_SIGNAL_THRESHOLD = Number(process.env.SIGNAL_BUY_THRESHOLD || '0.35')
@@ -419,7 +420,7 @@ export async function addSymbolToWatchlist(userId: string, symbol: string): Prom
     await addWatchedAsset(userId, {
       symbol: sym,
       display_name: displayName,
-      asset_type: THAI_MARKET_SYMBOLS.has(sym) || getMarketAsset(sym)?.category === 'TH_FUND' ? 'TH_STOCK' : 'US_STOCK',
+      asset_type: isThaiListedSymbol(sym) || THAI_MARKET_SYMBOLS.has(sym) || getMarketAsset(sym)?.category === 'TH_FUND' ? 'TH_STOCK' : 'US_STOCK',
       currency: getMarketAsset(sym)?.currency === 'THB' ? 'THB' : 'USD',
     })
   } catch (err) {
