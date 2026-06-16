@@ -3,7 +3,6 @@ import { marketSymbols, marketAnalysisCache, marketScanState } from '../lib/sche
 import { eq, desc, gte, sql, asc } from 'drizzle-orm'
 import { MARKET_UNIVERSE, resolveYahooSymbol } from '../data/market-universe'
 import { THAI_SET_SYMBOLS } from '../data/thai-set-symbols'
-import { US_MUTUAL_FUNDS } from '../data/us-mutual-funds'
 import { fetchUsSymbolsFromNasdaqTrader } from './us-market-symbols.service'
 import { analyzeStock, BUY_SIGNAL_THRESHOLD } from './investment.service'
 import { registerYahooSymbol, clearYahooSymbolMap } from './yahoo.service'
@@ -135,16 +134,6 @@ async function fetchExchangeSymbols(exchange: 'BK' | 'SET' | 'US'): Promise<Symb
   })
 }
 
-function buildUsMutualFundRows(): SymbolRow[] {
-  return US_MUTUAL_FUNDS.map((f, i) => ({
-    symbol: f.symbol,
-    exchange: 'US_FUND',
-    displayName: f.displayName,
-    yahooSymbol: f.yahooSymbol,
-    sortOrder: 30000 + i,
-  }))
-}
-
 async function buildUsNasdaqRows(): Promise<SymbolRow[]> {
   const symbols = await fetchUsSymbolsFromNasdaqTrader()
   return symbols.map((s, i) => ({
@@ -197,12 +186,6 @@ export async function refreshMarketSymbolList(resetCursor = false): Promise<numb
   } catch (err) {
     console.error('[market-scan] US NASDAQ list fetch failed:', err)
   }
-
-  const usFundRows = buildUsMutualFundRows()
-  for (const row of usFundRows) {
-    if (!merged.has(row.symbol)) merged.set(row.symbol, row)
-  }
-  console.log(`[market-scan] US mutual funds: ${usFundRows.length} symbols`)
 
   if (hasFinnhubKey()) {
     const finnhubThaiRows = await fetchThaiMarketSymbolsFromFinnhub()
@@ -445,11 +428,11 @@ export async function ensureMarketScanInitialized(): Promise<void> {
   const thaiStocks = progress.breakdown?.thaiStocks ?? 0
   const usStocks = progress.breakdown?.usStocks ?? 0
   const usFunds = progress.breakdown?.usFunds ?? 0
-  const needsRefresh = thaiStocks < 100 || usStocks < 5000 || usFunds < 1000
+  const needsRefresh = thaiStocks < 100 || usStocks < 5000 || usFunds > 0
 
   if (!state || state.totalSymbols === 0 || needsRefresh) {
     if (needsRefresh && state && state.totalSymbols > 0) {
-      console.log(`[market-scan] Symbol count low (TH:${thaiStocks} US:${usStocks} funds:${usFunds}) — refreshing`)
+      console.log(`[market-scan] Refresh needed (TH:${thaiStocks} US:${usStocks} legacyFunds:${usFunds})`)
     }
     await refreshMarketSymbolList(needsRefresh)
   } else {
