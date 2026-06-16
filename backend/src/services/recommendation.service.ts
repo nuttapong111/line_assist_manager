@@ -1,7 +1,7 @@
 import { db } from '../lib/db'
 import { marketAnalysisCache, marketRecommendationSnapshots } from '../lib/schema'
-import { desc, eq, gte } from 'drizzle-orm'
-import { BUY_SIGNAL_THRESHOLD } from './investment.service'
+import { desc, eq, gte, and } from 'drizzle-orm'
+import { BUY_SIGNAL_THRESHOLD, ANALYSIS_VERSION } from './investment.service'
 import { formatBangkokDate, formatBangkokTime } from '../lib/datetime'
 import { getMarketScanProgress } from './market-scanner.service'
 import { compareAnalysisRank } from './analysis-ranking'
@@ -80,7 +80,10 @@ async function rankAllCachedPicks(
   const rows = await db
     .select()
     .from(marketAnalysisCache)
-    .where(gte(marketAnalysisCache.normalizedScore, String(minScore)))
+    .where(and(
+      gte(marketAnalysisCache.normalizedScore, String(minScore)),
+      eq(marketAnalysisCache.analysisVersion, ANALYSIS_VERSION),
+    ))
 
   const filtered = rows
     .filter(isRecommendableCandidate)
@@ -109,6 +112,7 @@ export async function computeRecommendationSnapshot(): Promise<string | null> {
     status: 'running',
     picks: [],
     pickLimit: RECOMMENDATION_PICK_LIMIT,
+    scoringVersion: ANALYSIS_VERSION,
   }).returning({ id: marketRecommendationSnapshots.id })
 
   const snapshotId = running.id
@@ -123,6 +127,7 @@ export async function computeRecommendationSnapshot(): Promise<string | null> {
       candidateCount,
       cachedCount,
       totalSymbols,
+      scoringVersion: ANALYSIS_VERSION,
       completedAt: new Date(),
     }).where(eq(marketRecommendationSnapshots.id, snapshotId))
 
@@ -162,10 +167,14 @@ export function formatSnapshotUpdatedLabel(completedAt: Date | string | null): s
 export async function ensureRecommendationSnapshotFresh(): Promise<void> {
   const latest = await getLatestCompletedSnapshot()
   const maxAgeMs = RECOMMENDATION_INTERVAL_HOURS * 60 * 60 * 1000
-  const stale = !latest?.completedAt
+  const versionStale = !latest || (latest.scoringVersion ?? 1) < ANALYSIS_VERSION
+  const timeStale = !latest?.completedAt
     || (Date.now() - new Date(latest.completedAt).getTime() > maxAgeMs)
 
-  if (stale && !snapshotLock) {
+  if ((versionStale || timeStale) && !snapshotLock) {
+    if (versionStale) {
+      console.log(`[recommendation] Scoring version ${latest?.scoringVersion ?? 1} → ${ANALYSIS_VERSION}, recomputing snapshot`)
+    }
     computeRecommendationSnapshot().catch(err => {
       console.error('[recommendation] Background snapshot failed:', err)
     })

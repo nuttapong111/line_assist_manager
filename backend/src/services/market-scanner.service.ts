@@ -4,7 +4,7 @@ import { eq, desc, gte, sql, asc } from 'drizzle-orm'
 import { MARKET_UNIVERSE, resolveYahooSymbol } from '../data/market-universe'
 import { THAI_SET_SYMBOLS } from '../data/thai-set-symbols'
 import { fetchUsSymbolsFromNasdaqTrader } from './us-market-symbols.service'
-import { analyzeStock, BUY_SIGNAL_THRESHOLD } from './investment.service'
+import { analyzeStock, BUY_SIGNAL_THRESHOLD, ANALYSIS_VERSION } from './investment.service'
 import { compareAnalysisRank } from './analysis-ranking'
 import { registerYahooSymbol, clearYahooSymbolMap } from './yahoo.service'
 import { hasFinnhubKey } from './news.service'
@@ -267,6 +267,7 @@ async function upsertAnalysisCache(
     exchange,
     normalizedScore: String(analysis.normalizedScore),
     tieBreakScore: String(analysis.tieBreakScore ?? 0),
+    analysisVersion: ANALYSIS_VERSION,
     overall: analysis.overall,
     price: analysis.price != null ? String(analysis.price) : null,
     changePct: analysis.changePct != null ? String(analysis.changePct) : null,
@@ -278,6 +279,7 @@ async function upsertAnalysisCache(
       exchange,
       normalizedScore: String(analysis.normalizedScore),
       tieBreakScore: String(analysis.tieBreakScore ?? 0),
+      analysisVersion: ANALYSIS_VERSION,
       overall: analysis.overall,
       price: analysis.price != null ? String(analysis.price) : null,
       changePct: analysis.changePct != null ? String(analysis.changePct) : null,

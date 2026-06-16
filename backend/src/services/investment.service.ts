@@ -19,6 +19,8 @@ import { isThaiListedSymbol } from '../data/thai-set-symbols'
 
 /** คะแนนรวม (normalized -1..1) ที่ถือว่ามีสัญญาณซื้อน่าพิจารณา */
 export const BUY_SIGNAL_THRESHOLD = Number(process.env.SIGNAL_BUY_THRESHOLD || '0.35')
+/** เวอร์ชันสูตรวิเคราะห์ — เปลี่ยนเมื่อปรับตัวชี้วัด แล้วบังคับ snapshot ใหม่ */
+export const ANALYSIS_VERSION = Number(process.env.ANALYSIS_VERSION || '2')
 
 /** @deprecated ใช้ MARKET_SCAN_SYMBOLS จาก market-universe */
 export const DEFAULT_SCAN_SYMBOLS = MARKET_SCAN_SYMBOLS
@@ -276,7 +278,7 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
 
   if (!snapshot || snapshot.picks.length === 0) {
   const progressLine = progress.total > 0
-    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}\n⏳ กำลังจัดอันดับหุ้นแนะนำครั้งแรก (ทุก ${RECOMMENDATION_INTERVAL_HOURS} ชม.)`
+    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}\n⏳ กำลังอัปเดตคะแนนสูตรใหม่ (v${(await import('./investment.service')).ANALYSIS_VERSION}) — ลองถามใหม่ใน 15–30 นาที`
     : '🔄 กำลังเริ่มสแกนทั้งตลาดในพื้นหลัง...'
 
     const topRows = await (await import('./market-scanner.service')).getCachedTopScores(3)
