@@ -242,20 +242,78 @@ function formatTopStockPicks(
 }
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
-  const { symbols, watchlistSymbols, watchlistCount, marketCount } = await buildScanUniverse(userId)
-  const results = await collectStockAnalyses(symbols)
+  const {
+    getCachedBuySignals,
+    getCachedTopScores,
+    getMarketScanProgress,
+    runMarketScanBatch,
+  } = await import('./market-scanner.service')
 
-  const universeLabel = getUniverseScanLabel()
-  const sourceLabel = watchlistCount > 0
-    ? `🔍 สแกน ${symbols.length} ตัว (${universeLabel} + watchlist ${watchlistCount} ตัว)`
-    : `🔍 สแกน ${marketCount} ตัว (${universeLabel})`
+  const watched = await getWatchedAssets(userId)
+  const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
+  const progress = await getMarketScanProgress()
+  const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
 
+  // เร่งสแกน batch ถัดไปในพื้นหลัง (ไม่รอ)
+  runMarketScanBatch().catch(err => console.error('[investment] background scan failed:', err))
+
+  const buyRows = await getCachedBuySignals(5)
+  const progressLine = progress.total > 0
+    ? `🔄 สแกนทั้งตลาดแล้ว ${progress.cachedCount}/${progress.total} ตัว`
+    : '🔄 กำลังเริ่มสแกนทั้งตลาดในพื้นหลัง...'
+
+  const toAnalysis = (row: typeof buyRows[0]): StockAnalysis => ({
+    symbol: row.symbol,
+    displayName: row.displayName || row.symbol,
+    price: row.price != null ? Number(row.price) : null,
+    changePct: row.changePct != null ? Number(row.changePct) : null,
+    overall: (row.overall as StockAnalysis['overall']) || 'NEUTRAL',
+    normalizedScore: Number(row.normalizedScore ?? 0),
+    indicators: [],
+  })
+
+  if (buyRows.length > 0) {
+    const results = buyRows.map(toAnalysis)
+    return formatTopStockPicks(results, {
+      title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
+      sourceLabel: `${progressLine}\n✅ จากข้อมูลสแกนทั้งตลาด — คะแนน ≥ ${thresholdPct}/100`,
+      requireBuySignal: true,
+      watchlistSymbols,
+      scannedCount: progress.cachedCount,
+    })
+  }
+
+  const topRows = await getCachedTopScores(3)
+  if (topRows.length > 0) {
+    const best = topRows[0]
+    const lines = [
+      `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
+      progressLine,
+      `ยังไม่มีหุ้นที่คะแนนเกิน ${thresholdPct}/100 จากที่สแกนแล้ว`,
+      `score สูงสุด: ${best.displayName} (${best.symbol}) — ${Math.round(Number(best.normalizedScore) * 100)}/100`,
+      '',
+      ...topRows.map((r, i) => {
+        const score = Math.round(Number(r.normalizedScore) * 100)
+        const tag = watchlistSymbols.has(r.symbol) ? ' 📋' : ''
+        return `${i + 1}. ${r.displayName} (${r.symbol}) — ${score}/100${tag}`
+      }),
+      '',
+      'ระบบสแกนต่อเนื่องทุก 5 นาที — ลองถามใหม่ภายหลัง',
+      'ดูรายละเอียด: "NVDA ตอนนี้เป็นอย่างไร"',
+      INVESTMENT_DISCLAIMER,
+    ]
+    return lines.join('\n')
+  }
+
+  // cache ยังว่าง — fallback สแกนเร็วจากรายการหลัก
+  const { symbols, watchlistCount, marketCount } = await buildScanUniverse(userId)
+  const results = await collectStockAnalyses(symbols.slice(0, 20))
   return formatTopStockPicks(results, {
     title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
-    sourceLabel,
+    sourceLabel: `⏳ กำลังสแกนทั้งตลาด (${progress.total || marketCount}+ ตัว) — แสดงผลเบื้องต้น ${results.length} ตัว`,
     requireBuySignal: true,
     watchlistSymbols,
-    scannedCount: symbols.length,
+    scannedCount: results.length,
   })
 }
 

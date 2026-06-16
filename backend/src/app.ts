@@ -55,7 +55,7 @@ app.use(cors({
 }))
 app.get('/health', (_req, res) => res.json({
   status: 'ok',
-  features: ['stock-chat', 'watchlist-chat', 'morning-summary'],
+  features: ['stock-chat', 'watchlist-chat', 'morning-summary', 'market-scan'],
   build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'local',
 }))
 

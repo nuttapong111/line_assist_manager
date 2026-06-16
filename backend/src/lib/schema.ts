@@ -200,3 +200,30 @@ export const newsCache = pgTable('news_cache', {
   url:       text('url'),
   fetchedAt: timestamp('fetched_at').defaultNow(),
 })
+
+export const marketSymbols = pgTable('market_symbols', {
+  symbol:       text('symbol').primaryKey(),
+  exchange:     text('exchange').notNull(),
+  displayName:  text('display_name'),
+  yahooSymbol:  text('yahoo_symbol').notNull(),
+  sortOrder:    integer('sort_order').notNull().default(0),
+})
+
+export const marketAnalysisCache = pgTable('market_analysis_cache', {
+  symbol:          text('symbol').primaryKey(),
+  displayName:     text('display_name'),
+  exchange:        text('exchange'),
+  normalizedScore: numeric('normalized_score', { precision: 6, scale: 4 }),
+  overall:         text('overall'),
+  price:           numeric('price', { precision: 16, scale: 4 }),
+  changePct:       numeric('change_pct', { precision: 8, scale: 4 }),
+  scannedAt:       timestamp('scanned_at').defaultNow(),
+})
+
+export const marketScanState = pgTable('market_scan_state', {
+  id:           text('id').primaryKey().default('global'),
+  cursorIndex:  integer('cursor_index').notNull().default(0),
+  totalSymbols: integer('total_symbols').notNull().default(0),
+  lastCycleAt:  timestamp('last_cycle_at'),
+  updatedAt:    timestamp('updated_at').defaultNow(),
+})

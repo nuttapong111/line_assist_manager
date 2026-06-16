@@ -14,8 +14,17 @@ import { syncFromGoogle } from './gcal.service'
 import { formatBangkokTime } from '../lib/datetime'
 import { fetchAndCacheAllWatchedNews } from './news.service'
 import { sendMorningInvestmentSummaries } from './investment.service'
+import {
+  ensureMarketScanInitialized,
+  runMarketScanBatch,
+  refreshMarketSymbolList,
+} from './market-scanner.service'
 
 export function startScheduler() {
+  // เริ่มสแกนตลาดทั้งหมดแบบ batch
+  ensureMarketScanInitialized()
+    .then(() => runMarketScanBatch())
+    .catch(err => console.error('[market-scan] init failed:', err))
   // Reminders + appointment alerts every minute
   cron.schedule('* * * * *', async () => {
     try {
@@ -70,6 +79,16 @@ export function startScheduler() {
   // News fetch daily 07:00 Bangkok
   cron.schedule('0 7 * * *', async () => {
     try { await fetchAndCacheAllWatchedNews() } catch (err) { console.error('News cron error:', err) }
+  }, { timezone: 'Asia/Bangkok' })
+
+  // สแกนหุ้นทั้งตลาดเป็นชุดทุก 5 นาที
+  cron.schedule('*/5 * * * *', async () => {
+    try { await runMarketScanBatch() } catch (err) { console.error('Market scan cron error:', err) }
+  })
+
+  // รีเฟรชรายชื่อหุ้นจาก Finnhub ทุกเช้า 06:00
+  cron.schedule('0 6 * * *', async () => {
+    try { await refreshMarketSymbolList() } catch (err) { console.error('Market symbol refresh error:', err) }
   }, { timezone: 'Asia/Bangkok' })
 
   console.log('✅ Scheduler started')

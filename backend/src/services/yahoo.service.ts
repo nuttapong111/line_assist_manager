@@ -1,5 +1,22 @@
 import { resolveYahooSymbol } from '../data/market-universe'
 
+const dynamicYahooMap = new Map<string, string>()
+
+export function registerYahooSymbol(appSymbol: string, yahooSymbol: string): void {
+  dynamicYahooMap.set(appSymbol.toUpperCase(), yahooSymbol)
+}
+
+export function clearYahooSymbolMap(): void {
+  dynamicYahooMap.clear()
+}
+
+export function resolveSymbol(symbol: string): string {
+  const upper = symbol.toUpperCase()
+  const dynamic = dynamicYahooMap.get(upper)
+  if (dynamic) return dynamic
+  return resolveYahooSymbol(symbol)
+}
+
 export interface OHLCV {
   date: string
   open: number
@@ -7,10 +24,6 @@ export interface OHLCV {
   low: number
   close: number
   volume: number
-}
-
-export function resolveSymbol(symbol: string): string {
-  return resolveYahooSymbol(symbol)
 }
 
 export async function fetchOHLCV(symbol: string, interval = '1d', count = 200): Promise<OHLCV[]> {
