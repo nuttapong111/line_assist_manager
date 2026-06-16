@@ -23,7 +23,7 @@ import {
 export function startScheduler() {
   // เริ่มสแกนตลาดทั้งหมดแบบ batch
   ensureMarketScanInitialized()
-    .then(() => runMarketScanBatches(2))
+    .then(() => runMarketScanBatches(4))
     .catch(err => console.error('[market-scan] init failed:', err))
   // Reminders + appointment alerts every minute
   cron.schedule('* * * * *', async () => {

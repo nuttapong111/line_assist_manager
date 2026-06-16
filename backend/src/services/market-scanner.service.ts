@@ -10,8 +10,8 @@ import { registerYahooSymbol, clearYahooSymbolMap } from './yahoo.service'
 import { hasFinnhubKey } from './news.service'
 
 const FINNHUB_BASE = 'https://finnhub.io/api/v1'
-const SCAN_BATCH_SIZE = Number(process.env.SCAN_BATCH_SIZE || '15')
-const SCAN_CONCURRENCY = Number(process.env.SCAN_CONCURRENCY || '4')
+const SCAN_BATCH_SIZE = Number(process.env.SCAN_BATCH_SIZE || '40')
+const SCAN_CONCURRENCY = Number(process.env.SCAN_CONCURRENCY || '8')
 const US_SYMBOL_LIMIT = Number(process.env.US_SCAN_LIMIT || '0')
 const DB_UPSERT_BATCH = Number(process.env.DB_UPSERT_BATCH || '500')
 const SCAN_STATE_ID = 'global'
@@ -340,7 +340,7 @@ export async function runMarketScanBatch(): Promise<{ scanned: number; cursor: n
       }
     }))
     if (i + SCAN_CONCURRENCY < batch.length) {
-      await new Promise(r => setTimeout(r, 200))
+      await new Promise(r => setTimeout(r, 100))
     }
   }
 
@@ -359,11 +359,11 @@ export async function runMarketScanBatch(): Promise<{ scanned: number; cursor: n
 }
 
 /** รันหลาย batch ต่อรอบ — ใช้ใน cron เพื่อให้ progress เร็วขึ้น */
-export async function runMarketScanBatches(count = Number(process.env.SCAN_BATCHES_PER_CRON || '4')): Promise<void> {
+export async function runMarketScanBatches(count = Number(process.env.SCAN_BATCHES_PER_CRON || '8')): Promise<void> {
   for (let i = 0; i < count; i++) {
     const result = await runMarketScanBatch()
     if (!result) break
-    if (i < count - 1) await new Promise(r => setTimeout(r, 300))
+    if (i < count - 1) await new Promise(r => setTimeout(r, 150))
   }
 }
 

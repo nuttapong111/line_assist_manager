@@ -158,7 +158,7 @@ async function buildScanUniverse(userId: string) {
   }
 }
 
-const SCAN_CONCURRENCY = Number(process.env.SCAN_CONCURRENCY || '6')
+const SCAN_CONCURRENCY = Number(process.env.SCAN_CONCURRENCY || '8')
 
 async function collectStockAnalyses(
   symbols: { symbol: string; displayName: string }[],
@@ -258,7 +258,7 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
   const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
 
   // เร่งสแกนหลาย batch ในพื้นหลัง
-  runMarketScanBatches(3).catch(err => console.error('[investment] background scan failed:', err))
+  runMarketScanBatches(5).catch(err => console.error('[investment] background scan failed:', err))
 
   const buyRows = await getCachedBuySignals(5)
   const scannedPos = Math.min(progress.cursor, progress.total)
