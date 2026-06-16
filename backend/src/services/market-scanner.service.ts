@@ -45,8 +45,17 @@ async function fetchExchangeSymbols(exchange: 'BK' | 'US'): Promise<SymbolRow[]>
     return []
   }
 
-  let filtered = items.filter(s => !s.type || s.type === 'Common Stock' || s.type === 'EQS')
-  if (exchange === 'US') {
+  let filtered = items
+  if (exchange === 'BK') {
+    // หุ้นไทย + ETF/กองทุนบน SET — อย่ากรอง type เข้มเกินไป
+    filtered = items.filter(s => {
+      const t = (s.type || '').toLowerCase()
+      if (!t) return true
+      if (t.includes('warrant') || t.includes('unit') || t.includes('right')) return false
+      return true
+    })
+  } else {
+    filtered = items.filter(s => !s.type || s.type === 'Common Stock' || s.type === 'EQS' || s.type === 'ETP' || s.type === 'ETF')
     filtered = filtered.filter(s => ['XNAS', 'XNYS', 'ARCX', 'BATS'].includes(s.mic || ''))
     filtered = filtered.slice(0, US_SYMBOL_LIMIT)
   }
@@ -59,7 +68,7 @@ async function fetchExchangeSymbols(exchange: 'BK' | 'US'): Promise<SymbolRow[]>
       : raw
     return {
       symbol: appSymbol,
-      exchange: exchange === 'BK' ? 'SET' : 'US',
+      exchange: exchange === 'BK' ? 'TH_STOCK' : 'US_STOCK',
       displayName: s.description || appSymbol,
       yahooSymbol,
       sortOrder: exchange === 'BK' ? 10 + i : 20 + i,
@@ -237,12 +246,50 @@ export async function runMarketScanBatch(): Promise<{ scanned: number; cursor: n
 export async function getMarketScanProgress() {
   const [state] = await db.select().from(marketScanState).where(eq(marketScanState.id, SCAN_STATE_ID)).limit(1)
   const [cached] = await db.select({ count: sql<number>`count(*)::int` }).from(marketAnalysisCache)
+  const breakdownRows = await db
+    .select({
+      exchange: marketSymbols.exchange,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(marketSymbols)
+    .groupBy(marketSymbols.exchange)
+
+  const breakdown: Record<string, number> = {}
+  for (const row of breakdownRows) {
+    breakdown[row.exchange] = Number(row.count)
+  }
+
+  const thaiStocks = (breakdown.TH_STOCK ?? 0) + (breakdown.SET ?? 0)
+  const thaiFunds = breakdown.TH_FUND ?? 0
+  const usStocks = (breakdown.US_STOCK ?? 0) + (breakdown.US ?? 0)
+  const usEtfs = breakdown.US_ETF ?? 0
+  const commodity = breakdown.COMMODITY ?? 0
+
   return {
     total: state?.totalSymbols ?? 0,
     cursor: state?.cursorIndex ?? 0,
     cachedCount: Number(cached?.count ?? 0),
     lastCycleAt: state?.lastCycleAt ?? null,
+    breakdown: {
+      thaiStocks,
+      thaiFunds,
+      usStocks,
+      usEtfs,
+      commodity,
+      raw: breakdown,
+    },
   }
+}
+
+export function formatScanBreakdownLabel(b: NonNullable<Awaited<ReturnType<typeof getMarketScanProgress>>['breakdown']>): string {
+  const parts = [
+    b.thaiStocks ? `หุ้นไทย ${b.thaiStocks}` : '',
+    b.thaiFunds ? `กองทุน/ETF ไทย ${b.thaiFunds}` : '',
+    b.usStocks ? `หุ้น US ${b.usStocks}` : '',
+    b.usEtfs ? `ETF US ${b.usEtfs}` : '',
+    b.commodity ? `ทองคำ ${b.commodity}` : '',
+  ].filter(Boolean)
+  return parts.join(' + ') || 'กำลังโหลดรายการ...'
 }
 
 export async function getCachedBuySignals(limit = 5, minScore = BUY_SIGNAL_THRESHOLD) {
@@ -266,7 +313,7 @@ export async function ensureMarketScanInitialized(): Promise<void> {
   const [state] = await db.select().from(marketScanState).where(eq(marketScanState.id, SCAN_STATE_ID)).limit(1)
 
   const needsFullRefresh = hasFinnhubKey()
-    && (!state || state.totalSymbols < 200)
+    && (!state || state.totalSymbols < 500)
 
   if (needsFullRefresh) {
     await refreshMarketSymbolList()
