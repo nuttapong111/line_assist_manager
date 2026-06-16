@@ -16,7 +16,7 @@ import {
   isCancelText,
   type PendingType,
 } from '../services/chat-context.service'
-import { buildStockQueryReply, buildStockRecommendReply, buildViFundRecommendReply, buildViStockRecommendReply, buildViOnlyRecommendReply, addSymbolToWatchlist, isAddWatchlistText, isStockRecommendText, isViFundRecommendText, isViStockRecommendText, isViOnlyRecommendText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
+import { buildStockQueryReply, buildViStockQueryReply, buildSupportResistanceQueryReply, buildStockRecommendReply, buildViFundRecommendReply, buildViStockRecommendReply, buildViOnlyRecommendReply, addSymbolToWatchlist, isAddWatchlistText, isStockRecommendText, isViFundRecommendText, isViStockRecommendText, isViOnlyRecommendText, isViStockQueryText, isSupportResistanceQueryText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
 
 const router = Router()
 
@@ -192,6 +192,18 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
     }
 
     const stockSymbol = extractSymbolFromText(text)
+    if (stockSymbol && isViStockQueryText(text) && !isAddWatchlistText(text)) {
+      const reply = await buildViStockQueryReply(stockSymbol)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
+    if (stockSymbol && isSupportResistanceQueryText(text) && !isAddWatchlistText(text)) {
+      const reply = await buildSupportResistanceQueryReply(stockSymbol)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
     if (stockSymbol && isStockRelatedText(text) && !isAddWatchlistText(text)) {
       const reply = await buildStockQueryReply(stockSymbol)
       await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })

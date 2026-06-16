@@ -17,7 +17,7 @@ import {
 } from '../data/market-universe'
 import { isThaiListedSymbol } from '../data/thai-set-symbols'
 import { calcSupportResistance, type SupportResistanceLevels } from './support-resistance.service'
-import { computeValueScore, computeViCompositeScore } from './value-score.service'
+import { computeValueScore, computeViCompositeScore, getValueAnalysis, VI_VALUE_WEIGHT, VI_TECH_WEIGHT, formatScorePct } from './value-score.service'
 import { isViSymbol, isSuperinvestorSymbol } from '../data/vi-universe'
 
 /** คะแนนรวม (normalized -1..1) ที่ถือว่ามีสัญญาณซื้อน่าพิจารณา */
@@ -102,6 +102,20 @@ export function isViOnlyRecommendText(text: string): boolean {
     && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
 }
 
+export function isViStockQueryText(text: string): boolean {
+  const symbol = extractSymbolFromText(text)
+  if (!symbol) return false
+  if (isViFundRecommendText(text)) return false
+  return /(?:^|\s)vi(?:\s|$|ของ)|แนว\s*vi|value\s*invest|มูลค่า(?:พื้นฐาน)?|แนว\s*value/i.test(text)
+}
+
+export function isSupportResistanceQueryText(text: string): boolean {
+  const symbol = extractSymbolFromText(text)
+  if (!symbol) return false
+  if (isViStockQueryText(text)) return false
+  return /แนวรับ|แนวต้าน|support|resistance/i.test(text)
+}
+
 export function isStockRecommendText(text: string): boolean {
   if (isAddWatchlistText(text)) return false
   if (extractSymbolFromText(text)) return false
@@ -132,7 +146,7 @@ export async function analyzeSymbol(symbol: string) {
   return analyzeIndicators(ohlcv)
 }
 
-export async function analyzeStock(symbol: string, displayName?: string): Promise<StockAnalysis | null> {
+export async function analyzeStock(symbol: string, displayName?: string, options?: { includeVi?: boolean }): Promise<StockAnalysis | null> {
   const sym = symbol.toUpperCase()
   try {
     const ohlcv = await fetchOHLCV(sym, '1d', 200)
@@ -146,7 +160,8 @@ export async function analyzeStock(symbol: string, displayName?: string): Promis
     let valueScore: number | null = null
     let viCompositeScore: number | null = null
     let valueReasons: string[] | undefined
-    if (isViSymbol(sym) || isSuperinvestorSymbol(sym)) {
+    const shouldIncludeVi = options?.includeVi || isViSymbol(sym) || isSuperinvestorSymbol(sym)
+    if (shouldIncludeVi) {
       const value = await computeValueScore(sym, ohlcv)
       valueScore = value.score
       valueReasons = value.reasons
@@ -212,6 +227,69 @@ export function formatStockAnalysisMessage(a: StockAnalysis): string {
   ].filter(Boolean)
 
   return lines.join('\n')
+}
+
+export function formatViStockAnalysisMessage(a: StockAnalysis, valueDetail: Awaited<ReturnType<typeof getValueAnalysis>>): string {
+  const valueScore = valueDetail.score
+  const viComposite = computeViCompositeScore(valueScore, a.normalizedScore)
+  const valuePct = Math.round(VI_VALUE_WEIGHT * 100)
+  const techPct = Math.round(VI_TECH_WEIGHT * 100)
+
+  const priceLine = a.price != null
+    ? `ราคา: ${formatAssetPrice(a.symbol, a.price)}${a.changePct != null ? ` (${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(2)}%)` : ''}`
+    : ''
+
+  const srLine = a.supportResistance
+    ? `📍 แนวรับ ${formatAssetPrice(a.symbol, a.supportResistance.support1)} / ${formatAssetPrice(a.symbol, a.supportResistance.support2)} | แนวต้าน ${formatAssetPrice(a.symbol, a.supportResistance.resistance1)} / ${formatAssetPrice(a.symbol, a.supportResistance.resistance2)}`
+    : ''
+
+  const metricLines = valueDetail.metrics.map(m => `• ${m.label}: ${m.value} — ${m.viNote}`)
+
+  const techBrief = a.indicators
+    .filter(i => ['RSI (14)', 'MACD (12,26,9)', 'SMA Trend'].includes(i.name))
+    .map(i => `${i.name.split(' ')[0]} ${i.signal}`)
+    .join(' | ')
+
+  const lines = [
+    `📊 ${a.displayName} (${a.symbol}) — มุมมองแนว VI`,
+    priceLine,
+    '',
+    `คะแนน VI รวม: ${formatScorePct(viComposite)}/100`,
+    `├ มูลค่าพื้นฐาน: ${formatScorePct(valueScore)}/100 (${valuePct}%)`,
+    `└ จังหวะเทคนิค: ${formatScorePct(a.normalizedScore)}/100 (${techPct}%)`,
+    `สไตล์: ${valueDetail.styleLabel}`,
+    '',
+    '📋 พื้นฐานธุรกิจ',
+    ...metricLines,
+    '',
+    '💬 สรุปแนว VI',
+    valueDetail.summary,
+    '',
+    srLine,
+    techBrief ? `\n⏱ จังหวะเทคนิค (ย่อ): ${techBrief}` : '',
+    '',
+    INVESTMENT_DISCLAIMER,
+  ].filter(Boolean)
+
+  return lines.join('\n')
+}
+
+export function formatSupportResistanceMessage(a: StockAnalysis): string {
+  const priceLine = a.price != null
+    ? `ราคา: ${formatAssetPrice(a.symbol, a.price)}${a.changePct != null ? ` (${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(2)}%)` : ''}`
+    : ''
+  const srLine = a.supportResistance
+    ? `📍 แนวรับ ${formatAssetPrice(a.symbol, a.supportResistance.support1)} / ${formatAssetPrice(a.symbol, a.supportResistance.support2)} | แนวต้าน ${formatAssetPrice(a.symbol, a.supportResistance.resistance1)} / ${formatAssetPrice(a.symbol, a.supportResistance.resistance2)}`
+    : 'ยังคำนวณแนวรับ/ต้านไม่ได้'
+
+  return [
+    `📈 ${a.displayName} (${a.symbol})`,
+    priceLine,
+    srLine,
+    '',
+    'คำนวณจาก pivot + swing high/low 60 วัน',
+    INVESTMENT_DISCLAIMER,
+  ].filter(Boolean).join('\n')
 }
 
 async function buildScanUniverse(userId: string) {
@@ -520,6 +598,25 @@ export async function buildStockQueryReply(symbol: string): Promise<string> {
     return `ไม่พบข้อมูลหุ้น ${symbol.toUpperCase()} ครับ\nลองสะกดเช่น PTT, NVDA, AAPL\n\n${INVESTMENT_DISCLAIMER}`
   }
   return formatStockAnalysisMessage(analysis)
+}
+
+export async function buildViStockQueryReply(symbol: string): Promise<string> {
+  const sym = symbol.toUpperCase()
+  const displayName = getMarketAsset(sym)?.displayName || sym
+  const analysis = await analyzeStock(sym, displayName, { includeVi: true })
+  if (!analysis) {
+    return `ไม่พบข้อมูล ${sym} ครับ\nลองสะกดเช่น PTT, NVDA, AAPL\n\n${INVESTMENT_DISCLAIMER}`
+  }
+  const valueDetail = await getValueAnalysis(sym)
+  return formatViStockAnalysisMessage(analysis, valueDetail)
+}
+
+export async function buildSupportResistanceQueryReply(symbol: string): Promise<string> {
+  const analysis = await analyzeStock(symbol)
+  if (!analysis) {
+    return `ไม่พบข้อมูลหุ้น ${symbol.toUpperCase()} ครับ\n\n${INVESTMENT_DISCLAIMER}`
+  }
+  return formatSupportResistanceMessage(analysis)
 }
 
 async function wasRecentlyAlerted(userId: string, symbol: string, hours = 24): Promise<boolean> {
