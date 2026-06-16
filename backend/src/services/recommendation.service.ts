@@ -5,8 +5,11 @@ import { BUY_SIGNAL_THRESHOLD, ANALYSIS_VERSION } from './investment.service'
 import { formatBangkokDate, formatBangkokTime } from '../lib/datetime'
 import { getMarketScanProgress } from './market-scanner.service'
 import { compareAnalysisRank } from './analysis-ranking'
+import { isViFundSymbol, isViStockSymbol } from '../data/vi-universe'
 
 export const RECOMMENDATION_PICK_LIMIT = Number(process.env.RECOMMENDATION_PICK_LIMIT || '20')
+export const VI_FUND_PICK_LIMIT = Number(process.env.VI_FUND_PICK_LIMIT || '5')
+export const VI_STOCK_PICK_LIMIT = Number(process.env.VI_STOCK_PICK_LIMIT || '5')
 export const RECOMMENDATION_INTERVAL_HOURS = Number(process.env.RECOMMENDATION_INTERVAL_HOURS || '8')
 
 export interface RecommendationPick {
@@ -49,6 +52,17 @@ export function isRecommendableCandidate(row: {
   return true
 }
 
+/** รายการแนะนำหุ้น/ETF ทั่วไป — ไม่รวมกองทุนไทย (แยกไว้ในแนว VI) */
+export function isGeneralMarketPick(row: {
+  symbol: string
+  displayName?: string | null
+  exchange?: string | null
+  price?: string | number | null
+}): boolean {
+  if (row.exchange === 'TH_FUND') return false
+  return isRecommendableCandidate(row)
+}
+
 function toPick(row: {
   symbol: string
   displayName: string | null
@@ -70,6 +84,30 @@ function toPick(row: {
   }
 }
 
+export async function getViPicksFromCache(): Promise<{ stocks: RecommendationPick[]; funds: RecommendationPick[] }> {
+  const rows = await db
+    .select()
+    .from(marketAnalysisCache)
+    .where(and(
+      gte(marketAnalysisCache.normalizedScore, String(BUY_SIGNAL_THRESHOLD)),
+      eq(marketAnalysisCache.analysisVersion, ANALYSIS_VERSION),
+    ))
+
+  const stockRows = rows
+    .filter(r => isViStockSymbol(r.symbol) && isRecommendableCandidate(r))
+    .sort(compareAnalysisRank)
+    .slice(0, VI_STOCK_PICK_LIMIT)
+    .map((row, i) => toPick(row, i + 1))
+
+  const fundRows = rows
+    .filter(r => isViFundSymbol(r.symbol) && isRecommendableCandidate(r))
+    .sort(compareAnalysisRank)
+    .slice(0, VI_FUND_PICK_LIMIT)
+    .map((row, i) => toPick(row, i + 1))
+
+  return { stocks: stockRows, funds: fundRows }
+}
+
 let snapshotLock = false
 
 async function rankAllCachedPicks(
@@ -86,7 +124,7 @@ async function rankAllCachedPicks(
     ))
 
   const filtered = rows
-    .filter(isRecommendableCandidate)
+    .filter(isGeneralMarketPick)
     .sort(compareAnalysisRank)
   const picks = filtered
     .slice(0, limit)

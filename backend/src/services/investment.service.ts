@@ -16,6 +16,9 @@ import {
   THAI_MARKET_SYMBOLS,
 } from '../data/market-universe'
 import { isThaiListedSymbol } from '../data/thai-set-symbols'
+import { calcSupportResistance, type SupportResistanceLevels } from './support-resistance.service'
+import { computeValueScore, computeViCompositeScore } from './value-score.service'
+import { isViSymbol, isSuperinvestorSymbol } from '../data/vi-universe'
 
 /** คะแนนรวม (normalized -1..1) ที่ถือว่ามีสัญญาณซื้อน่าพิจารณา */
 export const BUY_SIGNAL_THRESHOLD = Number(process.env.SIGNAL_BUY_THRESHOLD || '0.35')
@@ -38,7 +41,7 @@ export const SYMBOL_ALIASES: Record<string, string> = {
   scb: 'SCB', ไทยพาณิชย์: 'SCB',
   aot: 'AOT', สนามบิน: 'AOT',
   advanc: 'ADVANC', ais: 'ADVANC',
-  set50: 'SET50', tdex: 'TDEX',
+  set50: 'SET50', tdex: 'TDEX', '1div': '1DIV', sethd: '1DIV',
   gold: 'GOLD', ทอง: 'GOLD', ทองคำ: 'GOLD',
   spy: 'SPY', qqq: 'QQQ',
 }
@@ -54,6 +57,10 @@ export interface StockAnalysis {
   normalizedScore: number
   tieBreakScore: number
   indicators: ReturnType<typeof analyzeIndicators>['indicators']
+  supportResistance?: SupportResistanceLevels | null
+  valueScore?: number | null
+  viCompositeScore?: number | null
+  valueReasons?: string[]
 }
 
 export function extractSymbolFromText(text: string): string | null {
@@ -74,7 +81,7 @@ export function extractSymbolFromText(text: string): string | null {
 export function isStockRecommendText(text: string): boolean {
   if (isAddWatchlistText(text)) return false
   if (extractSymbolFromText(text)) return false
-  return /แนะนำ.*หุ้น|หุ้น.*แนะนำ|หุ้นตัวไหน|ตัวไหนดี|หุ้นอะไรดี|น่าสนใจ|ควรดูหุ้น|หุ้นวันนี้/i.test(text)
+  return /แนะนำ.*หุ้น|หุ้น.*แนะนำ|หุ้นตัวไหน|ตัวไหนดี|หุ้นอะไรดี|น่าสนใจ|ควรดูหุ้น|หุ้นวันนี้|แนว\s*vi|value\s*invest|กองทุนแนว|ปันผล.*แนะนำ|แนะนำ.*ปันผล|แนะนำ.*กองทุน/i.test(text)
 }
 
 export function isStockRelatedText(text: string): boolean {
@@ -103,16 +110,32 @@ export async function analyzeStock(symbol: string, displayName?: string): Promis
 
     const analysis = analyzeIndicators(ohlcv)
     const priceData = await fetchCurrentPrice(sym)
+    const price = priceData?.price ?? ohlcv[ohlcv.length - 1]?.close ?? null
+    const supportResistance = calcSupportResistance(ohlcv, price ?? undefined)
+
+    let valueScore: number | null = null
+    let viCompositeScore: number | null = null
+    let valueReasons: string[] | undefined
+    if (isViSymbol(sym) || isSuperinvestorSymbol(sym)) {
+      const value = await computeValueScore(sym, ohlcv)
+      valueScore = value.score
+      valueReasons = value.reasons
+      viCompositeScore = computeViCompositeScore(value.score, analysis.normalizedScore)
+    }
 
     return {
       symbol: sym,
       displayName: displayName || sym,
-      price: priceData?.price ?? ohlcv[ohlcv.length - 1]?.close ?? null,
+      price,
       changePct: priceData?.changePct ?? null,
       overall: analysis.overall,
       normalizedScore: analysis.normalizedScore,
       tieBreakScore: analysis.tieBreakScore,
       indicators: analysis.indicators,
+      supportResistance,
+      valueScore,
+      viCompositeScore,
+      valueReasons,
     }
   } catch (err) {
     console.error(`[investment] analyzeStock failed for ${sym}:`, err)
@@ -132,10 +155,25 @@ export function formatStockAnalysisMessage(a: StockAnalysis): string {
     ? `ราคา: ${formatAssetPrice(a.symbol, a.price)}${a.changePct != null ? ` (${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(2)}%)` : ''}`
     : ''
 
+  const viLine = a.viCompositeScore != null
+    ? `คะแนน VI: ${(Math.round(a.viCompositeScore * 1000) / 10).toFixed(1)}/100 (มูลค่า ${(Math.round((a.valueScore ?? 0) * 1000) / 10).toFixed(1)} / เทคนิค ${(Math.round(a.normalizedScore * 1000) / 10).toFixed(1)})`
+    : ''
+
+  const srLine = a.supportResistance
+    ? `📍 แนวรับ ${formatAssetPrice(a.symbol, a.supportResistance.support1)} / ${formatAssetPrice(a.symbol, a.supportResistance.support2)} | แนวต้าน ${formatAssetPrice(a.symbol, a.supportResistance.resistance1)} / ${formatAssetPrice(a.symbol, a.supportResistance.resistance2)}`
+    : ''
+
+  const valueReasonLine = a.valueReasons?.length
+    ? `💡 มูลค่า: ${a.valueReasons.slice(0, 3).join(' · ')}`
+    : ''
+
   const lines = [
     `📈 ${a.displayName} (${a.symbol})`,
     priceLine,
     `ภาพรวม: ${a.overall} — ${scoreLabel(a.normalizedScore)}`,
+    viLine,
+    srLine,
+    valueReasonLine,
     '',
     ...a.indicators.map(i => `• ${i.name}: ${i.signal} (${i.value})`),
     ...a.indicators.map(i => `  ${i.reason}`),
@@ -186,7 +224,15 @@ async function collectStockAnalyses(
 }
 
 function formatTopStockPicks(
-  results: StockAnalysis[],
+  results: (StockAnalysis | {
+    symbol: string
+    displayName: string
+    normalizedScore: number
+    tieBreakScore?: number
+    price: number | null
+    changePct: number | null
+    supportResistance?: SupportResistanceLevels | null
+  })[],
   options: {
     title: string
     sourceLabel: string
@@ -236,7 +282,11 @@ function formatTopStockPicks(
       const ch = a.changePct != null ? ` ${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(1)}%` : ''
       const price = a.price != null ? ` ${formatAssetPrice(a.symbol, a.price)}` : ''
       const tag = options.watchlistSymbols?.has(a.symbol) ? ' 📋' : ''
-      return `${i + 1}. ${a.displayName} (${a.symbol}) — ${scoreLabel(a.normalizedScore)}${price}${ch}${tag}`
+      const main = `${i + 1}. ${a.displayName} (${a.symbol}) — ${scoreLabel(a.normalizedScore)}${price}${ch}${tag}`
+      const sr = a.supportResistance
+        ? `\n   📍 รับ ${formatAssetPrice(a.symbol, a.supportResistance.support1)} / ${formatAssetPrice(a.symbol, a.supportResistance.support2)} | ต้าน ${formatAssetPrice(a.symbol, a.supportResistance.resistance1)} / ${formatAssetPrice(a.symbol, a.supportResistance.resistance2)}`
+        : ''
+      return main + sr
     }),
     '',
     options.requireBuySignal
@@ -249,6 +299,51 @@ function formatTopStockPicks(
   ].filter(Boolean)
 
   return lines.join('\n')
+}
+
+async function formatViPicksSection(
+  title: string,
+  picks: import('./vi-recommend.service').EnrichedViPick[],
+  watchlistSymbols?: Set<string>,
+): Promise<string> {
+  if (!picks.length) {
+    return `\n\n${title}\nยังไม่มีข้อมูลคะแนน — ระบบกำลังสแกนรายการนี้อยู่`
+  }
+  const { formatViPickLine } = await import('./vi-recommend.service')
+  const lines = [
+    '',
+    title,
+    ...picks.map(p => formatViPickLine(p, watchlistSymbols)),
+  ]
+  return lines.join('\n')
+}
+
+async function buildViRecommendSections(watchlistSymbols: Set<string>): Promise<string> {
+  const { getEnrichedViPicks } = await import('./vi-recommend.service')
+  const { VI_FUND_PICK_LIMIT, VI_STOCK_PICK_LIMIT } = await import('./recommendation.service')
+  const { VI_VALUE_WEIGHT, VI_TECH_WEIGHT } = await import('./value-score.service')
+
+  const { stocks, funds } = await getEnrichedViPicks()
+  if (!stocks.length && !funds.length) return ''
+
+  const valuePct = Math.round(VI_VALUE_WEIGHT * 100)
+  const techPct = Math.round(VI_TECH_WEIGHT * 100)
+  const thresholdPct = Math.round(Number(process.env.VI_COMPOSITE_THRESHOLD || '0.3') * 100)
+
+  return [
+    await formatViPicksSection(`📊 หุ้นแนว VI (คุณภาพ/ปันผล + นักลงทุนดัง) — Top ${stocks.length || VI_STOCK_PICK_LIMIT}`, stocks, watchlistSymbols),
+    await formatViPicksSection(`📊 กองทุน/ETF แนว VI (ดัชนี/ปันผล) — Top ${funds.length || VI_FUND_PICK_LIMIT}`, funds, watchlistSymbols),
+    '',
+    `💡 คะแนน VI = มูลค่า ${valuePct}% + เทคนิค ${techPct}% (≥ ${thresholdPct}/100)`,
+    '📍 แนวรับ/ต้านจาก pivot + swing high/low 60 วัน',
+  ].join('\n')
+}
+
+function appendBeforeDisclaimer(main: string, extra: string): string {
+  if (!extra) return main
+  const idx = main.lastIndexOf(INVESTMENT_DISCLAIMER)
+  if (idx < 0) return `${main}\n${extra}`
+  return `${main.slice(0, idx)}${extra}\n${main.slice(idx)}`
 }
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
@@ -292,42 +387,46 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
         '',
         INVESTMENT_DISCLAIMER,
       ]
-      return lines.join('\n')
+      return appendBeforeDisclaimer(lines.join('\n'), await buildViRecommendSections(watchlistSymbols))
     }
 
     const { symbols } = await buildScanUniverse(userId)
     const results = await collectStockAnalyses(symbols.slice(0, 20))
-    return formatTopStockPicks(results, {
+    return appendBeforeDisclaimer(formatTopStockPicks(results, {
       title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
       sourceLabel: progressLine,
       requireBuySignal: true,
       watchlistSymbols,
       scannedCount: progress.cachedCount,
       pickLimit: RECOMMENDATION_PICK_LIMIT,
-    })
+    }), await buildViRecommendSections(watchlistSymbols))
   }
 
   const progressLine = `🔄 วิเคราะห์แล้ว ${snapshot.cachedCount}/${snapshot.totalSymbols} ตัว | ผ่านเกณฑ์ ${snapshot.candidateCount} ตัว\n📋 ${breakdownLabel}\n📊 ${snapshot.updatedLabel} (จัดอันดับทุก ${RECOMMENDATION_INTERVAL_HOURS} ชม.)`
 
-  const results: StockAnalysis[] = snapshot.picks.map(p => ({
+  const { enrichPicksWithSupportResistance } = await import('./vi-recommend.service')
+  const enrichedPicks = await enrichPicksWithSupportResistance(snapshot.picks)
+
+  const results = enrichedPicks.map(p => ({
     symbol: p.symbol,
     displayName: p.displayName,
     price: p.price,
     changePct: p.changePct,
-    overall: 'NEUTRAL',
+    overall: 'NEUTRAL' as const,
     normalizedScore: p.normalizedScore,
     tieBreakScore: p.tieBreakScore ?? 0,
     indicators: [],
+    supportResistance: p.supportResistance,
   }))
 
-  return formatTopStockPicks(results, {
+  return appendBeforeDisclaimer(formatTopStockPicks(results, {
     title: `📈 หุ้นแนะนำ (${bangkokToday()}) — Top ${snapshot.picks.length}`,
     sourceLabel: `${progressLine}\n✅ เรียงจากคะแนนสูงสุด ≥ ${thresholdPct}/100 (จากที่วิเคราะห์ครบในรอบล่าสุด)`,
     requireBuySignal: true,
     watchlistSymbols,
     scannedCount: snapshot.cachedCount,
     pickLimit: RECOMMENDATION_PICK_LIMIT,
-  })
+  }), await buildViRecommendSections(watchlistSymbols))
 }
 
 export async function buildStockQueryReply(symbol: string): Promise<string> {
