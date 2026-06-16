@@ -5,6 +5,7 @@ import { MARKET_UNIVERSE, resolveYahooSymbol } from '../data/market-universe'
 import { THAI_SET_SYMBOLS } from '../data/thai-set-symbols'
 import { fetchUsSymbolsFromNasdaqTrader } from './us-market-symbols.service'
 import { analyzeStock, BUY_SIGNAL_THRESHOLD } from './investment.service'
+import { compareAnalysisRank } from './analysis-ranking'
 import { registerYahooSymbol, clearYahooSymbolMap } from './yahoo.service'
 import { hasFinnhubKey } from './news.service'
 
@@ -265,6 +266,7 @@ async function upsertAnalysisCache(
     displayName: analysis.displayName,
     exchange,
     normalizedScore: String(analysis.normalizedScore),
+    tieBreakScore: String(analysis.tieBreakScore ?? 0),
     overall: analysis.overall,
     price: analysis.price != null ? String(analysis.price) : null,
     changePct: analysis.changePct != null ? String(analysis.changePct) : null,
@@ -275,6 +277,7 @@ async function upsertAnalysisCache(
       displayName: analysis.displayName,
       exchange,
       normalizedScore: String(analysis.normalizedScore),
+      tieBreakScore: String(analysis.tieBreakScore ?? 0),
       overall: analysis.overall,
       price: analysis.price != null ? String(analysis.price) : null,
       changePct: analysis.changePct != null ? String(analysis.changePct) : null,
@@ -406,20 +409,34 @@ export function formatScanBreakdownLabel(b: NonNullable<Awaited<ReturnType<typeo
 }
 
 export async function getCachedBuySignals(limit = 5, minScore = BUY_SIGNAL_THRESHOLD) {
-  return db
+  const rows = await db
     .select()
     .from(marketAnalysisCache)
     .where(gte(marketAnalysisCache.normalizedScore, String(minScore)))
-    .orderBy(desc(marketAnalysisCache.normalizedScore))
-    .limit(limit)
+    .orderBy(desc(marketAnalysisCache.normalizedScore), desc(marketAnalysisCache.tieBreakScore))
+    .limit(limit * 3)
+
+  return rows
+    .sort((a, b) => compareAnalysisRank(
+      { symbol: a.symbol, normalizedScore: a.normalizedScore, tieBreakScore: a.tieBreakScore, exchange: a.exchange },
+      { symbol: b.symbol, normalizedScore: b.normalizedScore, tieBreakScore: b.tieBreakScore, exchange: b.exchange },
+    ))
+    .slice(0, limit)
 }
 
 export async function getCachedTopScores(limit = 3) {
-  return db
+  const rows = await db
     .select()
     .from(marketAnalysisCache)
-    .orderBy(desc(marketAnalysisCache.normalizedScore))
-    .limit(limit)
+    .orderBy(desc(marketAnalysisCache.normalizedScore), desc(marketAnalysisCache.tieBreakScore))
+    .limit(limit * 3)
+
+  return rows
+    .sort((a, b) => compareAnalysisRank(
+      { symbol: a.symbol, normalizedScore: a.normalizedScore, tieBreakScore: a.tieBreakScore, exchange: a.exchange },
+      { symbol: b.symbol, normalizedScore: b.normalizedScore, tieBreakScore: b.tieBreakScore, exchange: b.exchange },
+    ))
+    .slice(0, limit)
 }
 
 export async function ensureMarketScanInitialized(): Promise<void> {

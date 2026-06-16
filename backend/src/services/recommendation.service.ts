@@ -4,6 +4,7 @@ import { desc, eq, gte } from 'drizzle-orm'
 import { BUY_SIGNAL_THRESHOLD } from './investment.service'
 import { formatBangkokDate, formatBangkokTime } from '../lib/datetime'
 import { getMarketScanProgress } from './market-scanner.service'
+import { compareAnalysisRank } from './analysis-ranking'
 
 export const RECOMMENDATION_PICK_LIMIT = Number(process.env.RECOMMENDATION_PICK_LIMIT || '20')
 export const RECOMMENDATION_INTERVAL_HOURS = Number(process.env.RECOMMENDATION_INTERVAL_HOURS || '8')
@@ -14,6 +15,7 @@ export interface RecommendationPick {
   displayName: string
   exchange: string | null
   normalizedScore: number
+  tieBreakScore: number
   price: number | null
   changePct: number | null
 }
@@ -52,6 +54,7 @@ function toPick(row: {
   displayName: string | null
   exchange: string | null
   normalizedScore: string | null
+  tieBreakScore?: string | null
   price: string | null
   changePct: string | null
 }, rank: number): RecommendationPick {
@@ -61,6 +64,7 @@ function toPick(row: {
     displayName: row.displayName || row.symbol,
     exchange: row.exchange,
     normalizedScore: Number(row.normalizedScore ?? 0),
+    tieBreakScore: Number(row.tieBreakScore ?? 0),
     price: row.price != null ? Number(row.price) : null,
     changePct: row.changePct != null ? Number(row.changePct) : null,
   }
@@ -77,9 +81,10 @@ async function rankAllCachedPicks(
     .select()
     .from(marketAnalysisCache)
     .where(gte(marketAnalysisCache.normalizedScore, String(minScore)))
-    .orderBy(desc(marketAnalysisCache.normalizedScore))
 
-  const filtered = rows.filter(isRecommendableCandidate)
+  const filtered = rows
+    .filter(isRecommendableCandidate)
+    .sort(compareAnalysisRank)
   const picks = filtered
     .slice(0, limit)
     .map((row, i) => toPick(row, i + 1))

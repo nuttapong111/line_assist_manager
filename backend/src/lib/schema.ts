@@ -214,6 +214,7 @@ export const marketAnalysisCache = pgTable('market_analysis_cache', {
   displayName:     text('display_name'),
   exchange:        text('exchange'),
   normalizedScore: numeric('normalized_score', { precision: 6, scale: 4 }),
+  tieBreakScore:   numeric('tie_break_score', { precision: 8, scale: 4 }).default('0'),
   overall:         text('overall'),
   price:           numeric('price', { precision: 16, scale: 4 }),
   changePct:       numeric('change_pct', { precision: 8, scale: 4 }),

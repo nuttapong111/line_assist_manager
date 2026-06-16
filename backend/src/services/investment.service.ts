@@ -50,6 +50,7 @@ export interface StockAnalysis {
   changePct: number | null
   overall: 'BULLISH' | 'BEARISH' | 'NEUTRAL'
   normalizedScore: number
+  tieBreakScore: number
   indicators: ReturnType<typeof analyzeIndicators>['indicators']
 }
 
@@ -108,6 +109,7 @@ export async function analyzeStock(symbol: string, displayName?: string): Promis
       changePct: priceData?.changePct ?? null,
       overall: analysis.overall,
       normalizedScore: analysis.normalizedScore,
+      tieBreakScore: analysis.tieBreakScore,
       indicators: analysis.indicators,
     }
   } catch (err) {
@@ -117,7 +119,7 @@ export async function analyzeStock(symbol: string, displayName?: string): Promis
 }
 
 function scoreLabel(score: number): string {
-  const pct = Math.round(score * 100)
+  const pct = (Math.round(score * 1000) / 10).toFixed(1)
   if (score >= BUY_SIGNAL_THRESHOLD) return `สัญญาณซื้อ (${pct}/100)`
   if (score <= -BUY_SIGNAL_THRESHOLD) return `สัญญาณขาย (${pct}/100)`
   return `กลางๆ (${pct}/100)`
@@ -197,7 +199,10 @@ function formatTopStockPicks(
   }
 
   const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
-  const sorted = [...results].sort((a, b) => b.normalizedScore - a.normalizedScore)
+  const sorted = [...results].sort((a, b) => {
+    if (b.normalizedScore !== a.normalizedScore) return b.normalizedScore - a.normalizedScore
+    return (b.tieBreakScore ?? 0) - (a.tieBreakScore ?? 0)
+  })
   const buySignals = sorted.filter(s => s.normalizedScore >= BUY_SIGNAL_THRESHOLD)
 
   if (options.requireBuySignal && buySignals.length === 0) {
@@ -309,6 +314,7 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
     changePct: p.changePct,
     overall: 'NEUTRAL',
     normalizedScore: p.normalizedScore,
+    tieBreakScore: p.tieBreakScore ?? 0,
     indicators: [],
   }))
 
