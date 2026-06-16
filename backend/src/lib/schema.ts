@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, text, numeric, boolean,
-  timestamp, date, integer, unique
+  timestamp, date, integer, unique, jsonb
 } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
@@ -226,4 +226,17 @@ export const marketScanState = pgTable('market_scan_state', {
   totalSymbols: integer('total_symbols').notNull().default(0),
   lastCycleAt:  timestamp('last_cycle_at'),
   updatedAt:    timestamp('updated_at').defaultNow(),
+})
+
+export const marketRecommendationSnapshots = pgTable('market_recommendation_snapshots', {
+  id:             uuid('id').primaryKey().defaultRandom(),
+  status:         text('status').notNull().default('running'),
+  picks:          jsonb('picks').notNull().default([]),
+  pickLimit:      integer('pick_limit').notNull().default(20),
+  candidateCount: integer('candidate_count').notNull().default(0),
+  cachedCount:    integer('cached_count').notNull().default(0),
+  totalSymbols:   integer('total_symbols').notNull().default(0),
+  startedAt:      timestamp('started_at').defaultNow().notNull(),
+  completedAt:    timestamp('completed_at'),
+  errorMessage:   text('error_message'),
 })

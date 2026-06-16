@@ -189,6 +189,7 @@ function formatTopStockPicks(
     requireBuySignal?: boolean
     watchlistSymbols?: Set<string>
     scannedCount?: number
+    pickLimit?: number
   },
 ): string {
   if (!results.length) {
@@ -215,8 +216,9 @@ function formatTopStockPicks(
     return lines.join('\n')
   }
 
-  const top = options.requireBuySignal ? buySignals.slice(0, 5) : (
-    buySignals.length > 0 ? buySignals.slice(0, 5) : sorted.slice(0, 3)
+  const pickLimit = options.pickLimit ?? 20
+  const top = options.requireBuySignal ? buySignals.slice(0, pickLimit) : (
+    buySignals.length > 0 ? buySignals.slice(0, pickLimit) : sorted.slice(0, Math.min(3, pickLimit))
   )
 
   const lines = [
@@ -244,12 +246,16 @@ function formatTopStockPicks(
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
   const {
-    getCachedTopScores,
     getMarketScanProgress,
     formatScanBreakdownLabel,
     runMarketScanBatches,
   } = await import('./market-scanner.service')
-  const { getStableDailyBuySignals } = await import('./recommendation.service')
+  const {
+    getRecommendationSnapshotForDisplay,
+    ensureRecommendationSnapshotFresh,
+    RECOMMENDATION_PICK_LIMIT,
+    RECOMMENDATION_INTERVAL_HOURS,
+  } = await import('./recommendation.service')
 
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
@@ -258,66 +264,61 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
   const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
 
   runMarketScanBatches(5).catch(err => console.error('[investment] background scan failed:', err))
+  ensureRecommendationSnapshotFresh().catch(err => console.error('[investment] snapshot refresh failed:', err))
 
-  const { picks: buyRows, lockedForToday } = await getStableDailyBuySignals(5)
+  const snapshot = await getRecommendationSnapshotForDisplay()
   const scannedPos = Math.min(progress.cursor, progress.total)
-  const lockNote = lockedForToday ? '🔒 รายการนี้คงที่ทั้งวัน (อัปเดตใหม่พรุ่งนี้)' : ''
+
+  if (!snapshot || snapshot.picks.length === 0) {
   const progressLine = progress.total > 0
-    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}${lockNote ? `\n${lockNote}` : ''}`
+    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}\n⏳ กำลังจัดอันดับหุ้นแนะนำครั้งแรก (ทุก ${RECOMMENDATION_INTERVAL_HOURS} ชม.)`
     : '🔄 กำลังเริ่มสแกนทั้งตลาดในพื้นหลัง...'
 
-  const toAnalysis = (row: typeof buyRows[0]): StockAnalysis => ({
-    symbol: row.symbol,
-    displayName: row.displayName || row.symbol,
-    price: row.price != null ? Number(row.price) : null,
-    changePct: row.changePct != null ? Number(row.changePct) : null,
-    overall: (row.overall as StockAnalysis['overall']) || 'NEUTRAL',
-    normalizedScore: Number(row.normalizedScore ?? 0),
-    indicators: [],
-  })
+    const topRows = await (await import('./market-scanner.service')).getCachedTopScores(3)
+    if (topRows.length > 0) {
+      const best = topRows[0]
+      const lines = [
+        `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
+        progressLine,
+        `ยังไม่มี snapshot ที่คำนวณเสร็จ — รอสักครู่แล้วถามใหม่`,
+        `score สูงสุดชั่วคราว: ${best.displayName} (${best.symbol}) — ${Math.round(Number(best.normalizedScore) * 100)}/100`,
+        '',
+        INVESTMENT_DISCLAIMER,
+      ]
+      return lines.join('\n')
+    }
 
-  if (buyRows.length > 0) {
-    const results = buyRows.map(toAnalysis)
+    const { symbols } = await buildScanUniverse(userId)
+    const results = await collectStockAnalyses(symbols.slice(0, 20))
     return formatTopStockPicks(results, {
       title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
-      sourceLabel: `${progressLine}\n✅ จากข้อมูลสแกนทั้งตลาด — คะแนน ≥ ${thresholdPct}/100`,
+      sourceLabel: progressLine,
       requireBuySignal: true,
       watchlistSymbols,
       scannedCount: progress.cachedCount,
+      pickLimit: RECOMMENDATION_PICK_LIMIT,
     })
   }
 
-  const topRows = await getCachedTopScores(3)
-  if (topRows.length > 0) {
-    const best = topRows[0]
-    const lines = [
-      `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
-      progressLine,
-      `ยังไม่มีหุ้นที่คะแนนเกิน ${thresholdPct}/100 จากที่สแกนแล้ว`,
-      `score สูงสุด: ${best.displayName} (${best.symbol}) — ${Math.round(Number(best.normalizedScore) * 100)}/100`,
-      '',
-      ...topRows.map((r, i) => {
-        const score = Math.round(Number(r.normalizedScore) * 100)
-        const tag = watchlistSymbols.has(r.symbol) ? ' 📋' : ''
-        return `${i + 1}. ${r.displayName} (${r.symbol}) — ${score}/100${tag}`
-      }),
-      '',
-      'ระบบสแกนต่อเนื่องทุก 5 นาที — ลองถามใหม่ภายหลัง',
-      'ดูรายละเอียด: "NVDA ตอนนี้เป็นอย่างไร"',
-      INVESTMENT_DISCLAIMER,
-    ]
-    return lines.join('\n')
-  }
+  const progressLine = `🔄 วิเคราะห์แล้ว ${snapshot.cachedCount}/${snapshot.totalSymbols} ตัว | ผ่านเกณฑ์ ${snapshot.candidateCount} ตัว\n📋 ${breakdownLabel}\n📊 ${snapshot.updatedLabel} (จัดอันดับทุก ${RECOMMENDATION_INTERVAL_HOURS} ชม.)`
 
-  // cache ยังว่าง — fallback สแกนเร็วจากรายการหลัก
-  const { symbols, watchlistCount, marketCount } = await buildScanUniverse(userId)
-  const results = await collectStockAnalyses(symbols.slice(0, 20))
+  const results: StockAnalysis[] = snapshot.picks.map(p => ({
+    symbol: p.symbol,
+    displayName: p.displayName,
+    price: p.price,
+    changePct: p.changePct,
+    overall: 'NEUTRAL',
+    normalizedScore: p.normalizedScore,
+    indicators: [],
+  }))
+
   return formatTopStockPicks(results, {
-    title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
-    sourceLabel: `⏳ กำลังสแกนทั้งตลาด (${progress.total || marketCount}+ ตัว) — แสดงผลเบื้องต้น ${results.length} ตัว`,
+    title: `📈 หุ้นแนะนำ (${bangkokToday()}) — Top ${snapshot.picks.length}`,
+    sourceLabel: `${progressLine}\n✅ เรียงจากคะแนนสูงสุด ≥ ${thresholdPct}/100 (จากที่วิเคราะห์ครบในรอบล่าสุด)`,
     requireBuySignal: true,
     watchlistSymbols,
-    scannedCount: results.length,
+    scannedCount: snapshot.cachedCount,
+    pickLimit: RECOMMENDATION_PICK_LIMIT,
   })
 }
 

@@ -15,6 +15,13 @@
       "when": 1781600000000,
       "tag": "0001_market_scan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781700000000,
+      "tag": "0002_recommendation_snapshots",
+      "breakpoints": true
     }
   ]
 }

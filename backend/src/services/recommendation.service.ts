@@ -1,17 +1,21 @@
 import { db } from '../lib/db'
-import { marketAnalysisCache } from '../lib/schema'
-import { desc, gte } from 'drizzle-orm'
+import { marketAnalysisCache, marketRecommendationSnapshots } from '../lib/schema'
+import { desc, eq, gte } from 'drizzle-orm'
 import { BUY_SIGNAL_THRESHOLD } from './investment.service'
-import { bangkokToday } from '../lib/datetime'
+import { formatBangkokDate, formatBangkokTime } from '../lib/datetime'
+import { getMarketScanProgress } from './market-scanner.service'
 
-export interface RecommendableRow {
+export const RECOMMENDATION_PICK_LIMIT = Number(process.env.RECOMMENDATION_PICK_LIMIT || '20')
+export const RECOMMENDATION_INTERVAL_HOURS = Number(process.env.RECOMMENDATION_INTERVAL_HOURS || '8')
+
+export interface RecommendationPick {
+  rank: number
   symbol: string
-  displayName: string | null
+  displayName: string
   exchange: string | null
-  normalizedScore: string | null
-  overall: string | null
-  price: string | null
-  changePct: string | null
+  normalizedScore: number
+  price: number | null
+  changePct: number | null
 }
 
 const JUNK_NAME = /\b(WARRANT|WARRANTS|-\s*RIGHTS?|UNITS?|SUBSCRIPTION RECEIPT|DEPOSITARY SHARES? EACH REPRESENTING)\b/i
@@ -28,7 +32,6 @@ export function isRecommendableCandidate(row: {
   const exchange = row.exchange || ''
 
   if (exchange === 'US_FUND' || exchange === 'COMMODITY') return false
-
   if (JUNK_NAME.test(name)) return false
 
   if (exchange === 'US_STOCK' || exchange === 'US_ETF') {
@@ -44,68 +47,160 @@ export function isRecommendableCandidate(row: {
   return true
 }
 
-function scoreOf(row: RecommendableRow): number {
-  return Number(row.normalizedScore ?? 0)
-}
-
-/** เลือกหุ้นไทย + ETF + หุ้น US ให้สมดุล ไม่เอาแต่ตัวเดียวกันซ้ำประเภท */
-export function selectDiversifiedPicks(candidates: RecommendableRow[], limit: number): RecommendableRow[] {
-  const sorted = [...candidates].sort((a, b) => scoreOf(b) - scoreOf(a))
-  const picked: RecommendableRow[] = []
-  const used = new Set<string>()
-
-  const tryPick = (pred: (r: RecommendableRow) => boolean) => {
-    const row = sorted.find(r => pred(r) && !used.has(r.symbol))
-    if (row) {
-      picked.push(row)
-      used.add(row.symbol)
-    }
+function toPick(row: {
+  symbol: string
+  displayName: string | null
+  exchange: string | null
+  normalizedScore: string | null
+  price: string | null
+  changePct: string | null
+}, rank: number): RecommendationPick {
+  return {
+    rank,
+    symbol: row.symbol,
+    displayName: row.displayName || row.symbol,
+    exchange: row.exchange,
+    normalizedScore: Number(row.normalizedScore ?? 0),
+    price: row.price != null ? Number(row.price) : null,
+    changePct: row.changePct != null ? Number(row.changePct) : null,
   }
-
-  tryPick(r => r.exchange === 'TH_STOCK')
-  tryPick(r => r.exchange === 'TH_FUND')
-  tryPick(r => r.exchange === 'US_ETF')
-
-  for (const row of sorted) {
-    if (picked.length >= limit) break
-    if (!used.has(row.symbol)) {
-      picked.push(row)
-      used.add(row.symbol)
-    }
-  }
-
-  return picked.slice(0, limit)
 }
 
-let dailyPicksCache: { date: string; picks: RecommendableRow[] } | null = null
+let snapshotLock = false
 
-export function clearDailyPicksCache(): void {
-  dailyPicksCache = null
-}
-
-/** รายการแนะนำที่ล็อกตลอดวัน (ตามเวลาไทย) — ไม่เปลี่ยนทุกครั้งที่ถาม */
-export async function getStableDailyBuySignals(
-  limit = 5,
+async function rankAllCachedPicks(
+  limit: number,
   minScore = BUY_SIGNAL_THRESHOLD,
-): Promise<{ picks: RecommendableRow[]; lockedForToday: boolean }> {
-  const today = bangkokToday()
-  if (dailyPicksCache?.date === today && dailyPicksCache.picks.length > 0) {
-    return { picks: dailyPicksCache.picks.slice(0, limit), lockedForToday: true }
-  }
-
+): Promise<{ picks: RecommendationPick[]; candidateCount: number; cachedCount: number; totalSymbols: number }> {
+  const progress = await getMarketScanProgress()
   const rows = await db
     .select()
     .from(marketAnalysisCache)
     .where(gte(marketAnalysisCache.normalizedScore, String(minScore)))
     .orderBy(desc(marketAnalysisCache.normalizedScore))
-    .limit(200)
 
   const filtered = rows.filter(isRecommendableCandidate)
-  const picks = selectDiversifiedPicks(filtered, Math.max(limit, 5))
+  const picks = filtered
+    .slice(0, limit)
+    .map((row, i) => toPick(row, i + 1))
 
-  if (picks.length > 0) {
-    dailyPicksCache = { date: today, picks }
+  return {
+    picks,
+    candidateCount: filtered.length,
+    cachedCount: progress.cachedCount,
+    totalSymbols: progress.total,
+  }
+}
+
+/** คำนวณอันดับจาก cache ทั้งตลาด แล้วบันทึก snapshot */
+export async function computeRecommendationSnapshot(): Promise<string | null> {
+  if (snapshotLock) {
+    console.log('[recommendation] Snapshot already running — skip')
+    return null
   }
 
-  return { picks: picks.slice(0, limit), lockedForToday: false }
+  snapshotLock = true
+  const [running] = await db.insert(marketRecommendationSnapshots).values({
+    status: 'running',
+    picks: [],
+    pickLimit: RECOMMENDATION_PICK_LIMIT,
+  }).returning({ id: marketRecommendationSnapshots.id })
+
+  const snapshotId = running.id
+
+  try {
+    console.log('[recommendation] Computing snapshot from full market cache...')
+    const { picks, candidateCount, cachedCount, totalSymbols } = await rankAllCachedPicks(RECOMMENDATION_PICK_LIMIT)
+
+    await db.update(marketRecommendationSnapshots).set({
+      status: 'completed',
+      picks,
+      candidateCount,
+      cachedCount,
+      totalSymbols,
+      completedAt: new Date(),
+    }).where(eq(marketRecommendationSnapshots.id, snapshotId))
+
+    console.log(`[recommendation] Snapshot done: top ${picks.length} from ${candidateCount} candidates (${cachedCount}/${totalSymbols} analyzed)`)
+    return snapshotId
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    await db.update(marketRecommendationSnapshots).set({
+      status: 'failed',
+      errorMessage: message,
+      completedAt: new Date(),
+    }).where(eq(marketRecommendationSnapshots.id, snapshotId))
+    console.error('[recommendation] Snapshot failed:', err)
+    throw err
+  } finally {
+    snapshotLock = false
+  }
+}
+
+export async function getLatestCompletedSnapshot() {
+  const [row] = await db
+    .select()
+    .from(marketRecommendationSnapshots)
+    .where(eq(marketRecommendationSnapshots.status, 'completed'))
+    .orderBy(desc(marketRecommendationSnapshots.completedAt))
+    .limit(1)
+
+  return row ?? null
+}
+
+export function formatSnapshotUpdatedLabel(completedAt: Date | string | null): string {
+  if (!completedAt) return 'ยังไม่มีข้อมูลอัปเดต'
+  const d = typeof completedAt === 'string' ? new Date(completedAt) : completedAt
+  return `อัปเดตล่าสุด: ${formatBangkokDate(d)} ${formatBangkokTime(d)} น.`
+}
+
+export async function ensureRecommendationSnapshotFresh(): Promise<void> {
+  const latest = await getLatestCompletedSnapshot()
+  const maxAgeMs = RECOMMENDATION_INTERVAL_HOURS * 60 * 60 * 1000
+  const stale = !latest?.completedAt
+    || (Date.now() - new Date(latest.completedAt).getTime() > maxAgeMs)
+
+  if (stale && !snapshotLock) {
+    computeRecommendationSnapshot().catch(err => {
+      console.error('[recommendation] Background snapshot failed:', err)
+    })
+  }
+}
+
+export async function getRecommendationSnapshotForDisplay() {
+  const latest = await getLatestCompletedSnapshot()
+  if (!latest) return null
+
+  const picks = (latest.picks as RecommendationPick[]) || []
+  return {
+    snapshotId: latest.id,
+    picks: picks.slice(0, RECOMMENDATION_PICK_LIMIT),
+    candidateCount: latest.candidateCount,
+    cachedCount: latest.cachedCount,
+    totalSymbols: latest.totalSymbols,
+    completedAt: latest.completedAt,
+    updatedLabel: formatSnapshotUpdatedLabel(latest.completedAt),
+  }
+}
+
+/** @deprecated ใช้ getRecommendationSnapshotForDisplay แทน */
+export async function getStableDailyBuySignals(limit = RECOMMENDATION_PICK_LIMIT) {
+  const snapshot = await getRecommendationSnapshotForDisplay()
+  if (!snapshot) return { picks: [], lockedForToday: false }
+  return {
+    picks: snapshot.picks.slice(0, limit).map(p => ({
+      symbol: p.symbol,
+      displayName: p.displayName,
+      exchange: p.exchange,
+      normalizedScore: String(p.normalizedScore),
+      overall: null,
+      price: p.price != null ? String(p.price) : null,
+      changePct: p.changePct != null ? String(p.changePct) : null,
+    })),
+    lockedForToday: true,
+  }
+}
+
+export function clearDailyPicksCache(): void {
+  // no-op — snapshots เก็บใน DB แล้ว
 }

@@ -19,11 +19,16 @@ import {
   runMarketScanBatches,
   refreshMarketSymbolList,
 } from './market-scanner.service'
+import {
+  computeRecommendationSnapshot,
+  ensureRecommendationSnapshotFresh,
+} from './recommendation.service'
 
 export function startScheduler() {
   // เริ่มสแกนตลาดทั้งหมดแบบ batch
   ensureMarketScanInitialized()
     .then(() => runMarketScanBatches(4))
+    .then(() => ensureRecommendationSnapshotFresh())
     .catch(err => console.error('[market-scan] init failed:', err))
   // Reminders + appointment alerts every minute
   cron.schedule('* * * * *', async () => {
@@ -66,13 +71,14 @@ export function startScheduler() {
     try { await checkWatchlistBuySignals() } catch (err) { console.error('Signal cron error:', err) }
   })
 
+  // จัดอันดับหุ้นแนะนำจาก cache ทั้งตลาด ทุก 8 ชม. (00:00 / 08:00 / 16:00 ไทย)
+  cron.schedule('0 */8 * * *', async () => {
+    try { await computeRecommendationSnapshot() } catch (err) { console.error('Recommendation snapshot cron error:', err) }
+  }, { timezone: 'Asia/Bangkok' })
+
   // Morning investment summary 08:00 Bangkok
   cron.schedule('0 8 * * *', async () => {
-    try {
-      const { clearDailyPicksCache } = await import('./recommendation.service')
-      clearDailyPicksCache()
-      await sendMorningInvestmentSummaries()
-    } catch (err) { console.error('Morning summary cron error:', err) }
+    try { await sendMorningInvestmentSummaries() } catch (err) { console.error('Morning summary cron error:', err) }
   }, { timezone: 'Asia/Bangkok' })
 
   // Google Calendar sync every 15 minutes
