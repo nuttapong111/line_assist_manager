@@ -16,14 +16,14 @@ import { fetchAndCacheAllWatchedNews } from './news.service'
 import { sendMorningInvestmentSummaries } from './investment.service'
 import {
   ensureMarketScanInitialized,
-  runMarketScanBatch,
+  runMarketScanBatches,
   refreshMarketSymbolList,
 } from './market-scanner.service'
 
 export function startScheduler() {
   // เริ่มสแกนตลาดทั้งหมดแบบ batch
   ensureMarketScanInitialized()
-    .then(() => runMarketScanBatch())
+    .then(() => runMarketScanBatches(2))
     .catch(err => console.error('[market-scan] init failed:', err))
   // Reminders + appointment alerts every minute
   cron.schedule('* * * * *', async () => {
@@ -81,14 +81,14 @@ export function startScheduler() {
     try { await fetchAndCacheAllWatchedNews() } catch (err) { console.error('News cron error:', err) }
   }, { timezone: 'Asia/Bangkok' })
 
-  // สแกนหุ้นทั้งตลาดเป็นชุดทุก 5 นาที
-  cron.schedule('*/5 * * * *', async () => {
-    try { await runMarketScanBatch() } catch (err) { console.error('Market scan cron error:', err) }
+  // สแกนหุ้นทั้งตลาดเป็นชุดทุก 2 นาที (หลาย batch ต่อรอบ)
+  cron.schedule('*/2 * * * *', async () => {
+    try { await runMarketScanBatches() } catch (err) { console.error('Market scan cron error:', err) }
   })
 
   // รีเฟรชรายชื่อหุ้นจาก Finnhub ทุกเช้า 06:00
   cron.schedule('0 6 * * *', async () => {
-    try { await refreshMarketSymbolList() } catch (err) { console.error('Market symbol refresh error:', err) }
+    try { await refreshMarketSymbolList(true) } catch (err) { console.error('Market symbol refresh error:', err) }
   }, { timezone: 'Asia/Bangkok' })
 
   console.log('✅ Scheduler started')

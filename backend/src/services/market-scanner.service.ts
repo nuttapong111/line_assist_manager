@@ -11,6 +11,17 @@ const SCAN_BATCH_SIZE = Number(process.env.SCAN_BATCH_SIZE || '15')
 const SCAN_CONCURRENCY = Number(process.env.SCAN_CONCURRENCY || '4')
 const US_SYMBOL_LIMIT = Number(process.env.US_SCAN_LIMIT || '400')
 const SCAN_STATE_ID = 'global'
+let scanLock = false
+
+async function withScanLock<T>(fn: () => Promise<T>): Promise<T | null> {
+  if (scanLock) return null
+  scanLock = true
+  try {
+    return await fn()
+  } finally {
+    scanLock = false
+  }
+}
 
 interface SymbolRow {
   symbol: string
@@ -100,14 +111,6 @@ function buildStaticSymbolRows(): SymbolRow[] {
   }))
 }
 
-async function countThaiStocksInDb(): Promise<number> {
-  const [row] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(marketSymbols)
-    .where(eq(marketSymbols.exchange, 'TH_STOCK'))
-  return Number(row?.count ?? 0)
-}
-
 export async function reloadYahooSymbolMap(): Promise<void> {
   clearYahooSymbolMap()
   const rows = await db.select().from(marketSymbols)
@@ -116,7 +119,8 @@ export async function reloadYahooSymbolMap(): Promise<void> {
   }
 }
 
-export async function refreshMarketSymbolList(): Promise<number> {
+export async function refreshMarketSymbolList(resetCursor = false): Promise<number> {
+  const [prevState] = await db.select().from(marketScanState).where(eq(marketScanState.id, SCAN_STATE_ID)).limit(1)
   const merged = new Map<string, SymbolRow>()
 
   for (const row of buildStaticSymbolRows()) merged.set(row.symbol, row)
@@ -141,6 +145,8 @@ export async function refreshMarketSymbolList(): Promise<number> {
 
   const all = [...merged.values()]
   const symbolSet = new Set(all.map(r => r.symbol))
+  const prevCursor = prevState?.cursorIndex ?? 0
+  const nextCursor = resetCursor ? 0 : Math.min(prevCursor, Math.max(all.length - 1, 0))
 
   const existing = await db.select({ symbol: marketSymbols.symbol }).from(marketSymbols)
   for (const row of existing) {
@@ -170,14 +176,14 @@ export async function refreshMarketSymbolList(): Promise<number> {
 
   await db.insert(marketScanState).values({
     id: SCAN_STATE_ID,
-    cursorIndex: 0,
+    cursorIndex: nextCursor,
     totalSymbols: all.length,
     updatedAt: new Date(),
   }).onConflictDoUpdate({
     target: marketScanState.id,
     set: {
       totalSymbols: all.length,
-      cursorIndex: 0,
+      cursorIndex: nextCursor,
       updatedAt: new Date(),
     },
   })
@@ -214,10 +220,11 @@ async function upsertAnalysisCache(
   })
 }
 
-export async function runMarketScanBatch(): Promise<{ scanned: number; cursor: number; total: number }> {
+export async function runMarketScanBatch(): Promise<{ scanned: number; cursor: number; total: number } | null> {
+  return withScanLock(async () => {
   const [state] = await db.select().from(marketScanState).where(eq(marketScanState.id, SCAN_STATE_ID)).limit(1)
   if (!state || state.totalSymbols === 0) {
-    const total = await refreshMarketSymbolList()
+    const total = await refreshMarketSymbolList(false)
     return { scanned: 0, cursor: 0, total }
   }
 
@@ -268,6 +275,16 @@ export async function runMarketScanBatch(): Promise<{ scanned: number; cursor: n
 
   console.log(`[market-scan] Batch done: ${scanned}/${batch.length}, cursor ${wrapped ? 0 : nextCursor}/${state.totalSymbols}`)
   return { scanned, cursor: wrapped ? 0 : nextCursor, total: state.totalSymbols }
+  })
+}
+
+/** รันหลาย batch ต่อรอบ — ใช้ใน cron เพื่อให้ progress เร็วขึ้น */
+export async function runMarketScanBatches(count = Number(process.env.SCAN_BATCHES_PER_CRON || '4')): Promise<void> {
+  for (let i = 0; i < count; i++) {
+    const result = await runMarketScanBatch()
+    if (!result) break
+    if (i < count - 1) await new Promise(r => setTimeout(r, 300))
+  }
 }
 
 export async function getMarketScanProgress() {
@@ -297,7 +314,9 @@ export async function getMarketScanProgress() {
     total: state?.totalSymbols ?? listedTotal,
     cursor: state?.cursorIndex ?? 0,
     cachedCount: Number(cached?.count ?? 0),
+    scannedPosition: Math.min(state?.cursorIndex ?? 0, state?.totalSymbols ?? listedTotal),
     lastCycleAt: state?.lastCycleAt ?? null,
+    updatedAt: state?.updatedAt ?? null,
     breakdown: {
       thaiStocks,
       thaiFunds,
@@ -340,19 +359,8 @@ export async function getCachedTopScores(limit = 3) {
 export async function ensureMarketScanInitialized(): Promise<void> {
   const [state] = await db.select().from(marketScanState).where(eq(marketScanState.id, SCAN_STATE_ID)).limit(1)
 
-  const needsFullRefresh = hasFinnhubKey() && (
-    !state
-    || state.totalSymbols < 500
-    || (await countThaiStocksInDb()) < 100
-  )
-
-  if (needsFullRefresh) {
-    await refreshMarketSymbolList()
-    return
-  }
-
   if (!state || state.totalSymbols === 0) {
-    await refreshMarketSymbolList()
+    await refreshMarketSymbolList(true)
   } else {
     await reloadYahooSymbolMap()
   }

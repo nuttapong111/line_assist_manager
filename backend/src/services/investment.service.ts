@@ -247,7 +247,7 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
     getCachedTopScores,
     getMarketScanProgress,
     formatScanBreakdownLabel,
-    runMarketScanBatch,
+    runMarketScanBatches,
   } = await import('./market-scanner.service')
 
   const watched = await getWatchedAssets(userId)
@@ -256,12 +256,13 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
   const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
   const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
 
-  // เร่งสแกน batch ถัดไปในพื้นหลัง (ไม่รอ)
-  runMarketScanBatch().catch(err => console.error('[investment] background scan failed:', err))
+  // เร่งสแกนหลาย batch ในพื้นหลัง
+  runMarketScanBatches(3).catch(err => console.error('[investment] background scan failed:', err))
 
   const buyRows = await getCachedBuySignals(5)
+  const scannedPos = Math.min(progress.cursor, progress.total)
   const progressLine = progress.total > 0
-    ? `🔄 วิเคราะห์แล้ว ${progress.cachedCount}/${progress.total} ตัว\n📋 ${breakdownLabel}`
+    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}`
     : '🔄 กำลังเริ่มสแกนทั้งตลาดในพื้นหลัง...'
 
   const toAnalysis = (row: typeof buyRows[0]): StockAnalysis => ({
