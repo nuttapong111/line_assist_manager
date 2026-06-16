@@ -78,16 +78,46 @@ export function extractSymbolFromText(text: string): string | null {
   return null
 }
 
+export function isViFundRecommendText(text: string): boolean {
+  if (isAddWatchlistText(text)) return false
+  if (extractSymbolFromText(text)) return false
+  return /กองทุน|\betf\b|rmf|ltf/i.test(text)
+    && /แนะนำ|แนว\s*vi|value\s*invest|ปันผล|ดัชนี|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
+}
+
+export function isViStockRecommendText(text: string): boolean {
+  if (isAddWatchlistText(text)) return false
+  if (extractSymbolFromText(text)) return false
+  if (isViFundRecommendText(text)) return false
+  return /หุ้น/i.test(text)
+    && /แนว\s*vi|value\s*invest|ปันผล/i.test(text)
+    && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
+}
+
+export function isViOnlyRecommendText(text: string): boolean {
+  if (isViFundRecommendText(text) || isViStockRecommendText(text)) return false
+  if (isAddWatchlistText(text)) return false
+  if (extractSymbolFromText(text)) return false
+  return /แนว\s*vi|value\s*invest/i.test(text)
+    && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
+}
+
 export function isStockRecommendText(text: string): boolean {
   if (isAddWatchlistText(text)) return false
   if (extractSymbolFromText(text)) return false
-  return /แนะนำ.*หุ้น|หุ้น.*แนะนำ|หุ้นตัวไหน|ตัวไหนดี|หุ้นอะไรดี|น่าสนใจ|ควรดูหุ้น|หุ้นวันนี้|แนว\s*vi|value\s*invest|กองทุนแนว|ปันผล.*แนะนำ|แนะนำ.*ปันผล|แนะนำ.*กองทุน/i.test(text)
+  if (isViFundRecommendText(text)) return false
+  if (isViStockRecommendText(text)) return false
+  if (isViOnlyRecommendText(text)) return false
+  return /แนะนำ.*หุ้น|หุ้น.*แนะนำ|หุ้นตัวไหน|ตัวไหนดี|หุ้นอะไรดี|น่าสนใจ|ควรดูหุ้น|หุ้นวันนี้|ปันผล.*แนะนำ|แนะนำ.*ปันผล/i.test(text)
 }
 
 export function isStockRelatedText(text: string): boolean {
   if (extractSymbolFromText(text)) return true
+  if (isViFundRecommendText(text)) return true
+  if (isViStockRecommendText(text)) return true
+  if (isViOnlyRecommendText(text)) return true
   if (isStockRecommendText(text)) return true
-  return /หุ้น|ราคา|วิเคราะห์|macd|rsi|น่าสน|เป็นอย่างไร|ตอนนี้|ลงทุน|portfolio|watchlist|ติดตามหุ้น|สัญญาณซื้อ|bollinger/i.test(text)
+  return /หุ้น|กองทุน|\betf\b|ราคา|วิเคราะห์|macd|rsi|น่าสน|เป็นอย่างไร|ตอนนี้|ลงทุน|portfolio|watchlist|ติดตามหุ้น|สัญญาณซื้อ|bollinger|แนว\s*vi/i.test(text)
 }
 
 export function isAddWatchlistText(text: string): boolean {
@@ -318,32 +348,87 @@ async function formatViPicksSection(
   return lines.join('\n')
 }
 
-async function buildViRecommendSections(watchlistSymbols: Set<string>): Promise<string> {
+async function buildViRecommendSections(watchlistSymbols: Set<string>, mode: 'all' | 'funds' | 'stocks' = 'all'): Promise<string> {
   const { getEnrichedViPicks } = await import('./vi-recommend.service')
   const { VI_FUND_PICK_LIMIT, VI_STOCK_PICK_LIMIT } = await import('./recommendation.service')
   const { VI_VALUE_WEIGHT, VI_TECH_WEIGHT } = await import('./value-score.service')
 
   const { stocks, funds } = await getEnrichedViPicks()
-  if (!stocks.length && !funds.length) return ''
+  const showStocks = mode === 'all' || mode === 'stocks'
+  const showFunds = mode === 'all' || mode === 'funds'
+
+  if (mode === 'funds' && !funds.length) return ''
+  if (mode === 'stocks' && !stocks.length) return ''
+  if (mode === 'all' && !stocks.length && !funds.length) return ''
 
   const valuePct = Math.round(VI_VALUE_WEIGHT * 100)
   const techPct = Math.round(VI_TECH_WEIGHT * 100)
   const thresholdPct = Math.round(Number(process.env.VI_COMPOSITE_THRESHOLD || '0.3') * 100)
 
-  return [
-    await formatViPicksSection(`📊 หุ้นแนว VI (คุณภาพ/ปันผล + นักลงทุนดัง) — Top ${stocks.length || VI_STOCK_PICK_LIMIT}`, stocks, watchlistSymbols),
-    await formatViPicksSection(`📊 กองทุน/ETF แนว VI (ดัชนี/ปันผล) — Top ${funds.length || VI_FUND_PICK_LIMIT}`, funds, watchlistSymbols),
+  const parts: string[] = []
+  if (showStocks) {
+    parts.push(await formatViPicksSection(`📊 หุ้นแนว VI (คุณภาพ/ปันผล + นักลงทุนดัง) — Top ${stocks.length || VI_STOCK_PICK_LIMIT}`, stocks, watchlistSymbols))
+  }
+  if (showFunds) {
+    parts.push(await formatViPicksSection(`📊 กองทุน/ETF แนว VI (ดัชนี/ปันผล) — Top ${funds.length || VI_FUND_PICK_LIMIT}`, funds, watchlistSymbols))
+  }
+  parts.push(
     '',
     `💡 คะแนน VI = มูลค่า ${valuePct}% + เทคนิค ${techPct}% (≥ ${thresholdPct}/100)`,
     '📍 แนวรับ/ต้านจาก pivot + swing high/low 60 วัน',
-  ].join('\n')
+  )
+  return parts.join('\n')
 }
 
-function appendBeforeDisclaimer(main: string, extra: string): string {
-  if (!extra) return main
-  const idx = main.lastIndexOf(INVESTMENT_DISCLAIMER)
-  if (idx < 0) return `${main}\n${extra}`
-  return `${main.slice(0, idx)}${extra}\n${main.slice(idx)}`
+export async function buildViFundRecommendReply(userId: string): Promise<string> {
+  const watched = await getWatchedAssets(userId)
+  const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
+  const body = await buildViRecommendSections(watchlistSymbols, 'funds')
+
+  if (!body) {
+    return [
+      `📊 กองทุน/ETF แนว VI (${bangkokToday()})`,
+      'ยังไม่มีกองทุนที่ผ่านเกณฑ์ — ระบบกำลังวิเคราะห์อยู่ ลองถามใหม่ใน 15–30 นาที',
+      '',
+      INVESTMENT_DISCLAIMER,
+    ].join('\n')
+  }
+
+  return [`📊 กองทุน/ETF แนว VI (${bangkokToday()})`, body, '', INVESTMENT_DISCLAIMER].join('\n')
+}
+
+export async function buildViStockRecommendReply(userId: string): Promise<string> {
+  const watched = await getWatchedAssets(userId)
+  const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
+  const body = await buildViRecommendSections(watchlistSymbols, 'stocks')
+
+  if (!body) {
+    return [
+      `📊 หุ้นแนว VI (${bangkokToday()})`,
+      'ยังไม่มีหุ้นที่ผ่านเกณฑ์ — ระบบกำลังวิเคราะห์อยู่ ลองถามใหม่ใน 15–30 นาที',
+      '',
+      INVESTMENT_DISCLAIMER,
+    ].join('\n')
+  }
+
+  return [`📊 หุ้นแนว VI (${bangkokToday()})`, body, '', INVESTMENT_DISCLAIMER].join('\n')
+}
+
+export async function buildViOnlyRecommendReply(userId: string): Promise<string> {
+  const watched = await getWatchedAssets(userId)
+  const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
+  const body = await buildViRecommendSections(watchlistSymbols, 'all')
+
+  if (!body) {
+    return [
+      `📊 แนะนำแนว VI (${bangkokToday()})`,
+      'ยังไม่มีรายการที่ผ่านเกณฑ์ — ลองถามใหม่ใน 15–30 นาที',
+      '',
+      INVESTMENT_DISCLAIMER,
+    ].join('\n')
+  }
+
+  return [`📊 แนะนำแนว VI (${bangkokToday()})`, body, '', INVESTMENT_DISCLAIMER].join('\n')
 }
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
@@ -387,19 +472,19 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
         '',
         INVESTMENT_DISCLAIMER,
       ]
-      return appendBeforeDisclaimer(lines.join('\n'), await buildViRecommendSections(watchlistSymbols))
+      return lines.join('\n')
     }
 
     const { symbols } = await buildScanUniverse(userId)
     const results = await collectStockAnalyses(symbols.slice(0, 20))
-    return appendBeforeDisclaimer(formatTopStockPicks(results, {
+    return formatTopStockPicks(results, {
       title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
       sourceLabel: progressLine,
       requireBuySignal: true,
       watchlistSymbols,
       scannedCount: progress.cachedCount,
       pickLimit: RECOMMENDATION_PICK_LIMIT,
-    }), await buildViRecommendSections(watchlistSymbols))
+    })
   }
 
   const progressLine = `🔄 วิเคราะห์แล้ว ${snapshot.cachedCount}/${snapshot.totalSymbols} ตัว | ผ่านเกณฑ์ ${snapshot.candidateCount} ตัว\n📋 ${breakdownLabel}\n📊 ${snapshot.updatedLabel} (จัดอันดับทุก ${RECOMMENDATION_INTERVAL_HOURS} ชม.)`
@@ -419,14 +504,14 @@ export async function buildStockRecommendReply(userId: string): Promise<string> 
     supportResistance: p.supportResistance,
   }))
 
-  return appendBeforeDisclaimer(formatTopStockPicks(results, {
+  return formatTopStockPicks(results, {
     title: `📈 หุ้นแนะนำ (${bangkokToday()}) — Top ${snapshot.picks.length}`,
     sourceLabel: `${progressLine}\n✅ เรียงจากคะแนนสูงสุด ≥ ${thresholdPct}/100 (จากที่วิเคราะห์ครบในรอบล่าสุด)`,
     requireBuySignal: true,
     watchlistSymbols,
     scannedCount: snapshot.cachedCount,
     pickLimit: RECOMMENDATION_PICK_LIMIT,
-  }), await buildViRecommendSections(watchlistSymbols))
+  })
 }
 
 export async function buildStockQueryReply(symbol: string): Promise<string> {

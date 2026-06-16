@@ -16,7 +16,7 @@ import {
   isCancelText,
   type PendingType,
 } from '../services/chat-context.service'
-import { buildStockQueryReply, buildStockRecommendReply, addSymbolToWatchlist, isAddWatchlistText, isStockRecommendText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
+import { buildStockQueryReply, buildStockRecommendReply, buildViFundRecommendReply, buildViStockRecommendReply, buildViOnlyRecommendReply, addSymbolToWatchlist, isAddWatchlistText, isStockRecommendText, isViFundRecommendText, isViStockRecommendText, isViOnlyRecommendText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
 
 const router = Router()
 
@@ -143,7 +143,25 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
       return
     }
 
-    // หุ้น / watchlist — จับตรงๆ ก่อน NLP (ไม่พึ่ง Gemini)
+    // หุ้น / กองทุน / watchlist — จับตรงๆ ก่อน NLP (ไม่พึ่ง Gemini)
+    if (isViFundRecommendText(text)) {
+      const reply = await buildViFundRecommendReply(user.id)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
+    if (isViStockRecommendText(text)) {
+      const reply = await buildViStockRecommendReply(user.id)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
+    if (isViOnlyRecommendText(text)) {
+      const reply = await buildViOnlyRecommendReply(user.id)
+      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      return
+    }
+
     if (isStockRecommendText(text)) {
       const reply = await buildStockRecommendReply(user.id)
       await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
