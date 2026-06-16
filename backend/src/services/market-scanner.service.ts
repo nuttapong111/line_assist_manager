@@ -32,7 +32,22 @@ async function finnhubFetch(path: string): Promise<unknown> {
   return res.json()
 }
 
-async function fetchExchangeSymbols(exchange: 'BK' | 'US'): Promise<SymbolRow[]> {
+async function fetchThaiMarketSymbols(): Promise<SymbolRow[]> {
+  for (const exchange of ['BK', 'SET'] as const) {
+    try {
+      const rows = await fetchExchangeSymbols(exchange)
+      if (rows.length > 0) {
+        console.log(`[market-scan] Thai symbols via ${exchange}: ${rows.length}`)
+        return rows
+      }
+    } catch (err) {
+      console.error(`[market-scan] Finnhub ${exchange} fetch failed:`, err)
+    }
+  }
+  return []
+}
+
+async function fetchExchangeSymbols(exchange: 'BK' | 'SET' | 'US'): Promise<SymbolRow[]> {
   const items = await finnhubFetch(`/stock/symbol?exchange=${exchange}`) as Array<{
     symbol: string
     description?: string
@@ -46,8 +61,7 @@ async function fetchExchangeSymbols(exchange: 'BK' | 'US'): Promise<SymbolRow[]>
   }
 
   let filtered = items
-  if (exchange === 'BK') {
-    // หุ้นไทย + ETF/กองทุนบน SET — อย่ากรอง type เข้มเกินไป
+  if (exchange === 'BK' || exchange === 'SET') {
     filtered = items.filter(s => {
       const t = (s.type || '').toLowerCase()
       if (!t) return true
@@ -63,15 +77,15 @@ async function fetchExchangeSymbols(exchange: 'BK' | 'US'): Promise<SymbolRow[]>
   return filtered.map((s, i) => {
     const raw = s.symbol.toUpperCase()
     const appSymbol = raw.replace(/\.BK$/i, '')
-    const yahooSymbol = exchange === 'BK'
-      ? (raw.includes('.') ? raw : `${appSymbol}.BK`)
-      : raw
+    const yahooSymbol = exchange === 'US'
+      ? raw
+      : (raw.includes('.') ? raw : `${appSymbol}.BK`)
     return {
       symbol: appSymbol,
-      exchange: exchange === 'BK' ? 'TH_STOCK' : 'US_STOCK',
+      exchange: exchange === 'US' ? 'US_STOCK' : 'TH_STOCK',
       displayName: s.description || appSymbol,
       yahooSymbol,
-      sortOrder: exchange === 'BK' ? 10 + i : 20 + i,
+      sortOrder: exchange === 'US' ? 20 + i : 10 + i,
     }
   })
 }
@@ -84,6 +98,14 @@ function buildStaticSymbolRows(): SymbolRow[] {
     yahooSymbol: a.yahoo || resolveYahooSymbol(a.symbol),
     sortOrder: i,
   }))
+}
+
+async function countThaiStocksInDb(): Promise<number> {
+  const [row] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(marketSymbols)
+    .where(eq(marketSymbols.exchange, 'TH_STOCK'))
+  return Number(row?.count ?? 0)
 }
 
 export async function reloadYahooSymbolMap(): Promise<void> {
@@ -100,14 +122,9 @@ export async function refreshMarketSymbolList(): Promise<number> {
   for (const row of buildStaticSymbolRows()) merged.set(row.symbol, row)
 
   if (hasFinnhubKey()) {
-    try {
-      const setRows = await fetchExchangeSymbols('BK')
-      for (const row of setRows) {
-        if (!merged.has(row.symbol)) merged.set(row.symbol, row)
-      }
-      console.log(`[market-scan] Finnhub BK (SET): ${setRows.length} symbols`)
-    } catch (err) {
-      console.error('[market-scan] Finnhub BK fetch failed:', err)
+    const setRows = await fetchThaiMarketSymbols()
+    for (const row of setRows) {
+      if (!merged.has(row.symbol)) merged.set(row.symbol, row)
     }
     try {
       const usRows = await fetchExchangeSymbols('US')
@@ -123,6 +140,16 @@ export async function refreshMarketSymbolList(): Promise<number> {
   }
 
   const all = [...merged.values()]
+  const symbolSet = new Set(all.map(r => r.symbol))
+
+  const existing = await db.select({ symbol: marketSymbols.symbol }).from(marketSymbols)
+  for (const row of existing) {
+    if (!symbolSet.has(row.symbol)) {
+      await db.delete(marketSymbols).where(eq(marketSymbols.symbol, row.symbol))
+      await db.delete(marketAnalysisCache).where(eq(marketAnalysisCache.symbol, row.symbol))
+    }
+  }
+
   for (const row of all) {
     await db.insert(marketSymbols).values({
       symbol: row.symbol,
@@ -259,14 +286,15 @@ export async function getMarketScanProgress() {
     breakdown[row.exchange] = Number(row.count)
   }
 
-  const thaiStocks = (breakdown.TH_STOCK ?? 0) + (breakdown.SET ?? 0)
+  const thaiStocks = breakdown.TH_STOCK ?? 0
   const thaiFunds = breakdown.TH_FUND ?? 0
-  const usStocks = (breakdown.US_STOCK ?? 0) + (breakdown.US ?? 0)
+  const usStocks = breakdown.US_STOCK ?? 0
   const usEtfs = breakdown.US_ETF ?? 0
   const commodity = breakdown.COMMODITY ?? 0
+  const listedTotal = thaiStocks + thaiFunds + usStocks + usEtfs + commodity
 
   return {
-    total: state?.totalSymbols ?? 0,
+    total: state?.totalSymbols ?? listedTotal,
     cursor: state?.cursorIndex ?? 0,
     cachedCount: Number(cached?.count ?? 0),
     lastCycleAt: state?.lastCycleAt ?? null,
@@ -312,8 +340,11 @@ export async function getCachedTopScores(limit = 3) {
 export async function ensureMarketScanInitialized(): Promise<void> {
   const [state] = await db.select().from(marketScanState).where(eq(marketScanState.id, SCAN_STATE_ID)).limit(1)
 
-  const needsFullRefresh = hasFinnhubKey()
-    && (!state || state.totalSymbols < 500)
+  const needsFullRefresh = hasFinnhubKey() && (
+    !state
+    || state.totalSymbols < 500
+    || (await countThaiStocksInDb()) < 100
+  )
 
   if (needsFullRefresh) {
     await refreshMarketSymbolList()
