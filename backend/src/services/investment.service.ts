@@ -7,18 +7,19 @@ import { sendPushWithQuotaCheck } from './push.service'
 import { addWatchedAsset, getWatchedAssets } from './portfolio.service'
 import { INVESTMENT_DISCLAIMER } from '../types'
 import { bangkokToday } from '../lib/datetime'
+import {
+  MARKET_SCAN_SYMBOLS,
+  MARKET_UNIVERSE,
+  getMarketAsset,
+  getUniverseScanLabel,
+  formatAssetPrice,
+  THAI_MARKET_SYMBOLS,
+} from '../data/market-universe'
 
 /** คะแนนรวม (normalized -1..1) ที่ถือว่ามีสัญญาณซื้อน่าพิจารณา */
 export const BUY_SIGNAL_THRESHOLD = Number(process.env.SIGNAL_BUY_THRESHOLD || '0.35')
 
-/** หุ้นที่สแกนทั้งตลาด (ไทย + US + ทอง) */
-export const MARKET_SCAN_SYMBOLS = [
-  'PTT', 'KBANK', 'SCB', 'AOT', 'ADVANC', 'KFSDIV',
-  'NVDA', 'AAPL', 'MSFT', 'TSLA',
-  'GOLD',
-] as const
-
-/** @deprecated ใช้ MARKET_SCAN_SYMBOLS */
+/** @deprecated ใช้ MARKET_SCAN_SYMBOLS จาก market-universe */
 export const DEFAULT_SCAN_SYMBOLS = MARKET_SCAN_SYMBOLS
 
 export const SYMBOL_ALIASES: Record<string, string> = {
@@ -26,17 +27,20 @@ export const SYMBOL_ALIASES: Record<string, string> = {
   apple: 'AAPL', aapl: 'AAPL',
   microsoft: 'MSFT', msft: 'MSFT',
   tesla: 'TSLA', tsla: 'TSLA',
+  google: 'GOOGL', googl: 'GOOGL',
+  amazon: 'AMZN', amzn: 'AMZN',
+  meta: 'META', facebook: 'META',
   ptt: 'PTT', ปตท: 'PTT',
   kbank: 'KBANK', กสิกร: 'KBANK',
   scb: 'SCB', ไทยพาณิชย์: 'SCB',
   aot: 'AOT', สนามบิน: 'AOT',
   advanc: 'ADVANC', ais: 'ADVANC',
+  set50: 'SET50', tdex: 'TDEX',
   gold: 'GOLD', ทอง: 'GOLD', ทองคำ: 'GOLD',
+  spy: 'SPY', qqq: 'QQQ',
 }
 
-const KNOWN_SYMBOLS = new Set([
-  'PTT', 'SCB', 'AOT', 'ADVANC', 'KBANK', 'NVDA', 'AAPL', 'MSFT', 'TSLA', 'GOLD', 'KFSDIV',
-])
+const KNOWN_SYMBOLS = new Set(MARKET_SCAN_SYMBOLS)
 
 export interface StockAnalysis {
   symbol: string
@@ -120,7 +124,7 @@ function scoreLabel(score: number): string {
 
 export function formatStockAnalysisMessage(a: StockAnalysis): string {
   const priceLine = a.price != null
-    ? `ราคา: $${a.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}${a.changePct != null ? ` (${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(2)}%)` : ''}`
+    ? `ราคา: ${formatAssetPrice(a.symbol, a.price)}${a.changePct != null ? ` (${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(2)}%)` : ''}`
     : ''
 
   const lines = [
@@ -142,25 +146,37 @@ async function buildScanUniverse(userId: string) {
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
   const merged = new Map<string, string>()
 
-  for (const s of MARKET_SCAN_SYMBOLS) merged.set(s, s)
+  for (const asset of MARKET_UNIVERSE) merged.set(asset.symbol, asset.displayName)
   for (const w of watched) merged.set(w.symbol.toUpperCase(), w.displayName)
 
   return {
     symbols: [...merged.entries()].map(([symbol, displayName]) => ({ symbol, displayName })),
     watchlistSymbols,
     watchlistCount: watched.length,
+    marketCount: MARKET_UNIVERSE.length,
   }
 }
+
+const SCAN_CONCURRENCY = Number(process.env.SCAN_CONCURRENCY || '6')
 
 async function collectStockAnalyses(
   symbols: { symbol: string; displayName: string }[],
 ): Promise<StockAnalysis[]> {
   const results: StockAnalysis[] = []
-  for (const { symbol, displayName } of symbols) {
-    const a = await analyzeStock(symbol, displayName)
-    if (a) results.push(a)
-    await new Promise(r => setTimeout(r, 350))
+
+  for (let i = 0; i < symbols.length; i += SCAN_CONCURRENCY) {
+    const batch = symbols.slice(i, i + SCAN_CONCURRENCY)
+    const batchResults = await Promise.all(
+      batch.map(async ({ symbol, displayName }) => analyzeStock(symbol, displayName)),
+    )
+    for (const a of batchResults) {
+      if (a) results.push(a)
+    }
+    if (i + SCAN_CONCURRENCY < symbols.length) {
+      await new Promise(r => setTimeout(r, 150))
+    }
   }
+
   return results
 }
 
@@ -208,7 +224,7 @@ function formatTopStockPicks(
     '',
     ...top.map((a, i) => {
       const ch = a.changePct != null ? ` ${a.changePct >= 0 ? '+' : ''}${a.changePct.toFixed(1)}%` : ''
-      const price = a.price != null ? ` $${a.price.toFixed(2)}` : ''
+      const price = a.price != null ? ` ${formatAssetPrice(a.symbol, a.price)}` : ''
       const tag = options.watchlistSymbols?.has(a.symbol) ? ' 📋' : ''
       return `${i + 1}. ${a.displayName} (${a.symbol}) — ${scoreLabel(a.normalizedScore)}${price}${ch}${tag}`
     }),
@@ -226,12 +242,13 @@ function formatTopStockPicks(
 }
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
-  const { symbols, watchlistSymbols, watchlistCount } = await buildScanUniverse(userId)
+  const { symbols, watchlistSymbols, watchlistCount, marketCount } = await buildScanUniverse(userId)
   const results = await collectStockAnalyses(symbols)
 
+  const universeLabel = getUniverseScanLabel()
   const sourceLabel = watchlistCount > 0
-    ? `🔍 สแกน ${symbols.length} ตัว (ตลาด + watchlist ${watchlistCount} ตัว)`
-    : `🔍 สแกน ${symbols.length} ตัวจากตลาด`
+    ? `🔍 สแกน ${symbols.length} ตัว (${universeLabel} + watchlist ${watchlistCount} ตัว)`
+    : `🔍 สแกน ${marketCount} ตัว (${universeLabel})`
 
   return formatTopStockPicks(results, {
     title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
@@ -282,7 +299,7 @@ export async function checkWatchlistBuySignals(): Promise<void> {
     const text = [
       `🔔 สัญญาณซื้อ — ${asset.displayName} (${asset.symbol})`,
       `คะแนนรวม: ${Math.round(analysis.normalizedScore * 100)}/100`,
-      analysis.price != null ? `ราคา: $${analysis.price.toLocaleString()}` : '',
+      analysis.price != null ? `ราคา: ${formatAssetPrice(asset.symbol, analysis.price)}` : '',
       '',
       ...analysis.indicators.map(i => `• ${i.name}: ${i.signal} — ${i.reason}`),
       '',
@@ -317,7 +334,7 @@ export async function sendMorningInvestmentSummaries(): Promise<void> {
 
       const text = formatTopStockPicks(results, {
         title: `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()})`,
-        sourceLabel: `🔍 สแกน ${symbols.length} ตัว (ตลาด + watchlist)`,
+        sourceLabel: `🔍 สแกน ${symbols.length} ตัว (${getUniverseScanLabel()})`,
         watchlistSymbols,
       })
 
@@ -341,8 +358,8 @@ export async function addSymbolToWatchlist(userId: string, symbol: string): Prom
     await addWatchedAsset(userId, {
       symbol: sym,
       display_name: displayName,
-      asset_type: ['PTT', 'KBANK', 'SCB', 'AOT', 'ADVANC', 'KFSDIV'].includes(sym) ? 'TH_STOCK' : 'US_STOCK',
-      currency: ['PTT', 'KBANK', 'SCB', 'AOT', 'ADVANC', 'KFSDIV'].includes(sym) ? 'THB' : 'USD',
+      asset_type: THAI_MARKET_SYMBOLS.has(sym) || getMarketAsset(sym)?.category === 'TH_FUND' ? 'TH_STOCK' : 'US_STOCK',
+      currency: getMarketAsset(sym)?.currency === 'THB' ? 'THB' : 'USD',
     })
   } catch (err) {
     console.error(`[investment] addWatchedAsset failed for ${sym}:`, err)
@@ -355,7 +372,7 @@ export async function addSymbolToWatchlist(userId: string, symbol: string): Prom
     if (analysis) {
       scoreText = `\nคะแนนตอนนี้: ${Math.round(analysis.normalizedScore * 100)}/100 (${analysis.overall})`
       if (analysis.price != null) {
-        scoreText += `\nราคา: $${analysis.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        scoreText += `\nราคา: ${formatAssetPrice(sym, analysis.price)}`
       }
     }
   } catch (err) {

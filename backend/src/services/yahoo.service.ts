@@ -1,10 +1,4 @@
-const SYMBOL_MAP: Record<string, string> = {
-  PTT: 'PTT.BK', SCB: 'SCB.BK', AOT: 'AOT.BK',
-  ADVANC: 'ADVANC.BK', KBANK: 'KBANK.BK',
-  NVDA: 'NVDA', AAPL: 'AAPL', MSFT: 'MSFT', TSLA: 'TSLA',
-  GOLD: 'GC=F', XAUUSD: 'XAUUSD=X',
-  KFSDIV: 'KFSDIV-A.BK',
-}
+import { resolveYahooSymbol } from '../data/market-universe'
 
 export interface OHLCV {
   date: string
@@ -16,7 +10,7 @@ export interface OHLCV {
 }
 
 export function resolveSymbol(symbol: string): string {
-  return SYMBOL_MAP[symbol.toUpperCase()] || symbol
+  return resolveYahooSymbol(symbol)
 }
 
 export async function fetchOHLCV(symbol: string, interval = '1d', count = 200): Promise<OHLCV[]> {
@@ -24,7 +18,7 @@ export async function fetchOHLCV(symbol: string, interval = '1d', count = 200): 
   const period1 = Math.floor((Date.now() - count * 86400000) / 1000)
   const period2 = Math.floor(Date.now() / 1000)
 
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?period1=${period1}&period2=${period2}&interval=${interval}`
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?period1=${period1}&period2=${period2}&interval=${interval}`
 
   try {
     const res = await fetch(url, {
@@ -62,7 +56,7 @@ export async function fetchOHLCV(symbol: string, interval = '1d', count = 200): 
       volume: quote.volume?.[i] ?? 0,
     })).filter(d => d.close > 0)
   } catch (err) {
-    console.error('Yahoo fetch error:', err)
+    console.error('Yahoo fetch error:', yahooSymbol, err)
     return []
   }
 }
