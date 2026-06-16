@@ -32,7 +32,7 @@ async function finnhubFetch(path: string): Promise<unknown> {
   return res.json()
 }
 
-async function fetchExchangeSymbols(exchange: 'SET' | 'US'): Promise<SymbolRow[]> {
+async function fetchExchangeSymbols(exchange: 'BK' | 'US'): Promise<SymbolRow[]> {
   const items = await finnhubFetch(`/stock/symbol?exchange=${exchange}`) as Array<{
     symbol: string
     description?: string
@@ -40,19 +40,31 @@ async function fetchExchangeSymbols(exchange: 'SET' | 'US'): Promise<SymbolRow[]
     mic?: string
   }>
 
+  if (!Array.isArray(items) || items.length === 0) {
+    console.warn(`[market-scan] Finnhub returned empty list for ${exchange}`)
+    return []
+  }
+
   let filtered = items.filter(s => !s.type || s.type === 'Common Stock' || s.type === 'EQS')
   if (exchange === 'US') {
     filtered = filtered.filter(s => ['XNAS', 'XNYS', 'ARCX', 'BATS'].includes(s.mic || ''))
     filtered = filtered.slice(0, US_SYMBOL_LIMIT)
   }
 
-  return filtered.map((s, i) => ({
-    symbol: s.symbol.toUpperCase(),
-    exchange,
-    displayName: s.description || s.symbol,
-    yahooSymbol: exchange === 'SET' ? `${s.symbol.toUpperCase()}.BK` : s.symbol.toUpperCase(),
-    sortOrder: exchange === 'SET' ? 10 + i : 20 + i,
-  }))
+  return filtered.map((s, i) => {
+    const raw = s.symbol.toUpperCase()
+    const appSymbol = raw.replace(/\.BK$/i, '')
+    const yahooSymbol = exchange === 'BK'
+      ? (raw.includes('.') ? raw : `${appSymbol}.BK`)
+      : raw
+    return {
+      symbol: appSymbol,
+      exchange: exchange === 'BK' ? 'SET' : 'US',
+      displayName: s.description || appSymbol,
+      yahooSymbol,
+      sortOrder: exchange === 'BK' ? 10 + i : 20 + i,
+    }
+  })
 }
 
 function buildStaticSymbolRows(): SymbolRow[] {
@@ -80,17 +92,22 @@ export async function refreshMarketSymbolList(): Promise<number> {
 
   if (hasFinnhubKey()) {
     try {
-      const setRows = await fetchExchangeSymbols('SET')
+      const setRows = await fetchExchangeSymbols('BK')
       for (const row of setRows) {
         if (!merged.has(row.symbol)) merged.set(row.symbol, row)
       }
+      console.log(`[market-scan] Finnhub BK (SET): ${setRows.length} symbols`)
+    } catch (err) {
+      console.error('[market-scan] Finnhub BK fetch failed:', err)
+    }
+    try {
       const usRows = await fetchExchangeSymbols('US')
       for (const row of usRows) {
         if (!merged.has(row.symbol)) merged.set(row.symbol, row)
       }
-      console.log(`[market-scan] Finnhub symbols: SET ${setRows.length}, US ${usRows.length}`)
+      console.log(`[market-scan] Finnhub US: ${usRows.length} symbols`)
     } catch (err) {
-      console.error('[market-scan] Finnhub symbol fetch failed:', err)
+      console.error('[market-scan] Finnhub US fetch failed:', err)
     }
   } else {
     console.warn('[market-scan] No FINNHUB_API_KEY — using static universe only')
