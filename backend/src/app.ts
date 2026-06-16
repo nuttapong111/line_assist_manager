@@ -21,6 +21,8 @@ import * as gcal from './services/gcal.service'
 import { startScheduler } from './services/scheduler'
 import { verifyOAuthState } from './lib/oauth-state'
 import { normalizeUrl, isExternalFrontend } from './lib/url'
+import { hasFinnhubKey } from './services/news.service'
+import { getMarketScanProgress } from './services/market-scanner.service'
 
 dotenv.config()
 
@@ -53,11 +55,21 @@ app.use(cors({
   },
   credentials: true,
 }))
-app.get('/health', (_req, res) => res.json({
-  status: 'ok',
-  features: ['stock-chat', 'watchlist-chat', 'morning-summary', 'market-scan'],
-  build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'local',
-}))
+app.get('/health', async (_req, res) => {
+  let marketScan: Awaited<ReturnType<typeof getMarketScanProgress>> | null = null
+  try {
+    marketScan = await getMarketScanProgress()
+  } catch {
+    marketScan = null
+  }
+  res.json({
+    status: 'ok',
+    features: ['stock-chat', 'watchlist-chat', 'morning-summary', 'market-scan'],
+    build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || 'local',
+    finnhub: hasFinnhubKey(),
+    marketScan,
+  })
+})
 
 // Webhook ต้องอยู่ก่อน express.json() — LINE ต้องใช้ raw body ตรวจ signature
 app.use('/webhook', webhookRouter)
