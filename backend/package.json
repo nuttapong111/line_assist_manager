@@ -12,7 +12,9 @@
     "db:migrate:dev": "ts-node src/lib/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "setup:richmenu": "ts-node src/scripts/setup-richmenu.ts",
-    "setup:richmenu:prod": "node dist/scripts/setup-richmenu.js"
+    "setup:richmenu:prod": "node dist/scripts/setup-richmenu.js",
+    "trigger:morning": "ts-node src/scripts/trigger-morning-summary.ts",
+    "trigger:morning:prod": "node dist/scripts/trigger-morning-summary.js"
   },
   "keywords": [],
   "author": "",

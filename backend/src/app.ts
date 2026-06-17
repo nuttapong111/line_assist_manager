@@ -23,6 +23,8 @@ import { verifyOAuthState } from './lib/oauth-state'
 import { normalizeUrl, isExternalFrontend } from './lib/url'
 import { hasFinnhubKey } from './services/news.service'
 import { getMarketScanProgress } from './services/market-scanner.service'
+import { db } from './lib/db'
+import { users } from './lib/schema'
 
 dotenv.config()
 
@@ -69,6 +71,29 @@ app.get('/health', async (_req, res) => {
     finnhub: hasFinnhubKey(),
     marketScan,
   })
+})
+
+app.post('/internal/cron/morning-summary', express.json(), async (req, res) => {
+  const secret = process.env.CRON_SECRET
+  if (!secret || req.headers['x-cron-secret'] !== secret) {
+    return res.status(401).json({ error: 'unauthorized' })
+  }
+  try {
+    const { buildMorningSummaryReply, sendMorningInvestmentSummaries } = await import('./services/investment.service')
+    if (req.query.preview === '1') {
+      const allUsers = await db.select().from(users)
+      const previews = await Promise.all(allUsers.map(async user => ({
+        lineUserId: user.lineUserId,
+        text: await buildMorningSummaryReply(user.id),
+      })))
+      return res.json({ ok: true, previews })
+    }
+    await sendMorningInvestmentSummaries()
+    return res.json({ ok: true, sent: true })
+  } catch (err) {
+    console.error('[cron] morning-summary trigger failed:', err)
+    return res.status(500).json({ error: err instanceof Error ? err.message : String(err) })
+  }
 })
 
 // Webhook ต้องอยู่ก่อน express.json() — LINE ต้องใช้ raw body ตรวจ signature
