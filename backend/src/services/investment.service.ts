@@ -11,7 +11,6 @@ import {
   MARKET_SCAN_SYMBOLS,
   MARKET_UNIVERSE,
   getMarketAsset,
-  getUniverseScanLabel,
   formatAssetPrice,
   THAI_MARKET_SYMBOLS,
 } from '../data/market-universe'
@@ -674,21 +673,105 @@ export async function checkWatchlistBuySignals(): Promise<void> {
   }
 }
 
+export async function buildMorningSummaryReply(userId: string): Promise<string | null> {
+  const {
+    getMarketScanProgress,
+    formatScanBreakdownLabel,
+    runMarketScanBatches,
+    getCachedTopScores,
+  } = await import('./market-scanner.service')
+  const {
+    getRecommendationSnapshotForDisplay,
+    ensureRecommendationSnapshotFresh,
+    isGeneralMarketPick,
+  } = await import('./recommendation.service')
+  const { enrichPicksWithSupportResistance } = await import('./vi-recommend.service')
+  const { compareAnalysisRank } = await import('./analysis-ranking')
+
+  const pickLimit = Number(process.env.MORNING_SUMMARY_PICK_LIMIT || '3')
+  const watched = await getWatchedAssets(userId)
+  const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
+  const progress = await getMarketScanProgress()
+  const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
+  const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
+
+  runMarketScanBatches(3).catch(err => console.error('[investment] morning scan failed:', err))
+  ensureRecommendationSnapshotFresh().catch(err => console.error('[investment] morning snapshot failed:', err))
+
+  const snapshot = await getRecommendationSnapshotForDisplay()
+  let picks: {
+    symbol: string
+    displayName: string
+    normalizedScore: number
+    tieBreakScore?: number
+    price: number | null
+    changePct: number | null
+  }[] = []
+
+  if (snapshot?.picks.length) {
+    picks = snapshot.picks.slice(0, pickLimit).map(p => ({
+      symbol: p.symbol,
+      displayName: p.displayName,
+      normalizedScore: p.normalizedScore,
+      tieBreakScore: p.tieBreakScore,
+      price: p.price,
+      changePct: p.changePct,
+    }))
+  } else {
+    const topRows = (await getCachedTopScores(pickLimit * 5))
+      .filter(r => Number(r.analysisVersion ?? 1) >= ANALYSIS_VERSION)
+      .filter(isGeneralMarketPick)
+      .sort(compareAnalysisRank)
+      .slice(0, pickLimit)
+    picks = topRows.map(r => ({
+      symbol: r.symbol,
+      displayName: r.displayName || r.symbol,
+      normalizedScore: Number(r.normalizedScore ?? 0),
+      tieBreakScore: Number(r.tieBreakScore ?? 0),
+      price: r.price != null ? Number(r.price) : null,
+      changePct: r.changePct != null ? Number(r.changePct) : null,
+    }))
+  }
+
+  if (!picks.length) return null
+
+  const enrichedPicks = await enrichPicksWithSupportResistance(picks)
+  const results = enrichedPicks.map(p => ({
+    symbol: p.symbol,
+    displayName: p.displayName,
+    price: p.price,
+    changePct: p.changePct,
+    overall: 'NEUTRAL' as const,
+    normalizedScore: p.normalizedScore,
+    tieBreakScore: p.tieBreakScore ?? 0,
+    indicators: [],
+    supportResistance: p.supportResistance,
+  }))
+
+  const analyzedLabel = snapshot
+    ? `🔄 วิเคราะห์แล้ว ${snapshot.cachedCount}/${snapshot.totalSymbols} ตัว | ผ่านเกณฑ์ ${snapshot.candidateCount} ตัว`
+    : `🔄 วิเคราะห์แล้ว ${progress.cachedCount}/${progress.total} ตัว`
+
+  const updatedLabel = snapshot?.updatedLabel ? `\n📊 ${snapshot.updatedLabel}` : ''
+
+  return formatTopStockPicks(results, {
+    title: `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()}) — Top ${results.length}`,
+    sourceLabel: `${analyzedLabel}\n📋 ${breakdownLabel}${updatedLabel}\n✅ เรียงจากคะแนนสูงสุด ≥ ${thresholdPct}/100`,
+    requireBuySignal: true,
+    watchlistSymbols,
+    scannedCount: snapshot?.cachedCount ?? progress.cachedCount,
+    pickLimit,
+  })
+}
+
 export async function sendMorningInvestmentSummaries(): Promise<void> {
   const allUsers = await db.select().from(users)
   const enabledUsers = allUsers.filter(u => u.morningSummaryEnabled !== false)
 
   for (const user of enabledUsers) {
     try {
-      const { symbols, watchlistSymbols } = await buildScanUniverse(user.id)
-      const results = await collectStockAnalyses(symbols)
-      if (!results.length) continue
-
-      const text = formatTopStockPicks(results, {
-        title: `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()})`,
-        sourceLabel: `🔍 สแกน ${symbols.length} ตัว (${getUniverseScanLabel()})`,
-        watchlistSymbols,
-      })
+      const text = await buildMorningSummaryReply(user.id)
+      if (!text) continue
 
       await sendPushWithQuotaCheck(user.id, user.lineUserId, { type: 'text', text })
     } catch (err) {
