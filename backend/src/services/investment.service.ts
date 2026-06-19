@@ -85,12 +85,23 @@ export function isViFundRecommendText(text: string): boolean {
     && /แนะนำ|แนว\s*vi|value\s*invest|ปันผล|ดัชนี|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
 }
 
+export function isDividendStockRecommendText(text: string): boolean {
+  if (isAddWatchlistText(text)) return false
+  if (extractSymbolFromText(text)) return false
+  if (isViFundRecommendText(text)) return false
+  if (/แนว\s*vi|value\s*invest/i.test(text)) return false
+  return /หุ้น/i.test(text)
+    && /ปันผล|dividend|income/i.test(text)
+    && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร|ดีๆ|สูง|ควรซื้อ|แนะ/i.test(text)
+}
+
 export function isViStockRecommendText(text: string): boolean {
   if (isAddWatchlistText(text)) return false
   if (extractSymbolFromText(text)) return false
   if (isViFundRecommendText(text)) return false
+  if (isDividendStockRecommendText(text)) return false
   return /หุ้น/i.test(text)
-    && /แนว\s*vi|value\s*invest|ปันผล/i.test(text)
+    && /แนว\s*vi|value\s*invest/i.test(text)
     && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
 }
 
@@ -122,12 +133,14 @@ export function isStockRecommendText(text: string): boolean {
   if (isViFundRecommendText(text)) return false
   if (isViStockRecommendText(text)) return false
   if (isViOnlyRecommendText(text)) return false
-  return /แนะนำ.*หุ้น|หุ้น.*แนะนำ|หุ้นตัวไหน|ตัวไหนดี|หุ้นอะไรดี|น่าสนใจ|ควรดูหุ้น|หุ้นวันนี้|ปันผล.*แนะนำ|แนะนำ.*ปันผล/i.test(text)
+  if (isDividendStockRecommendText(text)) return false
+  return /แนะนำ.*หุ้น|หุ้น.*แนะนำ|หุ้นตัวไหน|ตัวไหนดี|หุ้นอะไรดี|น่าสนใจ|ควรดูหุ้น|หุ้นวันนี้/i.test(text)
 }
 
 export function isStockRelatedText(text: string): boolean {
   if (extractSymbolFromText(text)) return true
   if (isViFundRecommendText(text)) return true
+  if (isDividendStockRecommendText(text)) return true
   if (isViStockRecommendText(text)) return true
   if (isViOnlyRecommendText(text)) return true
   if (isStockRecommendText(text)) return true
@@ -515,6 +528,57 @@ export async function buildViOnlyRecommendReply(userId: string): Promise<string>
   }
 
   return [`📊 แนะนำแนว VI (${bangkokToday()})`, body, '', INVESTMENT_DISCLAIMER].join('\n')
+}
+
+export async function buildDividendStockRecommendReply(userId: string): Promise<string> {
+  const {
+    getMarketScanProgress,
+    formatScanBreakdownLabel,
+    runMarketScanBatches,
+  } = await import('./market-scanner.service')
+  const {
+    DIVIDEND_MIN_YIELD_PCT,
+    getEnrichedDividendPicks,
+    formatDividendPickLine,
+  } = await import('./dividend-recommend.service')
+
+  const watched = await getWatchedAssets(userId)
+  const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
+  const progress = await getMarketScanProgress()
+  const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
+
+  runMarketScanBatches(5).catch(err => console.error('[investment] background scan failed:', err))
+
+  const picks = await getEnrichedDividendPicks()
+  const progressLine = progress.total > 0
+    ? `🔄 วิเคราะห์แล้ว ${progress.cachedCount}/${progress.total} ตัว\n📋 ${breakdownLabel}`
+    : '🔄 กำลังสแกนทั้งตลาดในพื้นหลัง...'
+
+  if (!picks.length) {
+    return [
+      `💰 หุ้นปันผลแนะนำ (${bangkokToday()})`,
+      progressLine,
+      'ยังไม่มีหุ้นปันผลที่ผ่านเกณฑ์ — ลองถามใหม่ใน 15–30 นาที',
+      '',
+      INVESTMENT_DISCLAIMER,
+    ].join('\n')
+  }
+
+  const lines = [
+    `💰 หุ้นปันผลแนะนำ (${bangkokToday()}) — Top ${picks.length}`,
+    progressLine,
+    `✅ เรียงจากคะแนนปันผลรวม (อัตราปันผล 55% + คุณภาพ 30% + เทคนิค 15%)`,
+    `📌 ปันผลขั้นต่ำ ≥ ${DIVIDEND_MIN_YIELD_PCT}% | หุ้นไทย ~ = ประมาณการ`,
+    '',
+    ...picks.map(p => formatDividendPickLine(p, watchlistSymbols)),
+    '',
+    '💡 อยากได้กองทุนปันผล/ETF พิมพ์ "แนะนำกองทุนแนว VI"',
+    '💡 ดู VI รายตัว พิมพ์ "VI ของ PTT"',
+    '',
+    INVESTMENT_DISCLAIMER,
+  ]
+
+  return lines.join('\n')
 }
 
 export async function buildStockRecommendReply(userId: string): Promise<string> {
