@@ -7,7 +7,7 @@ import { ANALYSIS_VERSION, analyzeStock } from './investment.service'
 import { isRecommendableCandidate, VI_FUND_PICK_LIMIT, VI_STOCK_PICK_LIMIT } from './recommendation.service'
 import { calcSupportResistance, type SupportResistanceLevels } from './support-resistance.service'
 import { computeValueScore, computeViCompositeScore, getValueAnalysis } from './value-score.service'
-import { computeViPhases, formatViPhasesCompact, type ViPhasedResult } from './vi-phase.service'
+import { computeViHorizons, computeViPhases, formatViHorizonsCompact, formatViPhasesCompact, type ViHorizonResult, type ViPhasedResult } from './vi-phase.service'
 import { fetchOHLCV } from './yahoo.service'
 
 export interface EnrichedViPick {
@@ -23,6 +23,7 @@ export interface EnrichedViPick {
   valueReasons: string[]
   supportResistance: SupportResistanceLevels | null
   viPhases: ViPhasedResult | null
+  viHorizons: ViHorizonResult | null
 }
 
 const VI_COMPOSITE_THRESHOLD = Number(process.env.VI_COMPOSITE_THRESHOLD || '0.3')
@@ -43,8 +44,9 @@ export function formatViPickLine(pick: EnrichedViPick, watchlistSymbols?: Set<st
   const tag = watchlistSymbols?.has(pick.symbol) ? ' 📋' : ''
   const viLine = `${pick.rank}. ${pick.displayName} (${pick.symbol}) — VI ${pct(pick.viCompositeScore)} (มูลค่า ${pct(pick.valueScore)} / เทคนิค ${pct(pick.technicalScore)})${price}${ch}${tag}`
   const phaseLine = pick.viPhases ? `   ${formatViPhasesCompact(pick.viPhases)}` : ''
+  const horizonLine = pick.viHorizons ? `   ${formatViHorizonsCompact(pick.viHorizons)}` : ''
   const srLine = formatSupportResistanceLine(pick.symbol, pick.supportResistance)
-  const lines = [viLine, phaseLine, srLine].filter(Boolean)
+  const lines = [viLine, phaseLine, horizonLine, srLine].filter(Boolean)
   return lines.join('\n')
 }
 
@@ -69,6 +71,7 @@ async function enrichCandidate(row: {
 
     if (viCompositeScore < VI_COMPOSITE_THRESHOLD) return null
 
+    const changePct = row.changePct != null ? Number(row.changePct) : null
     const viPhases = computeViPhases({
       symbol: sym,
       valueDetail,
@@ -78,6 +81,16 @@ async function enrichCandidate(row: {
       supportResistance,
       indicators: [],
     })
+    const viHorizons = computeViHorizons({
+      symbol: sym,
+      valueDetail,
+      technicalScore,
+      price,
+      changePct,
+      supportResistance,
+      indicators: [],
+      phases: viPhases,
+    })
 
     return {
       rank: 0,
@@ -85,13 +98,14 @@ async function enrichCandidate(row: {
       displayName: row.displayName || sym,
       exchange: row.exchange,
       price,
-      changePct: row.changePct != null ? Number(row.changePct) : null,
+      changePct,
       technicalScore,
       valueScore,
       viCompositeScore,
       valueReasons: reasons,
       supportResistance,
       viPhases,
+      viHorizons,
     }
   } catch (err) {
     console.error(`[vi-recommend] enrich failed for ${sym}:`, err)
@@ -118,6 +132,16 @@ async function enrichFromAnalyze(symbol: string, displayName: string): Promise<E
     supportResistance: analysis.supportResistance,
     indicators: analysis.indicators,
   })
+  const viHorizons = computeViHorizons({
+    symbol: analysis.symbol,
+    valueDetail,
+    technicalScore: analysis.normalizedScore,
+    price: analysis.price,
+    changePct: analysis.changePct,
+    supportResistance: analysis.supportResistance,
+    indicators: analysis.indicators,
+    phases: viPhases,
+  })
 
   return {
     rank: 0,
@@ -132,6 +156,7 @@ async function enrichFromAnalyze(symbol: string, displayName: string): Promise<E
     valueReasons: reasons,
     supportResistance: analysis.supportResistance ?? null,
     viPhases,
+    viHorizons,
   }
 }
 

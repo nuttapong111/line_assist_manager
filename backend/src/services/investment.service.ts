@@ -17,7 +17,7 @@ import {
 import { isThaiListedSymbol } from '../data/thai-set-symbols'
 import { calcSupportResistance, type SupportResistanceLevels } from './support-resistance.service'
 import { computeValueScore, computeViCompositeScore, getValueAnalysis, VI_VALUE_WEIGHT, VI_TECH_WEIGHT, formatScorePct } from './value-score.service'
-import { computeViPhases, formatViPhasesSection } from './vi-phase.service'
+import { computeViHorizons, computeViPhases, formatViHorizonsSection, formatViPhasesSection } from './vi-phase.service'
 import { isViSymbol, isSuperinvestorSymbol } from '../data/vi-universe'
 
 /** คะแนนรวม (normalized -1..1) ที่ถือว่ามีสัญญาณซื้อน่าพิจารณา */
@@ -233,6 +233,7 @@ export function formatViStockAnalysisMessage(
   a: StockAnalysis,
   valueDetail: Awaited<ReturnType<typeof getValueAnalysis>>,
   phases: import('./vi-phase.service').ViPhasedResult,
+  horizons: import('./vi-phase.service').ViHorizonResult,
 ): string {
   const valueScore = valueDetail.score
   const viComposite = computeViCompositeScore(valueScore, a.normalizedScore)
@@ -267,6 +268,8 @@ export function formatViStockAnalysisMessage(
     ...metricLines,
     '',
     formatViPhasesSection(phases),
+    '',
+    formatViHorizonsSection(horizons),
     '',
     srLine,
     techBrief ? `\n⏱ จังหวะเทคนิค (ย่อ): ${techBrief}` : '',
@@ -457,6 +460,7 @@ async function buildViRecommendSections(watchlistSymbols: Set<string>, mode: 'al
     '',
     `💡 คะแนน VI = มูลค่า ${valuePct}% + เทคนิค ${techPct}% (≥ ${thresholdPct}/100)`,
     '🌱 VI ต้น = คุณภาพธุรกิจ | ⚖️ VI กลาง = ราคา/MoS | 🎯 VI ปลาย = จังหวะลงมือ',
+    '⏳ คุ้มค่า สั้น 1–3เดือน | กลาง 6–18เดือน | ยาว 3ปี+',
     '📍 แนวรับ/ต้านจาก pivot + swing high/low 60 วัน',
   )
   return parts.join('\n')
@@ -622,7 +626,17 @@ export async function buildViStockQueryReply(symbol: string): Promise<string> {
     supportResistance: analysis.supportResistance,
     indicators: analysis.indicators,
   })
-  return formatViStockAnalysisMessage(analysis, valueDetail, phases)
+  const horizons = computeViHorizons({
+    symbol: sym,
+    valueDetail,
+    technicalScore: analysis.normalizedScore,
+    price: analysis.price,
+    changePct: analysis.changePct,
+    supportResistance: analysis.supportResistance,
+    indicators: analysis.indicators,
+    phases,
+  })
+  return formatViStockAnalysisMessage(analysis, valueDetail, phases, horizons)
 }
 
 export async function buildSupportResistanceQueryReply(symbol: string): Promise<string> {

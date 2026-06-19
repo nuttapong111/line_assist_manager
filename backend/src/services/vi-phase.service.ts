@@ -8,6 +8,8 @@ import { isSuperinvestorSymbol, isViFundSymbol, isViStockSymbol } from '../data/
 
 export type ViPriceZone = 'ต้นกรอบ' | 'กลางกรอบ' | 'ปลายกรอบ'
 export type ViFocusPhase = 'ต้น' | 'กลาง' | 'ปลาย'
+export type ViHorizonKey = 'short' | 'medium' | 'long'
+export type ViBestHorizon = 'สั้น' | 'กลาง' | 'ยาว'
 
 export interface ViPhaseDetail {
   key: 'early' | 'mid' | 'late'
@@ -27,6 +29,24 @@ export interface ViPhasedResult {
   priceZonePct: number | null
   currentFocus: ViFocusPhase
   recommendation: string
+}
+
+export interface ViHorizonDetail {
+  key: ViHorizonKey
+  title: string
+  subtitle: string
+  score: number
+  verdict: string
+  bullets: string[]
+  action: string
+}
+
+export interface ViHorizonResult {
+  short: ViHorizonDetail
+  medium: ViHorizonDetail
+  long: ViHorizonDetail
+  bestHorizon: ViBestHorizon
+  summary: string
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -62,6 +82,14 @@ function verdictFromScore(score: number): string {
   if (score >= 0.25) return 'น่าพิจารณา'
   if (score >= 0) return 'ปานกลาง'
   return 'ระวัง'
+}
+
+function valueVerdictFromScore(score: number): string {
+  if (score >= 0.45) return 'คุ้มค่ามาก'
+  if (score >= 0.25) return 'คุ้มค่าดี'
+  if (score >= 0.05) return 'ปานกลาง'
+  if (score >= -0.15) return 'คุ้มค่าน้อย'
+  return 'ยังไม่คุ้ม'
 }
 
 function scoreEarlyPhase(symbol: string, detail: ValueAnalysisDetail): { score: number; bullets: string[] } {
@@ -338,6 +366,299 @@ export function computeViPhases(params: {
   const recommendation = buildRecommendation(early, mid, late, currentFocus, zone)
 
   return { early, mid, late, priceZone: zone, priceZonePct: zonePct, currentFocus, recommendation }
+}
+
+function scoreShortHorizon(
+  technicalScore: number,
+  phases: ViPhasedResult,
+  indicators: IndicatorResult[],
+  changePct: number | null,
+  sr: SupportResistanceLevels | null,
+  price: number | null,
+  symbol: string,
+): { score: number; bullets: string[] } {
+  const bullets: string[] = []
+  let total = technicalScore * 0.45 + phases.late.score * 0.35
+  let weight = 0.8
+
+  const rsi = indicators.find(i => i.name.startsWith('RSI'))
+  if (rsi) {
+    const rsiVal = parseFloat(rsi.value) || 50
+    weight += 0.15
+    if (rsiVal < 35) { total += 0.2; bullets.push(`RSI ${rsiVal.toFixed(0)} oversold — bounce สั้นมีโอกาส`) }
+    else if (rsiVal > 65) { total -= 0.2; bullets.push(`RSI ${rsiVal.toFixed(0)} overbought — ระยะสั้นเสี่ยงย่อ`) }
+    else { bullets.push(`RSI ${rsiVal.toFixed(0)} — ยังไม่ชัดสำหรับเก็งสั้น`) }
+  } else {
+    bullets.push(`เทคนิครวม ${formatScorePct(technicalScore)}/100 — ใช้เป็นตัวชี้จังหวะสั้น`)
+  }
+
+  if (sr && price != null) {
+    const distToSupport = (price - sr.support1) / price
+    const distToResist = (sr.resistance1 - price) / price
+    if (distToSupport < 0.04) {
+      weight += 0.1; total += 0.15
+      bullets.push(`ใกล้แนวรับ ${formatAssetPrice(symbol, sr.support1)} — จุดเก็งสั้น/สวนเทรนด์`)
+    } else if (distToResist < 0.04) {
+      weight += 0.1; total -= 0.15
+      bullets.push(`ใกล้แนวต้าน ${formatAssetPrice(symbol, sr.resistance1)} — ระยะสั้น take profit ดีกว่าไล่ซื้อ`)
+    }
+  }
+
+  if (phases.priceZone === 'ต้นกรอบ') {
+    weight += 0.05; total += 0.1
+    bullets.push('ราคาต้นกรอบ — สวนกลับระยะสั้นมี margin')
+  } else if (phases.priceZone === 'ปลายกรอบ') {
+    weight += 0.05; total -= 0.12
+    bullets.push('ราคาปลายกรอบ — ระยะสั้นไม่คุ้มไล่ซื้อ')
+  }
+
+  if (changePct != null) {
+    if (changePct <= -2.5) bullets.push(`วันนี้ลง ${changePct.toFixed(1)}% — อาจมี dead-cat bounce แต่ระวัง downtrend`)
+    else if (changePct >= 2.5) bullets.push(`วันนี้ขึ้น ${changePct.toFixed(1)}% — ระยะสั้นระวัง profit-taking`)
+  }
+
+  const macd = indicators.find(i => i.name.startsWith('MACD'))
+  if (macd?.signal === 'BULLISH') { total += 0.08; bullets.push('MACD bullish — โมเมนตัมสั้นขาขึ้น') }
+  else if (macd?.signal === 'BEARISH') { total -= 0.08; bullets.push('MACD bearish — รอสัญญาณกลับตัวก่อนเก็งสั้น') }
+
+  if (!bullets.length) bullets.push('ดูจากเทคนิค + แนวรับต้านเป็นหลัก')
+
+  return { score: clamp(total / weight, -1, 1), bullets }
+}
+
+function scoreMediumHorizon(
+  phases: ViPhasedResult,
+  technicalScore: number,
+  isFund: boolean,
+): { score: number; bullets: string[] } {
+  const bullets: string[] = []
+  let total = phases.mid.score * 0.4 + phases.early.score * 0.25 + technicalScore * 0.2
+  let weight = 0.85
+
+  if (isFund) {
+    total += 0.35; weight += 0.15
+    bullets.push('กองทุน/ETF — DCA ระยะกลางเหมาะกว่าจับจังหวะ')
+  }
+
+  if (phases.priceZone === 'ต้นกรอบ' && phases.mid.score >= 0.2) {
+    total += 0.15; weight += 0.1
+    bullets.push('ราคาต้นกรอบ + มูลค่าพอใช้ — สะสมระยะกลางน่าสนใจ')
+  } else if (phases.priceZone === 'กลางกรอบ') {
+    bullets.push('ราคากลางกรอบ — แบ่งซื้อระยะกลางได้ ไม่ต้องรอถูกมาก')
+  } else if (phases.priceZone === 'ปลายกรอบ') {
+    total -= 0.15; weight += 0.05
+    bullets.push('ราคาปลายกรอบ — ระยะกลางควรรอ pullback หรือซื้อบางส่วน')
+  }
+
+  if (phases.early.score >= 0.35) bullets.push('ธุรกิจผ่าน VI — ถือกลางได้ถ้าราคาไม่แพงเกิน')
+  else if (phases.early.score < 0.15) {
+    total -= 0.2
+    bullets.push('คุณภาพธุรกิจยังไม่แข็ง — ระยะกลางเสี่ยง')
+  }
+
+  if (phases.mid.score >= 0.3) bullets.push(`มูลค่า VI กลาง ${formatScorePct(phases.mid.score)}/100 — ราคายังรับได้`)
+  else bullets.push(`มูลค่า VI กลาง ${formatScorePct(phases.mid.score)}/100 — รอราคาดีกว่านี้`)
+
+  return { score: clamp(total / weight, -1, 1), bullets }
+}
+
+function scoreLongHorizon(
+  symbol: string,
+  phases: ViPhasedResult,
+  valueDetail: ValueAnalysisDetail,
+  isFund: boolean,
+): { score: number; bullets: string[] } {
+  const bullets: string[] = []
+  let total = phases.early.score * 0.5 + phases.mid.score * 0.35
+  let weight = 0.85
+
+  if (isFund) {
+    total += 0.45; weight += 0.15
+    bullets.push('กองทุนดัชนี/ปันผล — ถือยาวเป็นฐานพอร์ต VI คลาสสิก')
+  }
+
+  if (isSuperinvestorSymbol(symbol)) {
+    total += 0.15; weight += 0.1
+    bullets.push('นักลงทุนชื่อดานถือระยะยาว — สัญญาณคุณภาพระยะยาว')
+  }
+  if (isViStockSymbol(symbol)) {
+    total += 0.1; weight += 0.05
+    bullets.push('อยู่ในกลุ่มหุ้น VI ไทย — เหมาะเป็นหลักพอร์ตยาว')
+  }
+
+  if (phases.early.score >= 0.4 && phases.mid.score >= 0.25) {
+    total += 0.12
+    bullets.push('ผ่านทั้งคุณภาพ + มูลค่า — ถือยาวคุ้มที่สุด')
+  } else if (phases.early.score >= 0.35 && phases.mid.score < 0.2) {
+    bullets.push('ธุรกิจดีแต่ราคาแพง — ถือยาวได้ถ้าเชื่อมั่น แต่ DCA ดีกว่า lump sum')
+  } else if (phases.early.score < 0.2) {
+    total -= 0.25
+    bullets.push('ยังไม่ผ่าน VI ต้น — ไม่เหมาะเป็นหุ้นหลักระยะยาว')
+  }
+
+  if (valueDetail.styleLabel.includes('Quality') || valueDetail.styleLabel.includes('Value')) {
+    bullets.push(`สไตล์ ${valueDetail.styleLabel} — เข้ากับถือยาว`)
+  }
+
+  const dy = metricValue(valueDetail, 'ปันผล')
+  if (dy != null && dy >= 2.5) {
+    total += 0.1; weight += 0.05
+    bullets.push(`ปันผล ${dy.toFixed(1)}% — income ระยะยาวช่วยลดความผันผวน`)
+  }
+
+  return { score: clamp(total / weight, -1, 1), bullets }
+}
+
+function shortHorizonAction(score: number, zone: ViPriceZone | null): string {
+  if (score >= 0.4 && zone !== 'ปลายกรอบ') return 'เหมาะเก็งกำไรสั้น / swing ใกล้แนวรับ'
+  if (score >= 0.25) return 'เก็งสั้นได้บางส่วน — ตั้ง stop-loss ชัดเจน'
+  if (score >= 0) return 'ระยะสั้นปานกลาง — รอสัญญาณชัดกว่านี้'
+  return 'ไม่คุ้มระยะสั้น — หลีกเลี่ยงเก็งกำไรเร็ว'
+}
+
+function mediumHorizonAction(score: number, zone: ViPriceZone | null, isFund: boolean): string {
+  if (isFund) return 'เหมาะ DCA ระยะกลาง — ซื้อสม่ำเสมอทุกเดือน/ไตรมาส'
+  if (score >= 0.4 && zone === 'ต้นกรอบ') return 'คุ้มสะสมระยะกลาง — เริ่มแบ่งซื้อได้'
+  if (score >= 0.3) return 'น่าถือระยะกลาง — แบ่งซื้อ ไม่ all-in'
+  if (zone === 'ปลายกรอบ') return 'ราคาสูง — ระยะกลางรอ pullback หรือซื้อน้อยๆ'
+  return 'ยังไม่คุ้มระยะกลางชัด — รอมูลค่าดีขึ้น'
+}
+
+function longHorizonAction(score: number, isFund: boolean): string {
+  if (isFund) return 'เหมาะถือยาวเป็นหลักพอร์ต — ลดความเสี่ยงด้วย diversification'
+  if (score >= 0.45) return 'คุ้มถือยาว — เป็นหุ้นหลัก VI ได้'
+  if (score >= 0.28) return 'ถือยาวได้ถ้าเชื่อมั่นธุรกิจ — เน้น DCA'
+  if (score >= 0.1) return 'ถือยาวได้บางส่วน — ไม่ควรเป็นตัวใหญ่ในพอร์ต'
+  return 'ยังไม่คุ้มถือยาว — หาโอกาสอื่นที่ผ่าน VI ต้น+กลาง'
+}
+
+function inferBestHorizon(short: number, medium: number, long: number): ViBestHorizon {
+  const scores = [
+    { h: 'สั้น' as const, s: short },
+    { h: 'กลาง' as const, s: medium },
+    { h: 'ยาว' as const, s: long },
+  ]
+  scores.sort((a, b) => b.s - a.s)
+  return scores[0].h
+}
+
+function buildHorizonSummary(short: ViHorizonDetail, medium: ViHorizonDetail, long: ViHorizonDetail, best: ViBestHorizon): string {
+  const parts: string[] = [`เหมาะสุด: ถือ${best}`]
+  if (long.score >= 0.35 && short.score < 0.15) {
+    parts.push('ภาพรวม: เน้นถือยาว ไม่เหมาะเก็งสั้น')
+  } else if (short.score >= 0.35 && long.score < 0.25) {
+    parts.push('ภาพรวม: จังหวะสั้นดีกว่า แต่คุณภาพระยะยาวยังไม่ชัด')
+  } else if (short.score >= 0.3 && medium.score >= 0.3 && long.score >= 0.3) {
+    parts.push('ภาพรวม: คุ้มค่าทุกช่วง — ยืดหยุ่นได้ตามสไตล์')
+  } else if (medium.score >= long.score && medium.score >= short.score) {
+    parts.push('ภาพรวม: sweet spot อยู่ที่ระยะกลาง')
+  } else {
+    parts.push(`สั้น ${valueVerdictFromScore(short.score)} | กลาง ${valueVerdictFromScore(medium.score)} | ยาว ${valueVerdictFromScore(long.score)}`)
+  }
+  return parts.join(' | ')
+}
+
+export function computeViHorizons(params: {
+  symbol: string
+  valueDetail: ValueAnalysisDetail
+  technicalScore: number
+  price: number | null
+  changePct?: number | null
+  supportResistance?: SupportResistanceLevels | null
+  indicators?: IndicatorResult[]
+  phases?: ViPhasedResult
+}): ViHorizonResult {
+  const {
+    symbol,
+    valueDetail,
+    technicalScore,
+    price,
+    changePct = null,
+    supportResistance,
+    indicators = [],
+    phases: phasesIn,
+  } = params
+
+  const isFund = isViFundSymbol(symbol) || valueDetail.metrics.some(m => m.label === 'ประเภท')
+  const phases = phasesIn ?? computeViPhases({
+    symbol,
+    valueDetail,
+    technicalScore,
+    price,
+    ohlcv: undefined,
+    supportResistance,
+    indicators,
+  })
+
+  const shortRaw = scoreShortHorizon(technicalScore, phases, indicators, changePct, supportResistance ?? null, price, symbol)
+  const mediumRaw = scoreMediumHorizon(phases, technicalScore, isFund)
+  const longRaw = scoreLongHorizon(symbol, phases, valueDetail, isFund)
+
+  const short: ViHorizonDetail = {
+    key: 'short',
+    title: '⚡ VI ระยะสั้น (1–3 เดือน)',
+    subtitle: 'ความคุ้มค่าเก็งกำไรสั้น / swing ตามเทคนิค',
+    score: shortRaw.score,
+    verdict: valueVerdictFromScore(shortRaw.score),
+    bullets: shortRaw.bullets,
+    action: shortHorizonAction(shortRaw.score, phases.priceZone),
+  }
+
+  const medium: ViHorizonDetail = {
+    key: 'medium',
+    title: '📅 VI ระยะกลาง (6–18 เดือน)',
+    subtitle: 'ความคุ้มค่าสะสมกลาง — มูลค่า + แนวโน้ม',
+    score: mediumRaw.score,
+    verdict: valueVerdictFromScore(mediumRaw.score),
+    bullets: mediumRaw.bullets,
+    action: mediumHorizonAction(mediumRaw.score, phases.priceZone, isFund),
+  }
+
+  const long: ViHorizonDetail = {
+    key: 'long',
+    title: '🏛️ VI ระยะยาว (3 ปี+)',
+    subtitle: 'ความคุ้มค่าถือยาว — คุณภาพธุรกิจ + MoS',
+    score: longRaw.score,
+    verdict: valueVerdictFromScore(longRaw.score),
+    bullets: longRaw.bullets,
+    action: longHorizonAction(longRaw.score, isFund),
+  }
+
+  const bestHorizon = inferBestHorizon(short.score, medium.score, long.score)
+  const summary = buildHorizonSummary(short, medium, long, bestHorizon)
+
+  return { short, medium, long, bestHorizon, summary }
+}
+
+export function formatViHorizonBlock(horizon: ViHorizonDetail): string {
+  return [
+    horizon.title,
+    horizon.subtitle,
+    `ความคุ้มค่า: ${formatScorePct(horizon.score)}/100 | ${horizon.verdict}`,
+    ...horizon.bullets.map(b => `• ${b}`),
+    `→ ${horizon.action}`,
+  ].join('\n')
+}
+
+export function formatViHorizonsSection(horizons: ViHorizonResult): string {
+  return [
+    '━━━━━━━━━━━━━━━━━━━━',
+    formatViHorizonBlock(horizons.short),
+    '',
+    '━━━━━━━━━━━━━━━━━━━━',
+    formatViHorizonBlock(horizons.medium),
+    '',
+    '━━━━━━━━━━━━━━━━━━━━',
+    formatViHorizonBlock(horizons.long),
+    '',
+    '📌 สรุปความคุ้มค่าตามเวลา',
+    horizons.summary,
+    `เหมาะสุด: ถือ${horizons.bestHorizon}`,
+  ].join('\n')
+}
+
+export function formatViHorizonsCompact(horizons: ViHorizonResult): string {
+  return `คุ้มค่า สั้น ${formatScorePct(horizons.short.score)} | กลาง ${formatScorePct(horizons.medium.score)} | ยาว ${formatScorePct(horizons.long.score)} | เหมาะ:${horizons.bestHorizon}`
 }
 
 export function formatViPhaseBlock(phase: ViPhaseDetail): string {
