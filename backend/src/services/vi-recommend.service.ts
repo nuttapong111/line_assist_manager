@@ -6,7 +6,8 @@ import { isViFundSymbol, isViStockSymbol, VI_FUND_SYMBOLS, VI_STOCK_SYMBOLS } fr
 import { ANALYSIS_VERSION, analyzeStock } from './investment.service'
 import { isRecommendableCandidate, VI_FUND_PICK_LIMIT, VI_STOCK_PICK_LIMIT } from './recommendation.service'
 import { calcSupportResistance, type SupportResistanceLevels } from './support-resistance.service'
-import { computeValueScore, computeViCompositeScore } from './value-score.service'
+import { computeValueScore, computeViCompositeScore, getValueAnalysis } from './value-score.service'
+import { computeViPhases, formatViPhasesCompact, type ViPhasedResult } from './vi-phase.service'
 import { fetchOHLCV } from './yahoo.service'
 
 export interface EnrichedViPick {
@@ -21,6 +22,7 @@ export interface EnrichedViPick {
   viCompositeScore: number
   valueReasons: string[]
   supportResistance: SupportResistanceLevels | null
+  viPhases: ViPhasedResult | null
 }
 
 const VI_COMPOSITE_THRESHOLD = Number(process.env.VI_COMPOSITE_THRESHOLD || '0.3')
@@ -40,8 +42,10 @@ export function formatViPickLine(pick: EnrichedViPick, watchlistSymbols?: Set<st
   const price = pick.price != null ? ` ${formatAssetPrice(pick.symbol, pick.price)}` : ''
   const tag = watchlistSymbols?.has(pick.symbol) ? ' 📋' : ''
   const viLine = `${pick.rank}. ${pick.displayName} (${pick.symbol}) — VI ${pct(pick.viCompositeScore)} (มูลค่า ${pct(pick.valueScore)} / เทคนิค ${pct(pick.technicalScore)})${price}${ch}${tag}`
+  const phaseLine = pick.viPhases ? `   ${formatViPhasesCompact(pick.viPhases)}` : ''
   const srLine = formatSupportResistanceLine(pick.symbol, pick.supportResistance)
-  return srLine ? `${viLine}\n${srLine}` : viLine
+  const lines = [viLine, phaseLine, srLine].filter(Boolean)
+  return lines.join('\n')
 }
 
 async function enrichCandidate(row: {
@@ -61,8 +65,19 @@ async function enrichCandidate(row: {
     const supportResistance = calcSupportResistance(ohlcv, price ?? undefined)
     const { score: valueScore, reasons } = await computeValueScore(sym, ohlcv)
     const viCompositeScore = computeViCompositeScore(valueScore, technicalScore)
+    const valueDetail = await getValueAnalysis(sym, ohlcv)
 
     if (viCompositeScore < VI_COMPOSITE_THRESHOLD) return null
+
+    const viPhases = computeViPhases({
+      symbol: sym,
+      valueDetail,
+      technicalScore,
+      price,
+      ohlcv,
+      supportResistance,
+      indicators: [],
+    })
 
     return {
       rank: 0,
@@ -76,6 +91,7 @@ async function enrichCandidate(row: {
       viCompositeScore,
       valueReasons: reasons,
       supportResistance,
+      viPhases,
     }
   } catch (err) {
     console.error(`[vi-recommend] enrich failed for ${sym}:`, err)
@@ -91,6 +107,18 @@ async function enrichFromAnalyze(symbol: string, displayName: string): Promise<E
   const viCompositeScore = computeViCompositeScore(valueScore, analysis.normalizedScore)
   if (viCompositeScore < VI_COMPOSITE_THRESHOLD) return null
 
+  const ohlcv = await fetchOHLCV(symbol, '1d', 252)
+  const valueDetail = await getValueAnalysis(symbol, ohlcv)
+  const viPhases = computeViPhases({
+    symbol: analysis.symbol,
+    valueDetail,
+    technicalScore: analysis.normalizedScore,
+    price: analysis.price,
+    ohlcv,
+    supportResistance: analysis.supportResistance,
+    indicators: analysis.indicators,
+  })
+
   return {
     rank: 0,
     symbol: analysis.symbol,
@@ -103,6 +131,7 @@ async function enrichFromAnalyze(symbol: string, displayName: string): Promise<E
     viCompositeScore,
     valueReasons: reasons,
     supportResistance: analysis.supportResistance ?? null,
+    viPhases,
   }
 }
 
