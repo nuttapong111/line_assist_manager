@@ -410,6 +410,24 @@ export function formatScanBreakdownLabel(b: NonNullable<Awaited<ReturnType<typeo
   return parts.join(' + ') || 'กำลังโหลดรายการ...'
 }
 
+/** อธิบายว่าทำไม วิเคราะห์แล้ว xx/yy ไม่เท่ากัน */
+export function formatAnalysisProgressLabel(cachedCount: number, totalSymbols: number): string {
+  const total = Math.max(totalSymbols, 1)
+  const cached = Math.min(cachedCount, total)
+  const pct = Math.round((cached / total) * 100)
+  const main = `📊 วิเคราะห์แล้ว ${cached.toLocaleString()}/${total.toLocaleString()} ตัว (${pct}%)`
+
+  if (cached >= total) {
+    return `${main}\n✅ สแกนครบทั้งตลาดแล้ว — อันดับมาจากข้อมูลล่าสุด`
+  }
+
+  return [
+    main,
+    '⏳ ยังสแกนไม่ครบทั้งหมด — ระบบวิเคราะห์เป็นชุดในพื้นหลัง (~3 ชม./รอบ)',
+    `↳ อันดับมาจาก ${cached.toLocaleString()} ตัวที่วิเคราะห์แล้ว (ตัวที่ยังไม่เคยสแกนจะยังไม่เข้ารายการ)`,
+  ].join('\n')
+}
+
 export async function getCachedBuySignals(limit = 5, minScore = BUY_SIGNAL_THRESHOLD) {
   const rows = await db
     .select()

@@ -82,10 +82,13 @@ app.post('/internal/cron/morning-summary', express.json(), async (req, res) => {
     const { buildMorningSummaryReply, sendMorningInvestmentSummaries } = await import('./services/investment.service')
     if (req.query.preview === '1') {
       const allUsers = await db.select().from(users)
-      const previews = await Promise.all(allUsers.map(async user => ({
-        lineUserId: user.lineUserId,
-        text: await buildMorningSummaryReply(user.id),
-      })))
+      const previews = await Promise.all(allUsers.map(async user => {
+        const reply = await buildMorningSummaryReply(user.id)
+        return {
+          lineUserId: user.lineUserId,
+          messages: reply ? (Array.isArray(reply) ? reply : [reply]) : [],
+        }
+      }))
       return res.json({ ok: true, previews })
     }
     await sendMorningInvestmentSummaries()

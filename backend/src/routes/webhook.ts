@@ -16,7 +16,7 @@ import {
   isCancelText,
   type PendingType,
 } from '../services/chat-context.service'
-import { buildStockQueryReply, buildViStockQueryReply, buildSupportResistanceQueryReply, buildStockRecommendReply, buildDividendStockRecommendReply, buildViFundRecommendReply, buildViStockRecommendReply, buildViOnlyRecommendReply, addSymbolToWatchlist, isAddWatchlistText, isStockRecommendText, isDividendStockRecommendText, isViFundRecommendText, isViStockRecommendText, isViOnlyRecommendText, isViStockQueryText, isSupportResistanceQueryText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
+import { buildStockQueryReply, buildViStockQueryReply, buildSupportResistanceQueryReply, buildStockRecommendReply, buildDividendStockRecommendReply, buildViFundRecommendReply, buildViStockRecommendReply, buildViOnlyRecommendReply, addSymbolToWatchlist, toLineTextMessages, isAddWatchlistText, isStockRecommendText, isDividendStockRecommendText, isViFundRecommendText, isViStockRecommendText, isViOnlyRecommendText, isViStockQueryText, isSupportResistanceQueryText, isStockRelatedText, extractSymbolFromText } from '../services/investment.service'
 
 const router = Router()
 
@@ -170,7 +170,7 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
 
     if (isStockRecommendText(text)) {
       const reply = await buildStockRecommendReply(user.id)
-      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      await lineClient.replyMessage(event.replyToken, toLineTextMessages(reply))
       return
     }
 

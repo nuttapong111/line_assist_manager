@@ -15,9 +15,13 @@ async function main() {
       process.exit(1)
     }
     for (const user of allUsers) {
-      const text = await buildMorningSummaryReply(user.id)
-      console.log(`\n--- ${user.lineUserId} ---\n`)
-      console.log(text || '(ไม่มีข้อมูลสรุป)')
+      const reply = await buildMorningSummaryReply(user.id)
+      const messages = reply ? (Array.isArray(reply) ? reply : [reply]) : []
+      console.log(`\n--- ${user.lineUserId} (${messages.length} ข้อความ) ---\n`)
+      messages.forEach((text, i) => {
+        console.log(`[${i + 1}/${messages.length}]\n${text}`)
+      })
+      if (!messages.length) console.log('(ไม่มีข้อมูลสรุป)')
     }
     process.exit(0)
   }
