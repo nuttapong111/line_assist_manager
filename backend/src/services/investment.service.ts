@@ -367,6 +367,7 @@ function formatTopStockPicks(
     watchlistSymbols?: Set<string>
     scannedCount?: number
     pickLimit?: number
+    candidateCount?: number
   },
 ): string {
   if (!results.length) {
@@ -417,9 +418,13 @@ function formatTopStockPicks(
     }),
     '',
     options.requireBuySignal
-      ? `✅ แสดงเฉพาะหุ้นที่คะแนน ≥ ${thresholdPct}/100 (📋 = อยู่ใน watchlist)`
+      ? options.candidateCount != null && options.candidateCount > top.length
+        ? `✅ แสดง Top ${top.length} จาก ${options.candidateCount} ตัวที่คะแนน ≥ ${thresholdPct}/100 (📋 = watchlist)`
+        : `✅ แสดงเฉพาะหุ้นที่คะแนน ≥ ${thresholdPct}/100 (📋 = อยู่ใน watchlist)`
       : buySignals.length === 0 ? `⚠️ ยังไม่มีสัญญาณซื้อชัดเจน — แสดง 3 ตัวที่ score สูงสุด` : '',
-    'ดูรายละเอียด: "NVDA ตอนนี้เป็นอย่างไร"',
+    options.candidateCount != null && options.candidateCount > top.length
+      ? 'ดูรายการเต็ม: พิมพ์ "วันนี้แนะนำหุ้น" (Top 20)'
+      : 'ดูรายละเอียด: "NVDA ตอนนี้เป็นอย่างไร"',
     'ติดตาม: "ติดตาม NVDA"',
     '',
     INVESTMENT_DISCLAIMER,
@@ -777,11 +782,17 @@ export async function buildMorningSummaryReply(userId: string): Promise<string |
     getRecommendationSnapshotForDisplay,
     ensureRecommendationSnapshotFresh,
     isGeneralMarketPick,
+    RECOMMENDATION_PICK_LIMIT,
   } = await import('./recommendation.service')
   const { enrichPicksWithSupportResistance } = await import('./vi-recommend.service')
   const { compareAnalysisRank } = await import('./analysis-ranking')
 
-  const pickLimit = Number(process.env.MORNING_SUMMARY_PICK_LIMIT || '3')
+  const pickLimit = Number(
+    process.env.MORNING_SUMMARY_PICK_LIMIT
+    || process.env.RECOMMENDATION_PICK_LIMIT
+    || '10',
+  )
+  const displayLimit = Math.min(pickLimit, RECOMMENDATION_PICK_LIMIT)
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
   const progress = await getMarketScanProgress()
@@ -802,7 +813,7 @@ export async function buildMorningSummaryReply(userId: string): Promise<string |
   }[] = []
 
   if (snapshot?.picks.length) {
-    picks = snapshot.picks.slice(0, pickLimit).map(p => ({
+    picks = snapshot.picks.slice(0, displayLimit).map(p => ({
       symbol: p.symbol,
       displayName: p.displayName,
       normalizedScore: p.normalizedScore,
@@ -811,11 +822,11 @@ export async function buildMorningSummaryReply(userId: string): Promise<string |
       changePct: p.changePct,
     }))
   } else {
-    const topRows = (await getCachedTopScores(pickLimit * 5))
+    const topRows = (await getCachedTopScores(displayLimit * 5))
       .filter(r => Number(r.analysisVersion ?? 1) >= ANALYSIS_VERSION)
       .filter(isGeneralMarketPick)
       .sort(compareAnalysisRank)
-      .slice(0, pickLimit)
+      .slice(0, displayLimit)
     picks = topRows.map(r => ({
       symbol: r.symbol,
       displayName: r.displayName || r.symbol,
@@ -847,13 +858,24 @@ export async function buildMorningSummaryReply(userId: string): Promise<string |
 
   const updatedLabel = snapshot?.updatedLabel ? `\n📊 ${snapshot.updatedLabel}` : ''
 
+  const candidateCount = snapshot?.candidateCount ?? null
+
   return formatTopStockPicks(results, {
     title: `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()}) — Top ${results.length}`,
-    sourceLabel: `${analyzedLabel}\n📋 ${breakdownLabel}${updatedLabel}\n✅ เรียงจากคะแนนสูงสุด ≥ ${thresholdPct}/100`,
+    sourceLabel: [
+      analyzedLabel,
+      breakdownLabel ? `📋 ${breakdownLabel}` : '',
+      updatedLabel,
+      `✅ เรียงจากคะแนนสูงสุด ≥ ${thresholdPct}/100`,
+      candidateCount != null && candidateCount > results.length
+        ? `📌 สรุปเช้าแสดง Top ${displayLimit} จาก ${candidateCount} ตัวที่ผ่านเกณฑ์`
+        : '',
+    ].filter(Boolean).join('\n'),
     requireBuySignal: true,
     watchlistSymbols,
     scannedCount: snapshot?.cachedCount ?? progress.cachedCount,
-    pickLimit,
+    pickLimit: displayLimit,
+    candidateCount: candidateCount ?? undefined,
   })
 }
 

@@ -25,7 +25,7 @@ export interface RecommendationPick {
 
 const JUNK_NAME = /\b(WARRANT|WARRANTS|-\s*RIGHTS?|UNITS?|SUBSCRIPTION RECEIPT|DEPOSITARY SHARES? EACH REPRESENTING)\b/i
 
-/** กรอง warrant / หุ้นราคาต่ำ / กองทุน mutual fund ออกจากรายการแนะนำ */
+/** กรอง warrant / หุ้นราคาต่ำ / กองทุน mutual fund / OTC ต่างประเทศ ออกจากรายการแนะนำ */
 export function isRecommendableCandidate(row: {
   symbol: string
   displayName?: string | null
@@ -44,6 +44,8 @@ export function isRecommendableCandidate(row: {
     if (sym.endsWith('U') && /\bUNIT/i.test(name)) return false
     if (sym.endsWith('R') && /\bRIGHT/i.test(name)) return false
     if (sym.endsWith('W') && sym.length >= 5 && /\bWARRANT/i.test(name)) return false
+    // OTC / foreign ordinary มักลงท้าย F หรือ Y (เช่น MCDIF, REVXF) — สภาพคล่องต่ำ
+    if (exchange === 'US_STOCK' && sym.length === 5 && /[FY]$/.test(sym)) return false
   }
 
   const price = row.price != null ? Number(row.price) : null
