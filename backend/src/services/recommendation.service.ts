@@ -44,8 +44,9 @@ export function isRecommendableCandidate(row: {
     if (sym.endsWith('U') && /\bUNIT/i.test(name)) return false
     if (sym.endsWith('R') && /\bRIGHT/i.test(name)) return false
     if (sym.endsWith('W') && sym.length >= 5 && /\bWARRANT/i.test(name)) return false
-    // OTC / foreign ordinary มักลงท้าย F หรือ Y (เช่น MCDIF, REVXF) — สภาพคล่องต่ำ
-    if (exchange === 'US_STOCK' && sym.length === 5 && /[FY]$/.test(sym)) return false
+    // OTC / foreign ordinary มักลงท้าย F, Y, WY (เช่น MCDIF, REVXF, PHDWY)
+    if (exchange === 'US_STOCK' && sym.length === 5 && /[FWY]$/.test(sym)) return false
+    if (exchange === 'US_STOCK' && /\b(UNSP|ADR)\b/i.test(name)) return false
   }
 
   const price = row.price != null ? Number(row.price) : null

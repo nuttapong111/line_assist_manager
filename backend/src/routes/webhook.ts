@@ -146,25 +146,25 @@ async function handleTextMessage(event: any, user: any, lineUserId: string) {
     // หุ้น / กองทุน / watchlist — จับตรงๆ ก่อน NLP (ไม่พึ่ง Gemini)
     if (isViFundRecommendText(text)) {
       const reply = await buildViFundRecommendReply(user.id)
-      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      await lineClient.replyMessage(event.replyToken, toLineTextMessages(reply))
       return
     }
 
     if (isDividendStockRecommendText(text)) {
       const reply = await buildDividendStockRecommendReply(user.id)
-      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      await lineClient.replyMessage(event.replyToken, toLineTextMessages(reply))
       return
     }
 
     if (isViStockRecommendText(text)) {
       const reply = await buildViStockRecommendReply(user.id)
-      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      await lineClient.replyMessage(event.replyToken, toLineTextMessages(reply))
       return
     }
 
     if (isViOnlyRecommendText(text)) {
       const reply = await buildViOnlyRecommendReply(user.id)
-      await lineClient.replyMessage(event.replyToken, { type: 'text', text: reply })
+      await lineClient.replyMessage(event.replyToken, toLineTextMessages(reply))
       return
     }
 

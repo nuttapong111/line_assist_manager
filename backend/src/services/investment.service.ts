@@ -78,18 +78,22 @@ export function extractSymbolFromText(text: string): string | null {
   return null
 }
 
+export function hasViIntent(text: string): boolean {
+  return /แนว\s*vi|value\s*invest|(?:^|\s)vi(?:\s|$|ของ)/i.test(text)
+}
+
 export function isViFundRecommendText(text: string): boolean {
   if (isAddWatchlistText(text)) return false
   if (extractSymbolFromText(text)) return false
   return /กองทุน|\betf\b|rmf|ltf/i.test(text)
-    && /แนะนำ|แนว\s*vi|value\s*invest|ปันผล|ดัชนี|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
+    && (hasViIntent(text) || /แนะนำ|ปันผล|ดัชนี|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text))
 }
 
 export function isDividendStockRecommendText(text: string): boolean {
   if (isAddWatchlistText(text)) return false
   if (extractSymbolFromText(text)) return false
   if (isViFundRecommendText(text)) return false
-  if (/แนว\s*vi|value\s*invest/i.test(text)) return false
+  if (hasViIntent(text)) return false
   return /หุ้น/i.test(text)
     && /ปันผล|dividend|income/i.test(text)
     && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร|ดีๆ|สูง|ควรซื้อ|แนะ/i.test(text)
@@ -101,7 +105,7 @@ export function isViStockRecommendText(text: string): boolean {
   if (isViFundRecommendText(text)) return false
   if (isDividendStockRecommendText(text)) return false
   return /หุ้น/i.test(text)
-    && /แนว\s*vi|value\s*invest/i.test(text)
+    && hasViIntent(text)
     && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
 }
 
@@ -109,8 +113,9 @@ export function isViOnlyRecommendText(text: string): boolean {
   if (isViFundRecommendText(text) || isViStockRecommendText(text)) return false
   if (isAddWatchlistText(text)) return false
   if (extractSymbolFromText(text)) return false
-  return /แนว\s*vi|value\s*invest/i.test(text)
+  return hasViIntent(text)
     && /แนะนำ|ตัวไหน|อะไรดี|น่าสน|ควร/i.test(text)
+    && !/หุ้น|กองทุน|\betf\b/i.test(text)
 }
 
 export function isViStockQueryText(text: string): boolean {
@@ -251,6 +256,54 @@ export function splitIntoLineMessages(sections: string[], maxLen = LINE_TEXT_MAX
 
   if (current) messages.push(current)
   return messages.length ? messages : ['']
+}
+
+function annotateContinuedMessages(messages: string[], titlePrefix: string): string[] {
+  if (messages.length <= 1) return messages
+  return messages.map((msg, idx) => {
+    if (idx === 0) return msg
+    return `${titlePrefix} (ต่อ ${idx + 1}/${messages.length})\n\n${msg}`
+  })
+}
+
+/** หัวข้อสถานะสแกน — ใช้ร่วมกันทุกคำสั่งแนะนำ */
+export async function buildRecommendContextHeader(options: {
+  candidateCount?: number | null
+  rankingNote?: string
+  snapshotUpdatedLabel?: string | null
+  intervalHours?: number
+} = {}): Promise<string> {
+  const {
+    getMarketScanProgress,
+    formatScanBreakdownLabel,
+    formatAnalysisProgressLabel,
+    runMarketScanBatches,
+  } = await import('./market-scanner.service')
+  const {
+    getRecommendationSnapshotForDisplay,
+    ensureRecommendationSnapshotFresh,
+  } = await import('./recommendation.service')
+
+  runMarketScanBatches(3).catch(err => console.error('[investment] background scan failed:', err))
+  ensureRecommendationSnapshotFresh().catch(err => console.error('[investment] snapshot refresh failed:', err))
+
+  const progress = await getMarketScanProgress()
+  const snapshot = await getRecommendationSnapshotForDisplay()
+  const breakdown = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
+  const cached = snapshot?.cachedCount ?? progress.cachedCount
+  const total = snapshot?.totalSymbols ?? progress.total
+  const candidateCount = options.candidateCount ?? snapshot?.candidateCount ?? null
+  const updatedLabel = options.snapshotUpdatedLabel ?? snapshot?.updatedLabel ?? null
+
+  return [
+    formatAnalysisProgressLabel(cached, total),
+    candidateCount != null ? `ผ่านเกณฑ์ ${candidateCount} ตัว` : '',
+    breakdown ? `📋 ${breakdown}` : '',
+    updatedLabel
+      ? `📊 ${updatedLabel}${options.intervalHours ? ` (จัดอันดับทุก ${options.intervalHours} ชม.)` : ''}`
+      : '',
+    options.rankingNote,
+  ].filter(Boolean).join('\n')
 }
 
 async function enrichPicksWithFullAnalysis(
@@ -547,223 +600,227 @@ function formatTopStockPicks(
   return lines.join('\n')
 }
 
-async function formatViPicksSection(
+async function buildViRecommendMessages(
+  watchlistSymbols: Set<string>,
+  mode: 'all' | 'funds' | 'stocks',
   title: string,
-  picks: import('./vi-recommend.service').EnrichedViPick[],
-  watchlistSymbols?: Set<string>,
-): Promise<string> {
-  if (!picks.length) {
-    return `\n\n${title}\nยังไม่มีข้อมูลคะแนน — ระบบกำลังสแกนรายการนี้อยู่`
-  }
-  const { formatViPickLine } = await import('./vi-recommend.service')
-  const lines = [
-    '',
-    title,
-    ...picks.map(p => formatViPickLine(p, watchlistSymbols)),
-  ]
-  return lines.join('\n')
-}
-
-async function buildViRecommendSections(watchlistSymbols: Set<string>, mode: 'all' | 'funds' | 'stocks' = 'all'): Promise<string> {
-  const { getEnrichedViPicks } = await import('./vi-recommend.service')
-  const { VI_FUND_PICK_LIMIT, VI_STOCK_PICK_LIMIT } = await import('./recommendation.service')
+): Promise<string[] | null> {
+  const { getEnrichedViPicks, formatViPickDetailBlock } = await import('./vi-recommend.service')
+  const { VI_FUND_PICK_LIMIT, VI_STOCK_PICK_LIMIT, RECOMMENDATION_INTERVAL_HOURS } = await import('./recommendation.service')
   const { VI_VALUE_WEIGHT, VI_TECH_WEIGHT } = await import('./value-score.service')
 
   const { stocks, funds } = await getEnrichedViPicks()
   const showStocks = mode === 'all' || mode === 'stocks'
   const showFunds = mode === 'all' || mode === 'funds'
 
-  if (mode === 'funds' && !funds.length) return ''
-  if (mode === 'stocks' && !stocks.length) return ''
-  if (mode === 'all' && !stocks.length && !funds.length) return ''
+  if (mode === 'funds' && !funds.length) return null
+  if (mode === 'stocks' && !stocks.length) return null
+  if (mode === 'all' && !stocks.length && !funds.length) return null
 
   const valuePct = Math.round(VI_VALUE_WEIGHT * 100)
   const techPct = Math.round(VI_TECH_WEIGHT * 100)
   const thresholdPct = Math.round(Number(process.env.VI_COMPOSITE_THRESHOLD || '0.3') * 100)
 
-  const parts: string[] = []
-  if (showStocks) {
-    parts.push(await formatViPicksSection(`📊 หุ้นแนว VI (คุณภาพ/ปันผล + นักลงทุนดัง) — Top ${stocks.length || VI_STOCK_PICK_LIMIT}`, stocks, watchlistSymbols))
+  const pickBlocks: string[] = []
+  if (showStocks && stocks.length) {
+    for (const p of stocks) {
+      pickBlocks.push(formatViPickDetailBlock(p, watchlistSymbols.has(p.symbol)))
+    }
   }
-  if (showFunds) {
-    parts.push(await formatViPicksSection(`📊 กองทุน/ETF แนว VI (ดัชนี/ปันผล) — Top ${funds.length || VI_FUND_PICK_LIMIT}`, funds, watchlistSymbols))
+  if (showFunds && funds.length) {
+    for (const p of funds) {
+      pickBlocks.push(formatViPickDetailBlock(p, watchlistSymbols.has(p.symbol)))
+    }
   }
-  parts.push(
-    '',
-    `💡 คะแนน VI = มูลค่า ${valuePct}% + เทคนิค ${techPct}% (≥ ${thresholdPct}/100)`,
-    '🌱 VI ต้น = คุณภาพธุรกิจ | ⚖️ VI กลาง = ราคา/MoS | 🎯 VI ปลาย = จังหวะลงมือ',
-    '⏳ คุ้มค่า สั้น 1–3เดือน | กลาง 6–18เดือน | ยาว 3ปี+',
-    '📍 แนวรับ/ต้านจาก pivot + swing high/low 60 วัน',
-  )
-  return parts.join('\n')
+
+  const pickCount = (showStocks ? stocks.length : 0) + (showFunds ? funds.length : 0)
+  const sourceLabel = await buildRecommendContextHeader({
+    rankingNote: `✅ Top ${pickCount} | คะแนน VI ≥ ${thresholdPct}/100 (มูลค่า ${valuePct}% + เทคนิค ${techPct}%)`,
+    intervalHours: RECOMMENDATION_INTERVAL_HOURS,
+  })
+
+  const footer = [
+    '💡 VI ต้น = คุณภาพ | กลาง = มูลค่า | ปลาย = จังหวะ | ⏳ สั้น/กลาง/ยาว = คุ้มค่าตามเวลา',
+    'ดูรายตัวเต็ม: "VI ของ PTT"',
+    INVESTMENT_DISCLAIMER,
+  ].join('\n')
+
+  const header = `${title}\n${sourceLabel}`
+  const messages = splitIntoLineMessages([header, ...pickBlocks, footer])
+  if (messages.length <= 1) return messages
+
+  return messages.map((msg, idx) => {
+    if (idx === 0) return msg
+    return `📄 ${title.replace(/— Top \d+/, '').trim()} (ต่อ ${idx + 1}/${messages.length})\n\n${msg}`
+  })
 }
 
-export async function buildViFundRecommendReply(userId: string): Promise<string> {
+export async function buildViFundRecommendReply(userId: string): Promise<string | string[]> {
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
-  const body = await buildViRecommendSections(watchlistSymbols, 'funds')
+  const { VI_FUND_PICK_LIMIT } = await import('./recommendation.service')
+  const messages = await buildViRecommendMessages(
+    watchlistSymbols,
+    'funds',
+    `📊 กองทุน/ETF แนว VI (${bangkokToday()}) — Top ${VI_FUND_PICK_LIMIT}`,
+  )
 
-  if (!body) {
+  if (!messages) {
+    const header = await buildRecommendContextHeader()
     return [
       `📊 กองทุน/ETF แนว VI (${bangkokToday()})`,
-      'ยังไม่มีกองทุนที่ผ่านเกณฑ์ — ระบบกำลังวิเคราะห์อยู่ ลองถามใหม่ใน 15–30 นาที',
-      '',
+      header,
+      'ยังไม่มีกองทุนที่ผ่านเกณฑ์ — ลองถามใหม่ใน 15–30 นาที',
       INVESTMENT_DISCLAIMER,
     ].join('\n')
   }
 
-  return [`📊 กองทุน/ETF แนว VI (${bangkokToday()})`, body, '', INVESTMENT_DISCLAIMER].join('\n')
+  return messages
 }
 
-export async function buildViStockRecommendReply(userId: string): Promise<string> {
+export async function buildViStockRecommendReply(userId: string): Promise<string | string[]> {
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
-  const body = await buildViRecommendSections(watchlistSymbols, 'stocks')
+  const { VI_STOCK_PICK_LIMIT } = await import('./recommendation.service')
+  const messages = await buildViRecommendMessages(
+    watchlistSymbols,
+    'stocks',
+    `📊 หุ้นแนว VI (${bangkokToday()}) — Top ${VI_STOCK_PICK_LIMIT}`,
+  )
 
-  if (!body) {
+  if (!messages) {
+    const header = await buildRecommendContextHeader()
     return [
       `📊 หุ้นแนว VI (${bangkokToday()})`,
-      'ยังไม่มีหุ้นที่ผ่านเกณฑ์ — ระบบกำลังวิเคราะห์อยู่ ลองถามใหม่ใน 15–30 นาที',
-      '',
+      header,
+      'ยังไม่มีหุ้นที่ผ่านเกณฑ์ — ลองถามใหม่ใน 15–30 นาที',
       INVESTMENT_DISCLAIMER,
     ].join('\n')
   }
 
-  return [`📊 หุ้นแนว VI (${bangkokToday()})`, body, '', INVESTMENT_DISCLAIMER].join('\n')
+  return messages
 }
 
-export async function buildViOnlyRecommendReply(userId: string): Promise<string> {
+export async function buildViOnlyRecommendReply(userId: string): Promise<string | string[]> {
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
-  const body = await buildViRecommendSections(watchlistSymbols, 'all')
+  const { VI_STOCK_PICK_LIMIT, VI_FUND_PICK_LIMIT } = await import('./recommendation.service')
+  const messages = await buildViRecommendMessages(
+    watchlistSymbols,
+    'all',
+    `📊 แนะนำแนว VI (${bangkokToday()}) — หุ้น Top ${VI_STOCK_PICK_LIMIT} + กองทุน Top ${VI_FUND_PICK_LIMIT}`,
+  )
 
-  if (!body) {
+  if (!messages) {
+    const header = await buildRecommendContextHeader()
     return [
       `📊 แนะนำแนว VI (${bangkokToday()})`,
+      header,
       'ยังไม่มีรายการที่ผ่านเกณฑ์ — ลองถามใหม่ใน 15–30 นาที',
-      '',
       INVESTMENT_DISCLAIMER,
     ].join('\n')
   }
 
-  return [`📊 แนะนำแนว VI (${bangkokToday()})`, body, '', INVESTMENT_DISCLAIMER].join('\n')
+  return messages
 }
 
-export async function buildDividendStockRecommendReply(userId: string): Promise<string> {
-  const {
-    getMarketScanProgress,
-    formatScanBreakdownLabel,
-    runMarketScanBatches,
-  } = await import('./market-scanner.service')
+export async function buildDividendStockRecommendReply(userId: string): Promise<string | string[]> {
   const {
     DIVIDEND_MIN_YIELD_PCT,
+    DIVIDEND_STOCK_PICK_LIMIT,
     getEnrichedDividendPicks,
-    formatDividendPickLine,
   } = await import('./dividend-recommend.service')
+  const { RECOMMENDATION_INTERVAL_HOURS } = await import('./recommendation.service')
 
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
-  const progress = await getMarketScanProgress()
-  const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
-
-  runMarketScanBatches(5).catch(err => console.error('[investment] background scan failed:', err))
-
   const picks = await getEnrichedDividendPicks()
-  const progressLine = progress.total > 0
-    ? `🔄 วิเคราะห์แล้ว ${progress.cachedCount}/${progress.total} ตัว\n📋 ${breakdownLabel}`
-    : '🔄 กำลังสแกนทั้งตลาดในพื้นหลัง...'
+
+  const sourceLabel = await buildRecommendContextHeader({
+    rankingNote: `✅ Top ${DIVIDEND_STOCK_PICK_LIMIT} | ปันผล ≥ ${DIVIDEND_MIN_YIELD_PCT}% (อัตราปันผล 55% + คุณภาพ 30% + เทคนิค 15%)`,
+    intervalHours: RECOMMENDATION_INTERVAL_HOURS,
+  })
 
   if (!picks.length) {
     return [
       `💰 หุ้นปันผลแนะนำ (${bangkokToday()})`,
-      progressLine,
+      sourceLabel,
       'ยังไม่มีหุ้นปันผลที่ผ่านเกณฑ์ — ลองถามใหม่ใน 15–30 นาที',
-      '',
       INVESTMENT_DISCLAIMER,
     ].join('\n')
   }
 
-  const lines = [
-    `💰 หุ้นปันผลแนะนำ (${bangkokToday()}) — Top ${picks.length}`,
-    progressLine,
-    `✅ เรียงจากคะแนนปันผลรวม (อัตราปันผล 55% + คุณภาพ 30% + เทคนิค 15%)`,
-    `📌 ปันผลขั้นต่ำ ≥ ${DIVIDEND_MIN_YIELD_PCT}% | หุ้นไทย ~ = ประมาณการ`,
-    '',
-    ...picks.map(p => formatDividendPickLine(p, watchlistSymbols)),
-    '',
-    '💡 อยากได้กองทุนปันผล/ETF พิมพ์ "แนะนำกองทุนแนว VI"',
-    '💡 ดู VI รายตัว พิมพ์ "VI ของ PTT"',
-    '',
-    INVESTMENT_DISCLAIMER,
-  ]
+  const analyses = await enrichPicksWithFullAnalysis(
+    picks.map(p => ({ symbol: p.symbol, displayName: p.displayName })),
+  )
 
-  return lines.join('\n')
+  const title = `💰 หุ้นปันผลแนะนำ (${bangkokToday()}) — Top ${picks.length}`
+  const pickBlocks = analyses.map((a, i) => {
+    const pick = picks.find(p => p.symbol === a.symbol)
+    const divLine = pick ? `${pick.dividendLabel} | คะแนนปันผล ${(Math.round((pick.dividendCompositeScore) * 1000) / 10).toFixed(1)}/100` : ''
+    return [divLine, formatStockPickDetailBlock(a, i + 1, watchlistSymbols.has(a.symbol))].filter(Boolean).join('\n')
+  })
+
+  const footer = [
+    '📌 หุ้นไทย ~ = ประมาณการปันผล | กองทุนปันผล: "แนะนำกองทุน vi"',
+    'ดูรายตัวเต็ม: "VI ของ PTT"',
+    INVESTMENT_DISCLAIMER,
+  ].join('\n')
+
+  const messages = splitIntoLineMessages([`${title}\n${sourceLabel}`, ...pickBlocks, footer])
+  if (messages.length <= 1) return messages
+
+  return messages.map((msg, idx) => {
+    if (idx === 0) return msg
+    return `📄 หุ้นปันผลแนะนำ (ต่อ ${idx + 1}/${messages.length})\n\n${msg}`
+  })
 }
 
 export async function buildStockRecommendReply(userId: string): Promise<string | string[]> {
   const {
-    getMarketScanProgress,
-    formatScanBreakdownLabel,
-    formatAnalysisProgressLabel,
-    runMarketScanBatches,
-  } = await import('./market-scanner.service')
-  const {
     getRecommendationSnapshotForDisplay,
-    ensureRecommendationSnapshotFresh,
     RECOMMENDATION_PICK_LIMIT,
     RECOMMENDATION_INTERVAL_HOURS,
   } = await import('./recommendation.service')
 
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
-  const progress = await getMarketScanProgress()
   const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
-  const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
-
-  runMarketScanBatches(5).catch(err => console.error('[investment] background scan failed:', err))
-  ensureRecommendationSnapshotFresh().catch(err => console.error('[investment] snapshot refresh failed:', err))
-
   const snapshot = await getRecommendationSnapshotForDisplay()
-  const scannedPos = Math.min(progress.cursor, progress.total)
 
   if (!snapshot || snapshot.picks.length === 0) {
-  const progressLine = progress.total > 0
-    ? `🔄 สแกนไปแล้ว ${scannedPos}/${progress.total} ตัว (วิเคราะห์ได้ ${progress.cachedCount} ตัว)\n📋 ${breakdownLabel}\n⏳ กำลังอัปเดตคะแนนสูตรใหม่ (v${(await import('./investment.service')).ANALYSIS_VERSION}) — ลองถามใหม่ใน 15–30 นาที`
-    : '🔄 กำลังเริ่มสแกนทั้งตลาดในพื้นหลัง...'
+    const progressLine = await buildRecommendContextHeader({
+      rankingNote: `⏳ กำลังอัปเดตอันดับ — ลองถามใหม่ใน 15–30 นาที`,
+    })
 
     const topRows = await (await import('./market-scanner.service')).getCachedTopScores(3)
     if (topRows.length > 0) {
       const best = topRows[0]
-      const lines = [
+      return [
         `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
         progressLine,
         `ยังไม่มี snapshot ที่คำนวณเสร็จ — รอสักครู่แล้วถามใหม่`,
         `score สูงสุดชั่วคราว: ${best.displayName} (${best.symbol}) — ${Math.round(Number(best.normalizedScore) * 100)}/100`,
-        '',
         INVESTMENT_DISCLAIMER,
-      ]
-      return lines.join('\n')
+      ].join('\n')
     }
 
     const { symbols } = await buildScanUniverse(userId)
-    const results = await collectStockAnalyses(symbols.slice(0, 20))
-    return formatTopStockPicks(results, {
-      title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()})`,
+    const results = await collectStockAnalyses(symbols.slice(0, RECOMMENDATION_PICK_LIMIT))
+    const analyses = results.filter(Boolean) as StockAnalysis[]
+    return buildDetailedRecommendMessages(analyses, {
+      title: `📈 หุ้นแนะนำวันนี้ (${bangkokToday()}) — Top ${RECOMMENDATION_PICK_LIMIT}`,
       sourceLabel: progressLine,
-      requireBuySignal: true,
-      watchlistSymbols,
-      scannedCount: progress.cachedCount,
       pickLimit: RECOMMENDATION_PICK_LIMIT,
+      watchlistSymbols,
     })
   }
 
-  const progressLine = [
-    formatAnalysisProgressLabel(snapshot.cachedCount, snapshot.totalSymbols),
-    `ผ่านเกณฑ์ ${snapshot.candidateCount} ตัว`,
-    `📋 ${breakdownLabel}`,
-    `📊 ${snapshot.updatedLabel} (จัดอันดับทุก ${RECOMMENDATION_INTERVAL_HOURS} ชม.)`,
-    `✅ แสดง Top ${RECOMMENDATION_PICK_LIMIT} เรียงจากคะแนนสูงสุด ≥ ${thresholdPct}/100`,
-  ].join('\n')
+  const progressLine = await buildRecommendContextHeader({
+    candidateCount: snapshot.candidateCount,
+    rankingNote: `✅ Top ${RECOMMENDATION_PICK_LIMIT} | คะแนนเทคนิค ≥ ${thresholdPct}/100`,
+    intervalHours: RECOMMENDATION_INTERVAL_HOURS,
+  })
 
   const analyses = await enrichPicksWithFullAnalysis(
     snapshot.picks.slice(0, RECOMMENDATION_PICK_LIMIT).map(p => ({
@@ -888,31 +945,19 @@ export async function checkWatchlistBuySignals(): Promise<void> {
 }
 
 export async function buildMorningSummaryReply(userId: string): Promise<string | string[] | null> {
-  const {
-    getMarketScanProgress,
-    formatScanBreakdownLabel,
-    formatAnalysisProgressLabel,
-    runMarketScanBatches,
-    getCachedTopScores,
-  } = await import('./market-scanner.service')
+  const { getCachedTopScores } = await import('./market-scanner.service')
   const {
     getRecommendationSnapshotForDisplay,
-    ensureRecommendationSnapshotFresh,
     isGeneralMarketPick,
     RECOMMENDATION_PICK_LIMIT,
+    RECOMMENDATION_INTERVAL_HOURS,
   } = await import('./recommendation.service')
   const { compareAnalysisRank } = await import('./analysis-ranking')
 
   const pickLimit = RECOMMENDATION_PICK_LIMIT
   const watched = await getWatchedAssets(userId)
   const watchlistSymbols = new Set(watched.map(w => w.symbol.toUpperCase()))
-  const progress = await getMarketScanProgress()
-  const breakdownLabel = progress.breakdown ? formatScanBreakdownLabel(progress.breakdown) : ''
   const thresholdPct = Math.round(BUY_SIGNAL_THRESHOLD * 100)
-
-  runMarketScanBatches(3).catch(err => console.error('[investment] morning scan failed:', err))
-  ensureRecommendationSnapshotFresh().catch(err => console.error('[investment] morning snapshot failed:', err))
-
   const snapshot = await getRecommendationSnapshotForDisplay()
   let picks: {
     symbol: string
@@ -955,23 +1000,17 @@ export async function buildMorningSummaryReply(userId: string): Promise<string |
   )
   if (!analyses.length) return null
 
-  const candidateCount = snapshot?.candidateCount ?? null
-  const cachedCount = snapshot?.cachedCount ?? progress.cachedCount
-  const totalSymbols = snapshot?.totalSymbols ?? progress.total
-
-  const sourceLabel = [
-    formatAnalysisProgressLabel(cachedCount, totalSymbols),
-    candidateCount != null ? `ผ่านเกณฑ์ ${candidateCount} ตัว` : '',
-    breakdownLabel ? `📋 ${breakdownLabel}` : '',
-    snapshot?.updatedLabel ? `📊 ${snapshot.updatedLabel}` : '',
-    `✅ สรุปเช้า Top ${pickLimit} ตัว (คะแนน ≥ ${thresholdPct}/100)`,
-  ].filter(Boolean).join('\n')
+  const sourceLabel = await buildRecommendContextHeader({
+    candidateCount: snapshot?.candidateCount ?? null,
+    rankingNote: `✅ สรุปเช้า Top ${pickLimit} (คะแนน ≥ ${thresholdPct}/100)`,
+    intervalHours: RECOMMENDATION_INTERVAL_HOURS,
+  })
 
   return buildDetailedRecommendMessages(analyses, {
     title: `☀️ สรุปหุ้นเช้านี้ (${bangkokToday()}) — Top ${pickLimit}`,
     sourceLabel,
     pickLimit,
-    candidateCount: candidateCount ?? undefined,
+    candidateCount: snapshot?.candidateCount ?? undefined,
     watchlistSymbols,
   })
 }

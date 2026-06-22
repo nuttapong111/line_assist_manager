@@ -8,6 +8,7 @@ import { isRecommendableCandidate, VI_FUND_PICK_LIMIT, VI_STOCK_PICK_LIMIT } fro
 import { calcSupportResistance, type SupportResistanceLevels } from './support-resistance.service'
 import { computeValueScore, computeViCompositeScore, getValueAnalysis } from './value-score.service'
 import { computeViHorizons, computeViPhases, formatViHorizonsCompact, formatViPhasesCompact, type ViHorizonResult, type ViPhasedResult } from './vi-phase.service'
+import { formatScorePct } from './value-score.service'
 import { fetchOHLCV } from './yahoo.service'
 
 export interface EnrichedViPick {
@@ -39,15 +40,41 @@ export function formatSupportResistanceLine(symbol: string, levels: SupportResis
 }
 
 export function formatViPickLine(pick: EnrichedViPick, watchlistSymbols?: Set<string>): string {
-  const ch = pick.changePct != null ? ` ${pick.changePct >= 0 ? '+' : ''}${pick.changePct.toFixed(1)}%` : ''
-  const price = pick.price != null ? ` ${formatAssetPrice(pick.symbol, pick.price)}` : ''
-  const tag = watchlistSymbols?.has(pick.symbol) ? ' 📋' : ''
-  const viLine = `${pick.rank}. ${pick.displayName} (${pick.symbol}) — VI ${pct(pick.viCompositeScore)} (มูลค่า ${pct(pick.valueScore)} / เทคนิค ${pct(pick.technicalScore)})${price}${ch}${tag}`
-  const phaseLine = pick.viPhases ? `   ${formatViPhasesCompact(pick.viPhases)}` : ''
-  const horizonLine = pick.viHorizons ? `   ${formatViHorizonsCompact(pick.viHorizons)}` : ''
+  return formatViPickDetailBlock(pick, watchlistSymbols?.has(pick.symbol))
+}
+
+/** รายละเอียด VI รายตัว — ใช้ในรายการแนะนำ (รูปแบบเดียวกับ VI ของ SYMBOL) */
+export function formatViPickDetailBlock(pick: EnrichedViPick, watchlist?: boolean): string {
+  const tag = watchlist ? ' 📋' : ''
+  const ch = pick.changePct != null ? ` (${pick.changePct >= 0 ? '+' : ''}${pick.changePct.toFixed(2)}%)` : ''
+  const priceLine = pick.price != null
+    ? `ราคา: ${formatAssetPrice(pick.symbol, pick.price)}${ch}`
+    : ''
+
+  const lines = [
+    `━━ ${pick.rank}. ${pick.displayName} (${pick.symbol})${tag}`,
+    priceLine,
+    `คะแนน VI รวม: ${pct(pick.viCompositeScore)}/100 (มูลค่า ${pct(pick.valueScore)} / เทคนิค ${pct(pick.technicalScore)})`,
+    pick.valueReasons.length ? `💡 มูลค่า: ${pick.valueReasons.slice(0, 3).join(' · ')}` : '',
+  ]
+
+  if (pick.viPhases) {
+    lines.push(
+      `🌱 VI ต้น ${formatScorePct(pick.viPhases.early.score)}/100 — ${pick.viPhases.early.action}`,
+      `⚖️ VI กลาง ${formatScorePct(pick.viPhases.mid.score)}/100 — ${pick.viPhases.mid.action}`,
+      `🎯 VI ปลาย ${formatScorePct(pick.viPhases.late.score)}/100 — ${pick.viPhases.late.action}`,
+      `📌 ${pick.viPhases.recommendation}`,
+    )
+  }
+
+  if (pick.viHorizons) {
+    lines.push(`⏳ ${formatViHorizonsCompact(pick.viHorizons)}`)
+  }
+
   const srLine = formatSupportResistanceLine(pick.symbol, pick.supportResistance)
-  const lines = [viLine, phaseLine, horizonLine, srLine].filter(Boolean)
-  return lines.join('\n')
+  if (srLine) lines.push(srLine.trim())
+
+  return lines.filter(Boolean).join('\n')
 }
 
 async function enrichCandidate(row: {
